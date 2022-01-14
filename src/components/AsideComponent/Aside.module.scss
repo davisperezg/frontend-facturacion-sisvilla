@@ -1,0 +1,41 @@
+.aside {
+  width: 350px;
+  margin-top: 80px;
+  position: absolute;
+  top: 0;
+  height: calc(100% - 160px);
+  bottom: 0;
+  border-right: 1px solid rgba(0, 0, 0, 0.125);
+  overflow-y: auto;
+
+  &--noPaddin {
+    padding: 0 !important;
+  }
+
+  &::-webkit-scrollbar {
+    -webkit-appearance: none;
+  }
+
+  &::-webkit-scrollbar:vertical {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-button:increment,
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  &::-webkit-scrollbar:horizontal {
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #797979;
+    border-radius: 20px;
+    border: 2px solid #f1f2f3;
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: 10px;
+  }
+}

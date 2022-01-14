@@ -1,0 +1,14 @@
+.__label {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-left: 0;
+
+  &__button {
+    width: 150px;
+  }
+}

@@ -1,0 +1,45 @@
+// Required
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/mixins";
+
+.nav {
+  background-color: $primary;
+  height: 80px;
+  display: flex;
+
+  .item {
+    width: 50%;
+    height: 100%;
+
+    &__user {
+      color: $white;
+
+      &::after {
+        content: "\00a0\00a0";
+      }
+    }
+
+    &__left {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 20px;
+      height: 100%;
+      color: $white;
+    }
+
+    &__right {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 20px;
+      height: 100%;
+    }
+
+    &__icon {
+      color: $white;
+      font-size: 24px;
+    }
+  }
+}

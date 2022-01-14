@@ -1,0 +1,27 @@
+.button {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.table {
+  margin-top: 16px;
+
+  &--center {
+    text-align: center;
+  }
+
+  &__td {
+    cursor: pointer;
+  }
+
+  &__iconClose {
+    cursor: pointer;
+    color: red;
+  }
+
+  &__iconRestore {
+    cursor: pointer;
+    color: #444;
+  }
+}
