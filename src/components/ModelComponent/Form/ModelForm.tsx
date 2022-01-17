@@ -1,79 +1,50 @@
 import {
+  ChangeEvent,
+  FormEvent,
   memo,
-  useState,
   useCallback,
   useEffect,
-  FormEvent,
-  ChangeEvent,
+  useState,
 } from "react";
+import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { postCreateModel, updateModel } from "../../../api/model/model";
 import { IAlert } from "../../../interface/IAlert";
-import { Menu } from "../../../interface/Menu";
-import { Module } from "../../../interface/Module";
-import { getMenus } from "../../../api/menu/menu";
-import { postCreateModule, updateModule } from "../../../api/module/module";
-import { Modal, Form, Button, Alert, Row, Col } from "react-bootstrap";
-import Select from "react-select";
-import makeAnimated from "react-select/animated";
+import { Model } from "../../../interface/Model";
 
-const animatedComponents = makeAnimated();
 type InputChange = ChangeEvent<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
 >;
 
-const initialState: IAlert = {
-  type: "",
-  message: "",
-};
-
-const ModuleForm = ({
+const ModelForm = ({
   show,
-  module,
+  model,
   closeModal,
-  listModules,
+  listModels,
 }: {
   show: boolean;
-  module?: Module;
+  model?: Model;
   closeModal: () => void;
-  listModules: () => void;
+  listModels: () => void;
 }) => {
-  const initialStateMod = {
+  const initialStateModel: Model = {
     name: "",
-    menu: [],
   };
 
-  const [form, setForm] = useState<Module | any>(initialStateMod);
-  const [message, setMessage] = useState<IAlert>(initialState);
+  const initialStateAlert: IAlert = {
+    type: "",
+    message: "",
+  };
+
+  const [form, setForm] = useState<Model>(initialStateModel);
+  const [message, setMessage] = useState<IAlert>(initialStateAlert);
   const [disabled, setDisabled] = useState<boolean>(false);
-  const [menus, setMenus] = useState<Menu[]>([]);
   const [errors, setErrors] = useState<any>({});
 
   const closeAndClear = () => {
-    setForm(initialStateMod);
+    setForm(initialStateModel);
     closeModal();
-    setMessage(initialState);
+    setMessage(initialStateAlert);
     setErrors({});
-  };
-
-  const listMenus = async () => {
-    const res = await getMenus();
-    const { data } = res;
-    const filter = data.map((men: any) => {
-      return {
-        label: men.name,
-        value: men.name,
-      };
-    });
-    setMenus(filter);
-  };
-
-  const handleChange = (e: InputChange) => {
-    setMessage(initialState);
-    if (!!errors[e.target.name])
-      setErrors({
-        ...errors,
-        [e.target.name]: null,
-      });
-    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const findFormErrors = () => {
@@ -83,6 +54,16 @@ const ModuleForm = ({
     if (!name || name === "") newErrors.name = "Por favor ingrese el nombre.";
 
     return newErrors;
+  };
+
+  const handleChange = (e: InputChange) => {
+    setMessage(initialStateAlert);
+    if (!!errors[e.target.name])
+      setErrors({
+        ...errors,
+        [e.target.name]: null,
+      });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const onSubmit = async (e: FormEvent | any) => {
@@ -96,14 +77,14 @@ const ModuleForm = ({
       setDisabled(true);
       if (form?._id) {
         try {
-          const res = await updateModule(form!._id, form);
-          const { moduleUpdated } = res.data;
+          const res = await updateModel(form!._id, form);
+          const { modelUpdated } = res.data;
           setMessage({
             type: "success",
-            message: `El modulo ${moduleUpdated.name} ha sido actualizado existosamente.`,
+            message: `El modelo ${modelUpdated.name} ha sido actualizado existosamente.`,
           });
           setDisabled(false);
-          listModules();
+          listModels();
         } catch (e) {
           setDisabled(false);
           const error: any = e as Error;
@@ -112,15 +93,15 @@ const ModuleForm = ({
         }
       } else {
         try {
-          const res = await postCreateModule(form);
-          const { module } = res.data;
+          const res = await postCreateModel(form);
+          const { model } = res.data;
           setMessage({
             type: "success",
-            message: `El modulo ${module.name} ha sido registrado existosamente.`,
+            message: `El modelo ${model.name} ha sido registrado existosamente.`,
           });
-          setForm(initialStateMod);
+          setForm(initialStateModel);
           setDisabled(false);
-          listModules();
+          listModels();
         } catch (e) {
           setDisabled(false);
           const error: any = e as Error;
@@ -133,17 +114,15 @@ const ModuleForm = ({
   };
 
   const getModule = useCallback(() => {
-    if (module?._id) {
+    if (model?._id) {
       setForm({
-        _id: module?._id,
-        name: module?.name,
-        menu: module?.menu?.map((mod: any) => mod.value),
+        _id: model?._id,
+        name: model?.name,
       });
     }
-  }, [module?._id, module?.name, module?.menu]);
+  }, [model?._id, model?.name]);
 
   useEffect(() => {
-    listMenus();
     getModule();
   }, [getModule]);
 
@@ -156,9 +135,7 @@ const ModuleForm = ({
       top="true"
     >
       <Modal.Header closeButton>
-        <Modal.Title>
-          {form?._id ? "Editar Modulo" : "Crear Modulo"}
-        </Modal.Title>
+        <Modal.Title>{form?._id ? "Editar Model" : "Crear Model"}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={onSubmit}>
@@ -183,23 +160,6 @@ const ModuleForm = ({
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          <Form.Group as={Col} controlId="formGridMenu">
-            <Form.Label>Menus disponibles</Form.Label>
-            <Select
-              placeholder="[Seleccione menu]"
-              closeMenuOnSelect={false}
-              components={animatedComponents}
-              value={form.menu.map((mod: any) => {
-                return { label: mod, value: mod };
-              })}
-              onChange={(values: any) => {
-                const selected = values.map((val: any) => val.value);
-                setForm({ ...form, menu: selected });
-              }}
-              options={menus}
-              isMulti
-            />
-          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={closeAndClear}>
@@ -214,4 +174,4 @@ const ModuleForm = ({
   );
 };
 
-export default memo(ModuleForm);
+export default memo(ModelForm);

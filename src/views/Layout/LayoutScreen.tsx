@@ -10,6 +10,12 @@ import Aside from "../../components/AsideComponent/Aside";
 import styles from "./LayoutScreen.module.scss";
 import { useContext } from "react";
 import { AuthContext } from "../../context/auth";
+import MarkScreen from "../Marks/MarkScreen";
+import ModelScreen from "../Models/ModelScreen";
+import ProductScreen from "../Products/ProductScreen";
+import UnitScreen from "../Units/UnitScreen";
+import ClientScreen from "../Client/ClientScreen";
+import SupplierScreen from "../Supplier/SupplierScreen";
 
 const LayoutScreen = () => {
   const { resource } = useContext(AuthContext);
@@ -33,6 +39,30 @@ const LayoutScreen = () => {
           <Route
             path="/permisos"
             element={<OptionsScreen myResource={resource} />}
+          />
+          <Route
+            path="/marcas"
+            element={<MarkScreen myResource={resource} />}
+          />
+          <Route
+            path="/modelos"
+            element={<ModelScreen myResource={resource} />}
+          />
+          <Route
+            path="/productos"
+            element={<ProductScreen myResource={resource} />}
+          />
+          <Route
+            path="/unidad-medida"
+            element={<UnitScreen myResource={resource} />}
+          />
+          <Route
+            path="/clientes"
+            element={<ClientScreen myResource={resource} />}
+          />
+          <Route
+            path="/proveedores"
+            element={<SupplierScreen myResource={resource} />}
           />
         </Routes>
       </main>

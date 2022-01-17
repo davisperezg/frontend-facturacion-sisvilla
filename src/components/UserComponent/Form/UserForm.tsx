@@ -338,7 +338,7 @@ const UserForm = ({
             Cerrar
           </Button>
           <Button type="submit" variant="primary" disabled={disabled}>
-            {user?._id ? "Actualizar" : "Registrar"}
+            {form?._id ? "Actualizar" : "Registrar"}
           </Button>
         </Modal.Footer>
       </Form>
