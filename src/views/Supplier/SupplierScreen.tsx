@@ -9,6 +9,9 @@ import {
   restoreSupplier,
 } from "../../api/supplier/supplier";
 import styles from "./Supplier.module.scss";
+import SupplierForm from "../../components/SupplierComponent/Form/SupplierForm";
+import SupplierListActives from "../../components/SupplierComponent/List/Actives/SupplierListActives";
+import SupplierListRemoves from "../../components/SupplierComponent/List/Removes/SupplierListRemoves";
 
 const SupplierScreen = ({ myResource }: { myResource: Resources }) => {
   const [show, setShow] = useState(false);
@@ -36,16 +39,16 @@ const SupplierScreen = ({ myResource }: { myResource: Resources }) => {
   const openModalRE = useCallback((props: boolean, value?: any) => {
     setShow(true);
     if (props) {
-      setState({ ...value, role: value.role.name });
+      setState(value);
     }
   }, []);
 
-  const deleteCli = useCallback(
+  const deleteSup = useCallback(
     async (id: string) => {
       const __deletedSupplier = await deleteSupplier(id);
       const { data } = __deletedSupplier;
-      const { userDeleted } = data;
-      if (userDeleted) {
+      const { supplierDeleted } = data;
+      if (supplierDeleted) {
         listSuppliers();
         listSuppliersDeleted();
       }
@@ -53,12 +56,12 @@ const SupplierScreen = ({ myResource }: { myResource: Resources }) => {
     [listSuppliers, listSuppliersDeleted]
   );
 
-  const restoreCli = useCallback(
+  const restoreSup = useCallback(
     async (id: string) => {
-      const __restoreCli = await restoreSupplier(id);
-      const { data } = __restoreCli;
-      const { userRestored } = data;
-      if (userRestored) {
+      const __restoreSup = await restoreSupplier(id);
+      const { data } = __restoreSup;
+      const { supplierRestored } = data;
+      if (supplierRestored) {
         listSuppliers();
         listSuppliersDeleted();
       }
@@ -72,14 +75,14 @@ const SupplierScreen = ({ myResource }: { myResource: Resources }) => {
   }, [listSuppliers, listSuppliersDeleted]);
 
   return (
-    // <SupplierForm
-    //   show={show}
-    //   closeModal={closeModal}
-    //   listSuppliers={listSuppliers}
-    //   user={state}
-    // />
-
     <>
+      <SupplierForm
+        show={show}
+        closeModal={closeModal}
+        listSuppliers={listSuppliers}
+        supplier={state}
+      />
+
       <Card>
         <Card.Header as="h5">Lista de Proveedores</Card.Header>
         <Card.Body>
@@ -100,35 +103,35 @@ const SupplierScreen = ({ myResource }: { myResource: Resources }) => {
             <thead>
               <tr>
                 <th>#</th>
-                <th>Nombres</th>
-                <th>Apellidos</th>
-                <th>Documento</th>
-                <th>Nro. de documento</th>
+                <th>Nombre</th>
+                <th>Contacto</th>
+                <th>Celular</th>
+                <th>Tipo de documento</th>
+                <th>Nro de documento</th>
                 <th>Correo</th>
-                <th>Cliario</th>
-                <th>Rol</th>
+                <th>Dirección</th>
                 <th className={`${styles["table--center"]}`}>Estado</th>
                 <th className={`${styles["table--center"]}`}>Eliminar</th>
               </tr>
             </thead>
             <tbody>
-              {/* {suppliers.map((user) => (
+              {suppliers.map((supplier) => (
                 <SupplierListActives
-                  key={user._id}
-                  user={user}
-                  deleteCli={deleteCli}
+                  key={supplier._id}
+                  supplier={supplier}
+                  deleteSup={deleteSup}
                   openModalRE={openModalRE}
                 />
-              ))} */}
+              ))}
             </tbody>
             <tfoot>
-              {/* {removes.map((remove) => (
+              {removes.map((remove) => (
                 <SupplierListRemoves
                   key={remove._id}
                   remove={remove}
-                  restoreCli={restoreCli}
+                  restoreSup={restoreSup}
                 />
-              ))} */}
+              ))}
             </tfoot>
           </Table>
         </Card.Body>

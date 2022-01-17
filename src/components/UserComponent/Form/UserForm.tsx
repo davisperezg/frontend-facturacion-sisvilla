@@ -195,7 +195,7 @@ const UserForm = ({
       backdrop="static"
       keyboard={false}
       top="true"
-      size="lg"
+      // size="lg"
     >
       <Modal.Header closeButton>
         <Modal.Title>
@@ -270,6 +270,7 @@ const UserForm = ({
                 isInvalid={!!errors?.tipDocument}
               >
                 <option value="">[Seleccione el documento]</option>
+                <option value="OTRO">OTRO</option>
                 <option value="DNI">DNI</option>
                 <option value="RUC">RUC</option>
               </Form.Select>
