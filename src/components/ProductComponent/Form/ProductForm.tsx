@@ -266,13 +266,13 @@ const ProductForm = ({
               </Form.Control.Feedback>
             </Form.Group>
             <Form.Group as={Col} controlId="formGridCodInternal">
-              <Form.Label>Codigo interno</Form.Label>
+              <Form.Label>Codigo barra / interno</Form.Label>
               <Form.Control
                 name="cod_internal"
                 onChange={handleChange}
                 value={form?.cod_internal}
                 type="text"
-                placeholder="Introduce codigo interno"
+                placeholder="Introduce codigo barra / interno"
               />
             </Form.Group>
           </Row>

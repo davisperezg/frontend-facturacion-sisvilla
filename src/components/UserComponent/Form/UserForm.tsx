@@ -103,11 +103,14 @@ const UserForm = ({
       newErrors.email = "Por favor ingrese el correo.";
     if (!username || username === "")
       newErrors.username = "Por favor ingrese el usuario.";
-    if (!password || password === "")
-      newErrors.password = "Por favor ingrese la contraseña.";
-    else if (!password || password.length < 6)
-      newErrors.password =
-        "Por favor ingrese la contraseña mayor a 5 caracteres";
+
+    if (!form._id) {
+      if (!password || password === "")
+        newErrors.password = "Por favor ingrese la contraseña.";
+      else if (!password || password.length < 6)
+        newErrors.password =
+          "Por favor ingrese la contraseña mayor a 5 caracteres";
+    }
 
     return newErrors;
   };

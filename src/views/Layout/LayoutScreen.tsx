@@ -16,6 +16,7 @@ import ProductScreen from "../Products/ProductScreen";
 import UnitScreen from "../Units/UnitScreen";
 import ClientScreen from "../Client/ClientScreen";
 import SupplierScreen from "../Supplier/SupplierScreen";
+import FactScreen from "../Facts/FactScreen";
 
 const LayoutScreen = () => {
   const { resource } = useContext(AuthContext);
@@ -63,6 +64,10 @@ const LayoutScreen = () => {
           <Route
             path="/proveedores"
             element={<SupplierScreen myResource={resource} />}
+          />
+          <Route
+            path="/ventas"
+            element={<FactScreen myResource={resource} />}
           />
         </Routes>
       </main>

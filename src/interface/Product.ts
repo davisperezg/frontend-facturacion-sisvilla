@@ -3,7 +3,7 @@ import { Model } from "./Model";
 import { Unit } from "./Unit";
 export interface Product {
   _id?: string;
-  cod_internal?: string;
+  cod_internal: string;
   name: string;
   note?: string;
   mark: Mark | string;
