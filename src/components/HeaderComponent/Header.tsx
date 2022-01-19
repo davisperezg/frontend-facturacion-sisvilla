@@ -28,7 +28,10 @@ const Header = () => {
       <div className={styles.item}>
         <div className={styles.item__left}>
           <h1>
-            Comercial <strong>SARAI</strong>
+            Comercial <strong>SARAI</strong>{" "}
+            <span style={{ color: "red", background: "yellow" }}>
+              Version (<strong>Beta</strong>)
+            </span>
           </h1>
         </div>
       </div>
