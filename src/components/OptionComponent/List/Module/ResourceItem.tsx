@@ -13,13 +13,13 @@ const ResourceItem = ({
   resources: any[];
   clearAlert: () => void;
 }) => {
-  console.log("corazon");
   const initialState = {
     module: mod._id ? mod.name : "",
     canCreate: mod._id ? mod.canCreate : false,
     canUpdate: mod._id ? mod.canUpdate : false,
     canRead: mod._id ? mod.canRead : false,
     canDelete: mod._id ? mod.canDelete : false,
+    canRestore: mod._id ? mod.canRestore : false,
   };
 
   const [resource, setResource] = useState<Resources>(initialState);
@@ -117,6 +117,29 @@ const ResourceItem = ({
               ...resource,
               module: mod.name,
               canDelete: !resource.canDelete,
+            });
+          }}
+        />
+      </td>
+      <td>
+        <Form.Check
+          type="checkbox"
+          name="canRestore"
+          checked={mod.canRestore}
+          onChange={(e) => {
+            clearAlert();
+            const element = resources.map((res: any) => {
+              return {
+                ...res,
+                canRestore:
+                  res.name === mod.name ? !resource.canRestore : res.canRestore,
+              };
+            });
+            setResources(element);
+            setResource({
+              ...resource,
+              module: mod.name,
+              canRestore: !resource.canRestore,
             });
           }}
         />

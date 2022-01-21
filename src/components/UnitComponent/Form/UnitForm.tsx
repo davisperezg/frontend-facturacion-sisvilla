@@ -3,11 +3,15 @@ import {
   FormEvent,
   memo,
   useCallback,
+  useContext,
   useEffect,
   useState,
 } from "react";
 import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
+import { getModuleByMenu } from "../../../api/module/module";
 import { postCreateUnit, updateUnit } from "../../../api/unit/unit";
+import { AuthContext } from "../../../context/auth";
 import { IAlert } from "../../../interface/IAlert";
 import { Unit } from "../../../interface/Unit";
 type InputChange = ChangeEvent<
@@ -38,6 +42,18 @@ const UnitForm = ({
   const [message, setMessage] = useState<IAlert>(initialStateAlert);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [errors, setErrors] = useState<any>({});
+  const { resources } = useContext(AuthContext);
+  const location = useLocation();
+  const getNameLocation = location.pathname.slice(1);
+  const [resource, setResource] = useState<any>(null);
+
+  const getMyModule = useCallback(async () => {
+    const mymodule = await getModuleByMenu(getNameLocation);
+    const findResource = resources.find(
+      (res: any) => res.module.name === mymodule.data.name
+    );
+    setResource(findResource);
+  }, [resources, getNameLocation]);
 
   const closeAndClear = () => {
     setForm(initialStateUnit);
@@ -75,37 +91,55 @@ const UnitForm = ({
     } else {
       setDisabled(true);
       if (form?._id) {
-        try {
-          const res = await updateUnit(form!._id, form);
-          const { unitUpdated } = res.data;
+        if (resource && resource.canUpdate) {
+          try {
+            const res = await updateUnit(form!._id, form);
+            const { unitUpdated } = res.data;
+            setMessage({
+              type: "success",
+              message: `La unidad ${unitUpdated.name} ha sido actualizado existosamente.`,
+            });
+            setDisabled(false);
+            listUnits();
+          } catch (e) {
+            setDisabled(false);
+            const error: any = e as Error;
+            const msg = error.response.data;
+            setMessage({ type: "danger", message: msg.message });
+          }
+        } else {
           setMessage({
-            type: "success",
-            message: `La unidad ${unitUpdated.name} ha sido actualizado existosamente.`,
+            type: "danger",
+            message: "No tienes acceso a este recurso.",
           });
           setDisabled(false);
-          listUnits();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
+          return;
         }
       } else {
-        try {
-          const res = await postCreateUnit(form);
-          const { unit } = res.data;
+        if (resource && resource.canCreate) {
+          try {
+            const res = await postCreateUnit(form);
+            const { unit } = res.data;
+            setMessage({
+              type: "success",
+              message: `La unidad ${unit.name} ha sido registrado existosamente.`,
+            });
+            setForm(initialStateUnit);
+            setDisabled(false);
+            listUnits();
+          } catch (e) {
+            setDisabled(false);
+            const error: any = e as Error;
+            const msg = error.response.data;
+            setMessage({ type: "danger", message: msg.message });
+          }
+        } else {
           setMessage({
-            type: "success",
-            message: `La unidad ${unit.name} ha sido registrado existosamente.`,
+            type: "danger",
+            message: "No tienes acceso a este recurso.",
           });
-          setForm(initialStateUnit);
           setDisabled(false);
-          listUnits();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
+          return;
         }
       }
       setErrors({});
@@ -123,7 +157,8 @@ const UnitForm = ({
 
   useEffect(() => {
     getModule();
-  }, [getModule]);
+    getMyModule();
+  }, [getModule, getMyModule]);
 
   return (
     <Modal

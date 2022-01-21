@@ -3,6 +3,7 @@ import {
   FormEvent,
   memo,
   useCallback,
+  useContext,
   useEffect,
   useState,
 } from "react";
@@ -10,6 +11,9 @@ import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap";
 import { postCreateClient, updateClient } from "../../../api/client/client";
 import { IAlert } from "../../../interface/IAlert";
 import { Client } from "../../../interface/Client";
+import { AuthContext } from "../../../context/auth";
+import { useLocation } from "react-router-dom";
+import { getModuleByMenu } from "../../../api/module/module";
 
 type InputChange = ChangeEvent<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -45,6 +49,18 @@ const ClientForm = ({
   const [message, setMessage] = useState<IAlert>(initialStateAlert);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [errors, setErrors] = useState<any>({});
+  const { resources } = useContext(AuthContext);
+  const location = useLocation();
+  const getNameLocation = location.pathname.slice(1);
+  const [resource, setResource] = useState<any>(null);
+
+  const getMyModule = useCallback(async () => {
+    const mymodule = await getModuleByMenu(getNameLocation);
+    const findResource = resources.find(
+      (res: any) => res.module.name === mymodule.data.name
+    );
+    setResource(findResource);
+  }, [resources, getNameLocation]);
 
   const closeAndClear = () => {
     setForm(initialStateClient);
@@ -92,37 +108,55 @@ const ClientForm = ({
     } else {
       setDisabled(true);
       if (form?._id) {
-        try {
-          const res = await updateClient(form!._id, form);
-          const { clientUpdated } = res.data;
+        if (resource && resource.canUpdate) {
+          try {
+            const res = await updateClient(form!._id, form);
+            const { clientUpdated } = res.data;
+            setMessage({
+              type: "success",
+              message: `El cliente ${clientUpdated.name} ha sido actualizado existosamente.`,
+            });
+            setDisabled(false);
+            listClients();
+          } catch (e) {
+            setDisabled(false);
+            const error: any = e as Error;
+            const msg = error.response.data;
+            setMessage({ type: "danger", message: msg.message });
+          }
+        } else {
           setMessage({
-            type: "success",
-            message: `El cliente ${clientUpdated.name} ha sido actualizado existosamente.`,
+            type: "danger",
+            message: "No tienes acceso a este recurso.",
           });
           setDisabled(false);
-          listClients();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
+          return;
         }
       } else {
-        try {
-          const res = await postCreateClient(form);
-          const { client } = res.data;
+        if (resource && resource.canCreate) {
+          try {
+            const res = await postCreateClient(form);
+            const { client } = res.data;
+            setMessage({
+              type: "success",
+              message: `El cliente ${client.name} ha sido registrado existosamente.`,
+            });
+            setForm(initialStateClient);
+            setDisabled(false);
+            listClients();
+          } catch (e) {
+            setDisabled(false);
+            const error: any = e as Error;
+            const msg = error.response.data;
+            setMessage({ type: "danger", message: msg.message });
+          }
+        } else {
           setMessage({
-            type: "success",
-            message: `El cliente ${client.name} ha sido registrado existosamente.`,
+            type: "danger",
+            message: "No tienes acceso a este recurso.",
           });
-          setForm(initialStateClient);
           setDisabled(false);
-          listClients();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
+          return;
         }
       }
       setErrors({});
@@ -155,7 +189,8 @@ const ClientForm = ({
 
   useEffect(() => {
     getClient();
-  }, [getClient]);
+    getMyModule();
+  }, [getClient, getMyModule]);
 
   return (
     <Modal

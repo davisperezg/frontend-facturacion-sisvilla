@@ -458,7 +458,7 @@ const FactForm = ({
                     >
                       <h3>RUC: 20722312185</h3>
                       <h3>
-                        <strong>BOLETA DE VENTA</strong>
+                        <strong>NOTA DE CREDITO</strong>
                       </h3>
                       <h3>N° 5896</h3>
                     </div>

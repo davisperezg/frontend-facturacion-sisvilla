@@ -9,4 +9,5 @@ export interface Resources {
   canUpdate: boolean;
   canRead: boolean;
   canDelete: boolean;
+  canRestore: boolean;
 }

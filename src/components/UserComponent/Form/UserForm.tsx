@@ -9,9 +9,13 @@ import {
   useEffect,
   ChangeEvent,
   FormEvent,
+  useContext,
 } from "react";
 import { Rol } from "../../../interface/Rol";
 import { getRoles } from "../../../api/role/role";
+import { AuthContext } from "../../../context/auth";
+import { useLocation } from "react-router-dom";
+import { getModuleByMenu } from "../../../api/module/module";
 
 type InputChange = ChangeEvent<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -49,6 +53,18 @@ const UserForm = ({
   const [disabled, setDisabled] = useState<boolean>(false);
   const [roles, setRoles] = useState<Rol[]>([]);
   const [errors, setErrors] = useState<any>({});
+  const { resources } = useContext(AuthContext);
+  const location = useLocation();
+  const getNameLocation = location.pathname.slice(1);
+  const [resource, setResource] = useState<any>(null);
+
+  const getMyModule = useCallback(async () => {
+    const mymodule = await getModuleByMenu(getNameLocation);
+    const findResource = resources.find(
+      (res: any) => res.module.name === mymodule.data.name
+    );
+    setResource(findResource);
+  }, [resources, getNameLocation]);
 
   const closeAndClear = () => {
     setForm(initialStateUser);
@@ -125,37 +141,55 @@ const UserForm = ({
     } else {
       setDisabled(true);
       if (form?._id) {
-        try {
-          const res = await updateUser(form!._id, form);
-          const { userUpdated } = res.data;
+        if (resource && resource.canUpdate) {
+          try {
+            const res = await updateUser(form!._id, form);
+            const { userUpdated } = res.data;
+            setMessage({
+              type: "success",
+              message: `El usuario ${userUpdated.username} ha sido actualizado existosamente.`,
+            });
+            setDisabled(false);
+            listUsers();
+          } catch (e) {
+            setDisabled(false);
+            const error: any = e as Error;
+            const msg = error.response.data;
+            setMessage({ type: "danger", message: msg.message });
+          }
+        } else {
           setMessage({
-            type: "success",
-            message: `El usuario ${userUpdated.username} ha sido actualizado existosamente.`,
+            type: "danger",
+            message: "No tienes acceso a este recurso.",
           });
           setDisabled(false);
-          listUsers();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
+          return;
         }
       } else {
-        try {
-          const res = await postCreateUser(form);
-          const { user } = res.data;
+        if (resource && resource.canCreate) {
+          try {
+            const res = await postCreateUser(form);
+            const { user } = res.data;
+            setMessage({
+              type: "success",
+              message: `El usuario ${user.username} ha sido registrado existosamente.`,
+            });
+            setForm(initialStateUser);
+            setDisabled(false);
+            listUsers();
+          } catch (e) {
+            setDisabled(false);
+            const error: any = e as Error;
+            const msg = error.response.data;
+            setMessage({ type: "danger", message: msg.message });
+          }
+        } else {
           setMessage({
-            type: "success",
-            message: `El usuario ${user.username} ha sido registrado existosamente.`,
+            type: "danger",
+            message: "No tienes acceso a este recurso.",
           });
-          setForm(initialStateUser);
           setDisabled(false);
-          listUsers();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
+          return;
         }
       }
       setErrors(newErrors);
@@ -189,7 +223,8 @@ const UserForm = ({
   useEffect(() => {
     listRoles();
     getUser();
-  }, [getUser]);
+    getMyModule();
+  }, [getUser, getMyModule]);
 
   return (
     <Modal

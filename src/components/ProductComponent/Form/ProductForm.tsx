@@ -8,6 +8,7 @@ import {
   useEffect,
   ChangeEvent,
   FormEvent,
+  useContext,
 } from "react";
 import { Mark } from "../../../interface/Mark";
 import { Model } from "../../../interface/Model";
@@ -18,6 +19,9 @@ import Select from "react-select";
 import { getModels } from "../../../api/model/model";
 import makeAnimated from "react-select/animated";
 import { getUnits } from "../../../api/unit/unit";
+import { AuthContext } from "../../../context/auth";
+import { useLocation } from "react-router-dom";
+import { getModuleByMenu } from "../../../api/module/module";
 
 const animatedComponents = makeAnimated();
 
@@ -59,6 +63,18 @@ const ProductForm = ({
   const [models, setModels] = useState<Model[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [errors, setErrors] = useState<any>({});
+  const { resources } = useContext(AuthContext);
+  const location = useLocation();
+  const getNameLocation = location.pathname.slice(1);
+  const [resource, setResource] = useState<any>(null);
+
+  const getMyModule = useCallback(async () => {
+    const mymodule = await getModuleByMenu(getNameLocation);
+    const findResource = resources.find(
+      (res: any) => res.module.name === mymodule.data.name
+    );
+    setResource(findResource);
+  }, [resources, getNameLocation]);
 
   const closeAndClear = () => {
     setForm(initialStateProduct);
@@ -159,37 +175,55 @@ const ProductForm = ({
     } else {
       setDisabled(true);
       if (form?._id) {
-        try {
-          const res = await updateProduct(form!._id, form);
-          const { productUpdated } = res.data;
+        if (resource && resource.canUpdate) {
+          try {
+            const res = await updateProduct(form!._id, form);
+            const { productUpdated } = res.data;
+            setMessage({
+              type: "success",
+              message: `El producto ${productUpdated.name} ha sido actualizado existosamente.`,
+            });
+            setDisabled(false);
+            listProducts();
+          } catch (e) {
+            setDisabled(false);
+            const error: any = e as Error;
+            const msg = error.response.data;
+            setMessage({ type: "danger", message: msg.message });
+          }
+        } else {
           setMessage({
-            type: "success",
-            message: `El producto ${productUpdated.name} ha sido actualizado existosamente.`,
+            type: "danger",
+            message: "No tienes acceso a este recurso.",
           });
           setDisabled(false);
-          listProducts();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
+          return;
         }
       } else {
-        try {
-          const res = await postCreateProduct(form);
-          const { product } = res.data;
+        if (resource && resource.canCreate) {
+          try {
+            const res = await postCreateProduct(form);
+            const { product } = res.data;
+            setMessage({
+              type: "success",
+              message: `El producto ${product.name} ha sido registrado existosamente.`,
+            });
+            setForm(initialStateProduct);
+            setDisabled(false);
+            listProducts();
+          } catch (e) {
+            setDisabled(false);
+            const error: any = e as Error;
+            const msg = error.response.data;
+            setMessage({ type: "danger", message: msg.message });
+          }
+        } else {
           setMessage({
-            type: "success",
-            message: `El producto ${product.name} ha sido registrado existosamente.`,
+            type: "danger",
+            message: "No tienes acceso a este recurso.",
           });
-          setForm(initialStateProduct);
           setDisabled(false);
-          listProducts();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
+          return;
         }
       }
       setErrors(newErrors);
@@ -227,7 +261,8 @@ const ProductForm = ({
     listModels();
     listUnits();
     getProduct();
-  }, [getProduct]);
+    getMyModule();
+  }, [getProduct, getMyModule]);
 
   return (
     <Modal

@@ -1,6 +1,5 @@
 import { Button, Card, Table } from "react-bootstrap";
 import { useCallback, useState, useEffect } from "react";
-import { Resources } from "../../interface/Resources";
 import { Fact } from "../../interface/Fact";
 import {
   deleteFact,
@@ -11,7 +10,7 @@ import {
 import styles from "./Fact.module.scss";
 import FactForm from "../../components/FactComponent/Form/FactForm";
 
-const FactScreen = ({ myResource }: { myResource: Resources }) => {
+const FactScreen = () => {
   const [show, setShow] = useState(false);
   const [state, setState] = useState<any>();
   const [facts, setFacts] = useState<Fact[]>([]);
@@ -84,16 +83,14 @@ const FactScreen = ({ myResource }: { myResource: Resources }) => {
       <Card>
         <Card.Header as="h5">Lista de Ventas</Card.Header>
         <Card.Body>
-          {myResource?.canCreate && (
-            <Button
-              type="button"
-              variant="primary"
-              autoFocus
-              onClick={() => openModalRE(false)}
-            >
-              Agregar nueva venta
-            </Button>
-          )}
+          <Button
+            type="button"
+            variant="primary"
+            autoFocus
+            onClick={() => openModalRE(false)}
+          >
+            Agregar nueva venta
+          </Button>
 
           <Table
             striped

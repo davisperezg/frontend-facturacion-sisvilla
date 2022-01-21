@@ -5,15 +5,22 @@ import {
   useEffect,
   FormEvent,
   ChangeEvent,
+  useContext,
 } from "react";
 import { IAlert } from "../../../interface/IAlert";
 import { Menu } from "../../../interface/Menu";
 import { Module } from "../../../interface/Module";
 import { getMenus } from "../../../api/menu/menu";
-import { postCreateModule, updateModule } from "../../../api/module/module";
+import {
+  getModuleByMenu,
+  postCreateModule,
+  updateModule,
+} from "../../../api/module/module";
 import { Modal, Form, Button, Alert, Row, Col } from "react-bootstrap";
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
+import { AuthContext } from "../../../context/auth";
+import { useLocation } from "react-router-dom";
 
 const animatedComponents = makeAnimated();
 type InputChange = ChangeEvent<
@@ -46,6 +53,18 @@ const ModuleForm = ({
   const [disabled, setDisabled] = useState<boolean>(false);
   const [menus, setMenus] = useState<Menu[]>([]);
   const [errors, setErrors] = useState<any>({});
+  const { resources } = useContext(AuthContext);
+  const location = useLocation();
+  const getNameLocation = location.pathname.slice(1);
+  const [resource, setResource] = useState<any>(null);
+
+  const getMyModule = useCallback(async () => {
+    const mymodule = await getModuleByMenu(getNameLocation);
+    const findResource = resources.find(
+      (res: any) => res.module.name === mymodule.data.name
+    );
+    setResource(findResource);
+  }, [resources, getNameLocation]);
 
   const closeAndClear = () => {
     setForm(initialStateMod);
@@ -95,37 +114,55 @@ const ModuleForm = ({
     } else {
       setDisabled(true);
       if (form?._id) {
-        try {
-          const res = await updateModule(form!._id, form);
-          const { moduleUpdated } = res.data;
+        if (resource && resource.canUpdate) {
+          try {
+            const res = await updateModule(form!._id, form);
+            const { moduleUpdated } = res.data;
+            setMessage({
+              type: "success",
+              message: `El modulo ${moduleUpdated.name} ha sido actualizado existosamente.`,
+            });
+            setDisabled(false);
+            listModules();
+          } catch (e) {
+            setDisabled(false);
+            const error: any = e as Error;
+            const msg = error.response.data;
+            setMessage({ type: "danger", message: msg.message });
+          }
+        } else {
           setMessage({
-            type: "success",
-            message: `El modulo ${moduleUpdated.name} ha sido actualizado existosamente.`,
+            type: "danger",
+            message: "No tienes acceso a este recurso.",
           });
           setDisabled(false);
-          listModules();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
+          return;
         }
       } else {
-        try {
-          const res = await postCreateModule(form);
-          const { module } = res.data;
+        if (resource && resource.canCreate) {
+          try {
+            const res = await postCreateModule(form);
+            const { module } = res.data;
+            setMessage({
+              type: "success",
+              message: `El modulo ${module.name} ha sido registrado existosamente.`,
+            });
+            setForm(initialStateMod);
+            setDisabled(false);
+            listModules();
+          } catch (e) {
+            setDisabled(false);
+            const error: any = e as Error;
+            const msg = error.response.data;
+            setMessage({ type: "danger", message: msg.message });
+          }
+        } else {
           setMessage({
-            type: "success",
-            message: `El modulo ${module.name} ha sido registrado existosamente.`,
+            type: "danger",
+            message: "No tienes acceso a este recurso.",
           });
-          setForm(initialStateMod);
           setDisabled(false);
-          listModules();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
+          return;
         }
       }
       setErrors({});
@@ -145,7 +182,8 @@ const ModuleForm = ({
   useEffect(() => {
     listMenus();
     getModule();
-  }, [getModule]);
+    getMyModule();
+  }, [getModule, getMyModule]);
 
   return (
     <Modal

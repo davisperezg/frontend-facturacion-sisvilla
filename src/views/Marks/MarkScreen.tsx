@@ -1,23 +1,44 @@
-import { useCallback, useState, useEffect } from "react";
-import { Button, Card, Table } from "react-bootstrap";
+import { useCallback, useState, useEffect, useContext } from "react";
+import { Alert, Button, Card, Table } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
 import {
   deleteMark,
   getMarkDeleted,
   getMarks,
   restoreMark,
 } from "../../api/mark/mark";
+import { getModuleByMenu } from "../../api/module/module";
 import MarkForm from "../../components/MarkComponent/Form/MarkForm";
 import MarkListActives from "../../components/MarkComponent/List/Actives/MarkListActives";
 import MarkListRemoves from "../../components/MarkComponent/List/Removes/MarkListRemoves";
+import { AuthContext } from "../../context/auth";
+import { IAlert } from "../../interface/IAlert";
 import { Mark } from "../../interface/Mark";
-import { Resources } from "../../interface/Resources";
 import styles from "./Mark.module.scss";
 
-const MarkScreen = ({ myResource }: { myResource: Resources }) => {
+const initialState: IAlert = {
+  type: "",
+  message: "",
+};
+
+const MarkScreen = () => {
   const [show, setShow] = useState(false);
   const [state, setState] = useState<any>();
   const [marks, setMarks] = useState<Mark[]>([]);
   const [removes, setRemoves] = useState<Mark[]>([]);
+  const { resources } = useContext(AuthContext);
+  const [resource, setResource] = useState<any>(null);
+  const location = useLocation();
+  const getNameLocation = location.pathname.slice(1);
+  const [message, setMessage] = useState<IAlert>(initialState);
+
+  const getMyModule = useCallback(async () => {
+    const mymodule = await getModuleByMenu(getNameLocation);
+    const findResource = resources.find(
+      (res: any) => res.module.name === mymodule.data.name
+    );
+    setResource(findResource);
+  }, [resources, getNameLocation]);
 
   const openModalRE = useCallback((props: boolean, value?: any) => {
     setShow(true);
@@ -45,6 +66,13 @@ const MarkScreen = ({ myResource }: { myResource: Resources }) => {
 
   const _deleteMark = useCallback(
     async (id: string) => {
+      if (resource && resource.canDelete === false) {
+        setMessage({
+          type: "danger",
+          message: "No tienes acceso a este recurso.",
+        });
+        return;
+      }
       const __deletedMark = await deleteMark(id);
       const { data } = __deletedMark;
       const { markDeleted } = data;
@@ -53,11 +81,18 @@ const MarkScreen = ({ myResource }: { myResource: Resources }) => {
         listMarkDeleted();
       }
     },
-    [listMarks, listMarkDeleted]
+    [listMarks, listMarkDeleted, resource]
   );
 
   const _restoreMark = useCallback(
     async (id: string) => {
+      if (resource && resource.canRestore === false) {
+        setMessage({
+          type: "danger",
+          message: "No tienes acceso a este recurso.",
+        });
+        return;
+      }
       const __restoreMark = await restoreMark(id);
       const { data } = __restoreMark;
       const { markRestored } = data;
@@ -66,34 +101,68 @@ const MarkScreen = ({ myResource }: { myResource: Resources }) => {
         listMarkDeleted();
       }
     },
-    [listMarks, listMarkDeleted]
+    [listMarks, listMarkDeleted, resource]
   );
 
   useEffect(() => {
-    listMarks();
+    if (resource && resource.canRead) {
+      listMarks();
+    }
+
     listMarkDeleted();
-  }, [listMarks, listMarkDeleted]);
+    getMyModule();
+  }, [listMarks, listMarkDeleted, getMyModule, resource]);
 
   return (
     <>
-      <MarkForm
-        show={show}
-        closeModal={closeModal}
-        listMarks={listMarks}
-        mark={state}
-      />
-
       <Card>
         <Card.Header as="h5">Lista de Marcas</Card.Header>
         <Card.Body>
-          {myResource?.canCreate && (
-            <Button
-              type="button"
-              variant="primary"
-              onClick={() => openModalRE(false)}
-            >
-              Agregar nueva marca
-            </Button>
+          {message.type && (
+            <Alert variant={message.type}>{message.message}</Alert>
+          )}
+          {resource && resource.canCreate && resource.canUpdate ? (
+            <>
+              <Button
+                type="button"
+                variant="primary"
+                onClick={() => openModalRE(false)}
+              >
+                Agregar nueva marca
+              </Button>
+              <MarkForm
+                show={show}
+                closeModal={closeModal}
+                listMarks={listMarks}
+                mark={state}
+              />
+            </>
+          ) : resource && resource.canCreate ? (
+            <>
+              <Button
+                type="button"
+                variant="primary"
+                onClick={() => openModalRE(false)}
+              >
+                Agregar nueva marca
+              </Button>
+              <MarkForm
+                show={show}
+                closeModal={closeModal}
+                listMarks={listMarks}
+                mark={state}
+              />
+            </>
+          ) : (
+            resource &&
+            resource.canUpdate && (
+              <MarkForm
+                show={show}
+                closeModal={closeModal}
+                listMarks={listMarks}
+                mark={state}
+              />
+            )
           )}
 
           <Table
@@ -108,7 +177,9 @@ const MarkScreen = ({ myResource }: { myResource: Resources }) => {
                 <th>#</th>
                 <th>Nombre</th>
                 <th className={`${styles["table--center"]}`}>Estado</th>
-                <th className={`${styles["table--center"]}`}>Eliminar</th>
+                {resource && resource.canDelete && (
+                  <th className={`${styles["table--center"]}`}>Eliminar</th>
+                )}
               </tr>
             </thead>
             <tbody>

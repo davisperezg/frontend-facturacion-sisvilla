@@ -3,11 +3,15 @@ import {
   FormEvent,
   memo,
   useCallback,
+  useContext,
   useEffect,
   useState,
 } from "react";
 import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
 import { postCreateModel, updateModel } from "../../../api/model/model";
+import { getModuleByMenu } from "../../../api/module/module";
+import { AuthContext } from "../../../context/auth";
 import { IAlert } from "../../../interface/IAlert";
 import { Model } from "../../../interface/Model";
 
@@ -39,6 +43,18 @@ const ModelForm = ({
   const [message, setMessage] = useState<IAlert>(initialStateAlert);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [errors, setErrors] = useState<any>({});
+  const { resources } = useContext(AuthContext);
+  const location = useLocation();
+  const getNameLocation = location.pathname.slice(1);
+  const [resource, setResource] = useState<any>(null);
+
+  const getMyModule = useCallback(async () => {
+    const mymodule = await getModuleByMenu(getNameLocation);
+    const findResource = resources.find(
+      (res: any) => res.module.name === mymodule.data.name
+    );
+    setResource(findResource);
+  }, [resources, getNameLocation]);
 
   const closeAndClear = () => {
     setForm(initialStateModel);
@@ -76,37 +92,55 @@ const ModelForm = ({
     } else {
       setDisabled(true);
       if (form?._id) {
-        try {
-          const res = await updateModel(form!._id, form);
-          const { modelUpdated } = res.data;
+        if (resource && resource.canUpdate) {
+          try {
+            const res = await updateModel(form!._id, form);
+            const { modelUpdated } = res.data;
+            setMessage({
+              type: "success",
+              message: `El modelo ${modelUpdated.name} ha sido actualizado existosamente.`,
+            });
+            setDisabled(false);
+            listModels();
+          } catch (e) {
+            setDisabled(false);
+            const error: any = e as Error;
+            const msg = error.response.data;
+            setMessage({ type: "danger", message: msg.message });
+          }
+        } else {
           setMessage({
-            type: "success",
-            message: `El modelo ${modelUpdated.name} ha sido actualizado existosamente.`,
+            type: "danger",
+            message: "No tienes acceso a este recurso.",
           });
           setDisabled(false);
-          listModels();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
+          return;
         }
       } else {
-        try {
-          const res = await postCreateModel(form);
-          const { model } = res.data;
+        if (resource && resource.canCreate) {
+          try {
+            const res = await postCreateModel(form);
+            const { model } = res.data;
+            setMessage({
+              type: "success",
+              message: `El modelo ${model.name} ha sido registrado existosamente.`,
+            });
+            setForm(initialStateModel);
+            setDisabled(false);
+            listModels();
+          } catch (e) {
+            setDisabled(false);
+            const error: any = e as Error;
+            const msg = error.response.data;
+            setMessage({ type: "danger", message: msg.message });
+          }
+        } else {
           setMessage({
-            type: "success",
-            message: `El modelo ${model.name} ha sido registrado existosamente.`,
+            type: "danger",
+            message: "No tienes acceso a este recurso.",
           });
-          setForm(initialStateModel);
           setDisabled(false);
-          listModels();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
+          return;
         }
       }
       setErrors({});
@@ -124,7 +158,8 @@ const ModelForm = ({
 
   useEffect(() => {
     getModule();
-  }, [getModule]);
+    getMyModule();
+  }, [getModule, getMyModule]);
 
   return (
     <Modal

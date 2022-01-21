@@ -25,3 +25,7 @@ export const restoreModule = async (id: string) => {
 export const updateModule = async (id: string, module: Module) => {
   return await axios.put(`${API}/api/v1/modules/${id}`, module);
 };
+
+export const getModuleByMenu = async (link: string) => {
+  return await axios.get(`${API}/api/v1/modules/menu/${link}`);
+};
