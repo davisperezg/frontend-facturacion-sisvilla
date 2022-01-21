@@ -135,12 +135,13 @@ const ProductForm = ({
   };
 
   const findFormErrors = () => {
-    const { name, mark, model, unit, stock, price } = form;
+    const { name, cod_internal, mark, model, unit, stock, price } = form;
 
     const newErrors: any = {};
-    console.log(stock < 0 ? true : false);
 
     if (!name || name === "") newErrors.name = "Por favor ingrese el nombre.";
+    if (!cod_internal || cod_internal === "")
+      newErrors.cod_internal = "Por favor ingrese un Cod. de barra o interno.";
     if (!mark || mark === "") newErrors.mark = "Por favor seleccione la marca.";
     if (!model || model === "")
       newErrors.model = "Por favor seleccione el modelo.";
@@ -287,7 +288,9 @@ const ProductForm = ({
 
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridName">
-              <Form.Label>Nombres</Form.Label>
+              <Form.Label>
+                Nombre <strong className="text-danger">*</strong>
+              </Form.Label>
               <Form.Control
                 name="name"
                 onChange={handleChange}
@@ -301,14 +304,21 @@ const ProductForm = ({
               </Form.Control.Feedback>
             </Form.Group>
             <Form.Group as={Col} controlId="formGridCodInternal">
-              <Form.Label>Codigo barra / interno</Form.Label>
+              <Form.Label>
+                Codigo barra / interno{" "}
+                <strong className="text-danger">*</strong>
+              </Form.Label>
               <Form.Control
                 name="cod_internal"
                 onChange={handleChange}
                 value={form?.cod_internal}
                 type="text"
                 placeholder="Introduce codigo barra / interno"
+                isInvalid={!!errors?.cod_internal}
               />
+              <Form.Control.Feedback type="invalid">
+                {errors?.cod_internal}
+              </Form.Control.Feedback>
             </Form.Group>
           </Row>
           <Form.Group className="mb-3" controlId="formGridNote">
@@ -327,7 +337,9 @@ const ProductForm = ({
           </Form.Group>
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridMark">
-              <Form.Label>Marca</Form.Label>
+              <Form.Label>
+                Marca <strong className="text-danger">*</strong>
+              </Form.Label>
               <Form.Control
                 name="mark"
                 type="hidden"
@@ -356,7 +368,9 @@ const ProductForm = ({
               </Form.Control.Feedback>
             </Form.Group>
             <Form.Group as={Col} controlId="formGridModel">
-              <Form.Label>Modelo</Form.Label>
+              <Form.Label>
+                Modelo <strong className="text-danger">*</strong>
+              </Form.Label>
               <Form.Control
                 name="model"
                 type="hidden"
@@ -387,7 +401,9 @@ const ProductForm = ({
             </Form.Group>
           </Row>
           <Form.Group className="mb-3" as={Col} controlId="formGridUnit">
-            <Form.Label>Unidad de medida</Form.Label>
+            <Form.Label>
+              Unidad de medida <strong className="text-danger">*</strong>
+            </Form.Label>
             <Form.Control
               name="unit"
               type="hidden"

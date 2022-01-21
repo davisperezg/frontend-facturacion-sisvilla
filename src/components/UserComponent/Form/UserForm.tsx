@@ -248,7 +248,9 @@ const UserForm = ({
           )}
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridRole">
-              <Form.Label>Rol</Form.Label>
+              <Form.Label>
+                Rol <strong className="text-danger">*</strong>
+              </Form.Label>
               <Form.Select
                 name="role"
                 onChange={handleChange}
@@ -270,7 +272,9 @@ const UserForm = ({
 
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridNames">
-              <Form.Label>Nombres</Form.Label>
+              <Form.Label>
+                Nombres <strong className="text-danger">*</strong>
+              </Form.Label>
               <Form.Control
                 name="name"
                 onChange={handleChange}
@@ -284,7 +288,9 @@ const UserForm = ({
               </Form.Control.Feedback>
             </Form.Group>
             <Form.Group as={Col} controlId="formGridLastnames">
-              <Form.Label>Apellidos</Form.Label>
+              <Form.Label>
+                Apellidos <strong className="text-danger">*</strong>
+              </Form.Label>
               <Form.Control
                 name="lastname"
                 onChange={handleChange}
@@ -300,7 +306,9 @@ const UserForm = ({
           </Row>
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridTip">
-              <Form.Label>Documento</Form.Label>
+              <Form.Label>
+                Documento <strong className="text-danger">*</strong>
+              </Form.Label>
               <Form.Select
                 name="tipDocument"
                 onChange={handleChange}
@@ -318,7 +326,9 @@ const UserForm = ({
             </Form.Group>
           </Row>
           <Form.Group className="mb-3" controlId="formGridNroDocument">
-            <Form.Label>Nro de documento</Form.Label>
+            <Form.Label>
+              Nro de documento <strong className="text-danger">*</strong>
+            </Form.Label>
             <Form.Control
               name="nroDocument"
               onChange={handleChange}
@@ -331,7 +341,9 @@ const UserForm = ({
             </Form.Control.Feedback>
           </Form.Group>
           <Form.Group className="mb-3" controlId="formGridEmail">
-            <Form.Label>Correo electronico</Form.Label>
+            <Form.Label>
+              Correo electronico <strong className="text-danger">*</strong>
+            </Form.Label>
             <Form.Control
               isInvalid={!!errors?.email}
               name="email"
@@ -344,7 +356,9 @@ const UserForm = ({
             </Form.Control.Feedback>
           </Form.Group>
           <Form.Group className="mb-3" controlId="formGridUsername">
-            <Form.Label>Usuario</Form.Label>
+            <Form.Label>
+              Usuario <strong className="text-danger">*</strong>
+            </Form.Label>
             <Form.Control
               name="username"
               onChange={handleChange}
@@ -358,7 +372,9 @@ const UserForm = ({
           </Form.Group>
           {!user?._id && (
             <Form.Group className="mb-3" controlId="formGridPassword">
-              <Form.Label>Contraseña</Form.Label>
+              <Form.Label>
+                Contraseña <strong className="text-danger">*</strong>
+              </Form.Label>
               <Form.Control
                 name="password"
                 onChange={handleChange}

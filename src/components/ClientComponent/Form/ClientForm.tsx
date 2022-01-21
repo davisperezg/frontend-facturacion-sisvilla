@@ -214,7 +214,9 @@ const ClientForm = ({
 
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridName">
-              <Form.Label>Nombre</Form.Label>
+              <Form.Label>
+                Nombre <strong className="text-danger">*</strong>
+              </Form.Label>
               <Form.Control
                 name="name"
                 onChange={handleChange}
@@ -228,7 +230,9 @@ const ClientForm = ({
               </Form.Control.Feedback>
             </Form.Group>
             <Form.Group as={Col} controlId="formGridLastname">
-              <Form.Label>Apellidos</Form.Label>
+              <Form.Label>
+                Apellidos <strong className="text-danger">*</strong>
+              </Form.Label>
               <Form.Control
                 name="lastname"
                 onChange={handleChange}
@@ -243,7 +247,9 @@ const ClientForm = ({
             </Form.Group>
           </Row>
           <Form.Group className="mb-3" as={Col} controlId="formGridTip">
-            <Form.Label>Tipo de documento</Form.Label>
+            <Form.Label>
+              Tipo de documento <strong className="text-danger">*</strong>
+            </Form.Label>
             <Form.Select
               name="tipDocument"
               onChange={handleChange}
@@ -260,7 +266,9 @@ const ClientForm = ({
             </Form.Control.Feedback>
           </Form.Group>
           <Form.Group className="mb-3" as={Col} controlId="formGridNro">
-            <Form.Label>Nro de documento</Form.Label>
+            <Form.Label>
+              Nro de documento <strong className="text-danger">*</strong>
+            </Form.Label>
             <Form.Control
               name="nroDocument"
               onChange={handleChange}

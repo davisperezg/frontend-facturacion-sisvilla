@@ -207,7 +207,9 @@ const ModuleForm = ({
 
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridName">
-              <Form.Label>Nombre</Form.Label>
+              <Form.Label>
+                Nombre <strong className="text-danger">*</strong>
+              </Form.Label>
               <Form.Control
                 name="name"
                 onChange={handleChange}
