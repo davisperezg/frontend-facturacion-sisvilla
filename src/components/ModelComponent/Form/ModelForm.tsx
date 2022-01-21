@@ -98,7 +98,7 @@ const ModelForm = ({
             const { modelUpdated } = res.data;
             setMessage({
               type: "success",
-              message: `El modelo ${modelUpdated.name} ha sido actualizado existosamente.`,
+              message: `La categoria ${modelUpdated.name} ha sido actualizado existosamente.`,
             });
             setDisabled(false);
             listModels();
@@ -123,7 +123,7 @@ const ModelForm = ({
             const { model } = res.data;
             setMessage({
               type: "success",
-              message: `El modelo ${model.name} ha sido registrado existosamente.`,
+              message: `La categoria ${model.name} ha sido registrado existosamente.`,
             });
             setForm(initialStateModel);
             setDisabled(false);
@@ -170,7 +170,9 @@ const ModelForm = ({
       top="true"
     >
       <Modal.Header closeButton>
-        <Modal.Title>{form?._id ? "Editar Model" : "Crear Model"}</Modal.Title>
+        <Modal.Title>
+          {form?._id ? "Editar Categoria" : "Crear Categoria"}
+        </Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={onSubmit}>

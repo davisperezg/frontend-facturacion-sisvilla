@@ -117,7 +117,7 @@ const ModelScreen = () => {
   return (
     <>
       <Card>
-        <Card.Header as="h5">Lista de Modelos</Card.Header>
+        <Card.Header as="h5">Lista de Categoria</Card.Header>
         <Card.Body>
           {message.type && (
             <Alert variant={message.type}>{message.message}</Alert>
@@ -129,7 +129,7 @@ const ModelScreen = () => {
                 variant="primary"
                 onClick={() => openModalRE(false)}
               >
-                Agregar nuevo modelo
+                Agregar nueva categoria
               </Button>
               <ModelForm
                 show={show}
@@ -145,7 +145,7 @@ const ModelScreen = () => {
                 variant="primary"
                 onClick={() => openModalRE(false)}
               >
-                Agregar nuevo modelo
+                Agregar nueva categoria
               </Button>
               <ModelForm
                 show={show}
