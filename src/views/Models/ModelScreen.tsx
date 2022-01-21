@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { Button, Card, Table } from "react-bootstrap";
+import { Alert, Button, Card, Table } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 import {
   deleteModel,
@@ -119,6 +119,9 @@ const ModelScreen = () => {
       <Card>
         <Card.Header as="h5">Lista de Modelos</Card.Header>
         <Card.Body>
+          {message.type && (
+            <Alert variant={message.type}>{message.message}</Alert>
+          )}
           {resource && resource.canCreate && resource.canUpdate ? (
             <>
               <Button

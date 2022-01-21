@@ -1,5 +1,5 @@
 import { Unit } from "../../interface/Unit";
-import { Button, Card, Table } from "react-bootstrap";
+import { Alert, Button, Card, Table } from "react-bootstrap";
 import { useCallback, useState, useEffect, useContext } from "react";
 import styles from "./Unit.module.scss";
 import {
@@ -117,6 +117,9 @@ const UnitScreen = () => {
       <Card>
         <Card.Header as="h5">Lista de Unidades de medida</Card.Header>
         <Card.Body>
+          {message.type && (
+            <Alert variant={message.type}>{message.message}</Alert>
+          )}
           {resource && resource.canCreate && resource.canUpdate ? (
             <>
               <Button

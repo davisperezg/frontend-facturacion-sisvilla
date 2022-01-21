@@ -35,7 +35,7 @@ const LayoutScreen = () => {
           {/* sila VOFI*/}
           <Route path="/marcas" element={<MarkScreen />} />
           {/* sila VOFI*/}
-          <Route path="/modelos" element={<ModelScreen />} />
+          <Route path="/categorias" element={<ModelScreen />} />
           {/* sila VOFI*/}
           <Route path="/productos" element={<ProductScreen />} />
           {/* sila VOFI*/}

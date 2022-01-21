@@ -456,9 +456,9 @@ const FactForm = ({
                         border: "1px solid #000",
                       }}
                     >
-                      <h3>RUC: 20722312185</h3>
+                      <h3>RUC: 10443373824</h3>
                       <h3>
-                        <strong>NOTA DE CREDITO</strong>
+                        <strong>GUIA DE VENTA</strong>
                       </h3>
                       <h3>N° 5896</h3>
                     </div>
