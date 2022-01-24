@@ -29,7 +29,7 @@ const SequenceForm = ({
   listSequences: () => void;
 }) => {
   const initialStateSequence = {
-    sequence: 0,
+    sequence: 1,
     area: "",
   };
 
@@ -61,7 +61,7 @@ const SequenceForm = ({
     const { sequence, area } = form;
     const newErrors: any = {};
 
-    if (sequence <= -1) newErrors.sequence = "Por favor ingrese un nro entero.";
+    if (sequence <= 0) newErrors.sequence = "Por favor ingrese un nro > a 0.";
     if (!area || area === "") newErrors.area = "Por favor seleccione el area.";
 
     return newErrors;
