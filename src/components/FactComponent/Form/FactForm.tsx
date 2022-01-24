@@ -27,10 +27,14 @@ import styles from "./FactForm.module.scss";
 import { IoMdClose } from "react-icons/io";
 import { getSequenceFact } from "../../../api/sequence/sequence";
 import { AuthContext } from "../../../context/auth";
-import { postCreateDetailsFact } from "../../../api/detail-fact/detail";
+import {
+  getDetailsFacts,
+  postCreateDetailsFact,
+} from "../../../api/detail-fact/detail";
 import DetailItem from "../Detail/Item";
 import { DetailsFact } from "../../../interface/DetailsFact";
 import { formatter } from "../../../lib/helpers/functions/functions";
+import ClientForm from "../../ClientComponent/Form/ClientForm";
 
 const animatedComponents = makeAnimated();
 
@@ -90,6 +94,7 @@ const FactForm = ({
   });
   const { user } = useContext(AuthContext);
   const [showMoney, setShowMoney] = useState(false);
+  const [showModalClient, setShowModalClient] = useState(false);
 
   const handleCloseModalMoney = () => {
     setShowMoney(false);
@@ -344,12 +349,6 @@ const FactForm = ({
     listFacts();
   };
 
-  useEffect(() => {
-    listClients();
-    listProducts();
-    getFac();
-  }, []);
-
   const onKeyDownDiv = (e: any) => {
     if (!showProducts) {
       if (e.key === "Enter") {
@@ -490,6 +489,55 @@ const FactForm = ({
     );
   };
 
+  const closeModalClient = () => setShowModalClient(false);
+
+  const openModalClient = () => setShowModalClient(true);
+
+  const getFactById = useCallback(async () => {
+    setForm({
+      cod_fact: fact?.cod_fact || 0,
+      client: String(fact?.client.value) || "",
+      payment_type: fact?.payment_type || "",
+      way_to_pay: fact?.way_to_pay || "",
+      subtotal: fact?.subtotal || 0,
+      discount: fact?.discount || 0,
+      customer_payment: fact?.customer_payment || 0,
+    });
+    setNumberFact(fact?.cod_fact || 0);
+    const res = await getDetailsFacts(String(fact?._id));
+    const filter = res.data.map((detail: any) => {
+      return {
+        fact: detail.fact.cod_fact,
+        cod_internal: detail.product.cod_internal,
+        product: detail.product._id,
+        quantity: detail.quantity,
+        price: detail.price,
+        discount: detail.discount,
+        name: detail.product.name,
+        unit: detail.product.unit.name,
+      };
+    });
+    setList(filter);
+  }, [
+    fact?.cod_fact,
+    fact?.client,
+    fact?.payment_type,
+    fact?.way_to_pay,
+    fact?.subtotal,
+    fact?.discount,
+    fact?.customer_payment,
+  ]);
+
+  useEffect(() => {
+    if (fact?._id) {
+      getFactById();
+      return;
+    }
+    getFac();
+    listClients();
+    listProducts();
+  }, [getFactById, getFactById, fact?._id]);
+
   return (
     <div onKeyDown={onKeyDownDiv}>
       <Modal show={showMoney} onHide={handleCloseModalMoney} centered>
@@ -557,6 +605,12 @@ const FactForm = ({
         </Modal.Footer>
       </Modal>
 
+      <ClientForm
+        show={showModalClient}
+        closeModal={closeModalClient}
+        listClients={listClients}
+      />
+
       <Modal
         show={show}
         onHide={closeAndClear}
@@ -603,6 +657,7 @@ const FactForm = ({
                         onChange={handleChange}
                         value={form?.payment_type}
                         isInvalid={!!errors?.payment_type}
+                        disabled={fact?._id ? true : false}
                       >
                         <option value="CONTADO">CONTADO</option>
                         <option value="CREDITO">CREDITO</option>
@@ -611,16 +666,32 @@ const FactForm = ({
                   </Row>
                   <Row className="mb-3">
                     <Form.Group md="7" as={Col} controlId="formGridFech">
-                      <Form.Label>Cliente</Form.Label>
+                      <Form.Label>
+                        Cliente{" "}
+                        {!fact?._id && (
+                          <strong
+                            style={{ cursor: "pointer" }}
+                            className="text-primary"
+                            onClick={openModalClient}
+                          >
+                            Registrar cliente
+                          </strong>
+                        )}
+                      </Form.Label>
                       <Select
+                        isDisabled={fact?._id ? true : false}
                         closeMenuOnSelect={true}
                         components={animatedComponents}
                         value={
                           form.client === ""
                             ? []
                             : {
-                                label: selectCliente.label,
-                                value: selectCliente.value,
+                                label: fact?._id
+                                  ? String(fact?.client.label)
+                                  : selectCliente.label,
+                                value: fact?._id
+                                  ? String(fact.client.value)
+                                  : selectCliente.value,
                               }
                         }
                         onChange={(values: any) => {
@@ -639,6 +710,7 @@ const FactForm = ({
                         onChange={handleChange}
                         value={form?.way_to_pay}
                         isInvalid={!!errors?.way_to_pay}
+                        disabled={fact?._id ? true : false}
                       >
                         <option value="EFECTIVO COMPLETO">
                           EFECTIVO COMPLETO
@@ -685,40 +757,52 @@ const FactForm = ({
                     <th>Precio</th>
                     <th>Descuento</th>
                     <th>Total</th>
-                    <th className="text-center">Eliminar</th>
+                    {!fact?._id && <th className="text-center">Eliminar</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {list.map((listed, i: number) => (
-                    <DetailItem
-                      key={listed.product}
-                      listed={listed}
-                      item={i}
-                      list={list}
-                      deleteItem={deleteItem}
-                      numberFact={numberFact}
-                      getProductByItem={getProductByItem}
-                    />
-                  ))}
-                  <tr>
-                    <td>
-                      <button
-                        className="btn btn-success"
-                        type="button"
-                        onClick={() => {
-                          setMessage(initialStateAlert);
-                          setShowProducts(!showProducts);
-                        }}
-                        style={{
-                          width: 40,
-                          height: 40,
-                        }}
-                        ref={searchProducts}
-                      >
-                        <strong>+</strong>
-                      </button>
-                    </td>
-                  </tr>
+                  {fact?._id
+                    ? list.map((listed, i: number) => (
+                        <DetailItem
+                          key={listed.product}
+                          listed={listed}
+                          item={i}
+                          list={list}
+                          view={true}
+                        />
+                      ))
+                    : list.map((listed, i: number) => (
+                        <DetailItem
+                          key={listed.product}
+                          listed={listed}
+                          item={i}
+                          list={list}
+                          deleteItem={deleteItem}
+                          numberFact={numberFact}
+                          getProductByItem={getProductByItem}
+                        />
+                      ))}
+                  {!fact?._id && (
+                    <tr>
+                      <td>
+                        <button
+                          className="btn btn-success"
+                          type="button"
+                          onClick={() => {
+                            setMessage(initialStateAlert);
+                            setShowProducts(!showProducts);
+                          }}
+                          style={{
+                            width: 40,
+                            height: 40,
+                          }}
+                          ref={searchProducts}
+                        >
+                          <strong>+</strong>
+                        </button>
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
                 <tfoot>
                   <tr>
@@ -748,6 +832,7 @@ const FactForm = ({
                         name="discount"
                         value={form.discount}
                         type="number"
+                        disabled={fact?._id ? true : false}
                         onChange={handleChange}
                         step="0.01"
                         min="0"
@@ -768,6 +853,38 @@ const FactForm = ({
                       calSumSub() - form.discount
                     )}`}</td>
                   </tr>
+                  {fact?._id && form.way_to_pay === "EFECTIVO CON VUELTO" && (
+                    <>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                          <strong>Pagó con</strong>
+                        </td>
+                        <td>{`S/ -${formatter.format(
+                          form.customer_payment
+                        )}`}</td>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                          <strong>Vuelto</strong>
+                        </td>
+                        <td>{`S/ ${formatter.format(
+                          form.subtotal - form.customer_payment
+                        )}`}</td>
+                      </tr>
+                    </>
+                  )}
                 </tfoot>
               </Table>
               {showProducts && (
@@ -877,7 +994,7 @@ const FactForm = ({
               disabled={disabled}
               onClick={onSubmit}
             >
-              {form?._id ? "Actualizar" : "Registrar"}
+              {fact?._id ? "Imprimir" : "Registrar"}
             </Button>
           </Modal.Footer>
         </Form>

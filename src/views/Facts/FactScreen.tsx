@@ -1,25 +1,40 @@
-import { Button, Card, Table } from "react-bootstrap";
+import { Alert, Button, Card, Modal, Table } from "react-bootstrap";
 import { useCallback, useState, useEffect } from "react";
 import { Fact } from "../../interface/Fact";
-import {
-  deleteFact,
-  getFactDeleted,
-  getFacts,
-  restoreFact,
-} from "../../api/fact/fact";
+import { deleteFact, getFactDeleted, getFacts } from "../../api/fact/fact";
 import styles from "./Fact.module.scss";
 import FactForm from "../../components/FactComponent/Form/FactForm";
+import FactListActives from "../../components/FactComponent/List/Actives/FactListActives";
+import FactListRemoves from "../../components/FactComponent/List/Removes/FactListRemoves";
+import { IAlert } from "../../interface/IAlert";
+
+const initialState: IAlert = {
+  type: "",
+  message: "",
+};
 
 const FactScreen = () => {
   const [show, setShow] = useState(false);
   const [state, setState] = useState<any>();
   const [facts, setFacts] = useState<Fact[]>([]);
   const [removes, setRemoves] = useState<Fact[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [idFact, setIdFact] = useState({
+    id: "",
+    cod: 0,
+  });
+  const [message, setMessage] = useState<IAlert>(initialState);
 
   const openModalRE = useCallback((props: boolean, value?: any) => {
     setShow(true);
     if (props) {
-      setState(value);
+      setState({
+        ...value,
+        client: {
+          label: value.client.name + " " + value.client.lastname,
+          value: value.client.nroDocument,
+        },
+      });
     }
   }, []);
 
@@ -40,36 +55,44 @@ const FactScreen = () => {
     setRemoves(data);
   }, []);
 
-  const _deleteFact = useCallback(
-    async (id: string) => {
-      const __deletedFact = await deleteFact(id);
-      const { data } = __deletedFact;
-      const { factDeleted } = data;
-      if (factDeleted) {
-        listFacts();
-        listFactDeleted();
-      }
-    },
-    [listFacts, listFactDeleted]
-  );
-
-  const _restoreFact = useCallback(
-    async (id: string) => {
-      const __restoreFact = await restoreFact(id);
-      const { data } = __restoreFact;
-      const { factRestored } = data;
-      if (factRestored) {
-        listFacts();
-        listFactDeleted();
-      }
-    },
-    [listFacts, listFactDeleted]
-  );
+  const _deleteFact = async () => {
+    const __deletedFact = await deleteFact(idFact.id);
+    const { data } = __deletedFact;
+    const { factDeleted } = data;
+    if (factDeleted) {
+      listFacts();
+      listFactDeleted();
+    }
+    setMessage({
+      type: "success",
+      message: `Venta 000${idFact.cod}. anulada correctamente.`,
+    });
+    closeModalConfirm();
+  };
 
   useEffect(() => {
     listFacts();
     listFactDeleted();
   }, [listFacts, listFactDeleted]);
+
+  const closeModalConfirm = () => {
+    setShowModal(false);
+    setIdFact({
+      id: "",
+      cod: 0,
+    });
+    setTimeout(() => {
+      setMessage(initialState);
+    }, 2500);
+  };
+
+  const openModalConfirm = (id: string, cod: number) => {
+    setShowModal(true);
+    setIdFact({
+      id: id,
+      cod: cod,
+    });
+  };
 
   return (
     <>
@@ -79,10 +102,31 @@ const FactScreen = () => {
         listFacts={listFacts}
         fact={state}
       />
+      <Modal show={showModal} onHide={closeModalConfirm} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>AVISA DE CONFIRMACION</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          ¿ Estas seguro que deseas anular la venta{" "}
+          <strong>000{idFact.cod}</strong> ?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeModalConfirm}>
+            Cerrar
+          </Button>
+          <Button variant="success" onClick={_deleteFact}>
+            Aceptar
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <Card>
         <Card.Header as="h5">Lista de Ventas</Card.Header>
         <Card.Body>
+          {message.type && (
+            <Alert variant={message.type}>{message.message}</Alert>
+          )}
+
           <Button
             type="button"
             variant="primary"
@@ -109,29 +153,25 @@ const FactScreen = () => {
                 <th>Tipo de pago</th>
                 <th>Forma de pago</th>
                 <th>Total</th>
-                <th>Estado Factura</th>
-                <th className={`${styles["table--center"]}`}>Estado</th>
+                <th className={`${styles["table--center"]}`}>Estado Factura</th>
                 <th className={`${styles["table--center"]}`}>Eliminar</th>
               </tr>
             </thead>
             <tbody>
-              {/* {facts.map((fact) => (
+              {facts.map((fact, i: number) => (
                 <FactListActives
                   key={fact._id}
+                  item={i}
                   fact={fact}
                   openModalRE={openModalRE}
-                  deleteFact={_deleteFact}
+                  deleteFact={openModalConfirm}
                 />
-              ))} */}
+              ))}
             </tbody>
             <tfoot>
-              {/* {removes.map((remove) => (
-                <FactListRemoves
-                  key={remove._id}
-                  remove={remove}
-                  restoreFact={_restoreFact}
-                />
-              ))} */}
+              {removes.map((remove, i: number) => (
+                <FactListRemoves item={i} key={remove._id} remove={remove} />
+              ))}
             </tfoot>
           </Table>
         </Card.Body>

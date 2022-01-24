@@ -4,6 +4,7 @@ import { PrivateRoute } from "./PrivateRoute";
 import { PublicRoute } from "./PublicRoute";
 import LayoutScreen from "../views/Layout/LayoutScreen";
 import LoginScreen from "../views/Login/LoginScreen";
+import PrintScreen from "../views/Print/PrintScreen";
 
 export const AppRouter = () => {
   return (
@@ -16,6 +17,10 @@ export const AppRouter = () => {
               <LoginScreen />
             </PublicRoute>
           }
+        />
+        <Route
+          path="/comprobantes/ventas/venta-generada/nro/:id"
+          element={<PrintScreen />}
         />
 
         <Route
