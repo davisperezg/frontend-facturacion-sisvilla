@@ -60,7 +60,7 @@ const UserScreen = () => {
   const openModalRE = useCallback((props: boolean, value?: any) => {
     setShow(true);
     if (props) {
-      setState({ ...value, role: value.role.name });
+      setState({ ...value, role: value.role.name, area: value.area.name });
     }
   }, []);
 
@@ -118,6 +118,10 @@ const UserScreen = () => {
       <Card>
         <Card.Header as="h5">Lista de Usuarios</Card.Header>
         <Card.Body>
+          <Alert variant="warning">
+            Si haz actualizado el area y/o sede de un usuario, el usuario tiene
+            que actualizar su página para que vizualice su nueva area y/o sede.
+          </Alert>
           {message.type && (
             <Alert variant={message.type}>{message.message}</Alert>
           )}
@@ -175,6 +179,7 @@ const UserScreen = () => {
               <thead>
                 <tr>
                   <th>#</th>
+                  <th>Area</th>
                   <th>Nombres</th>
                   <th>Apellidos</th>
                   <th>Documento</th>

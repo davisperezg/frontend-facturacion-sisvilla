@@ -63,7 +63,7 @@ const ProductForm = ({
   const [models, setModels] = useState<Model[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [errors, setErrors] = useState<any>({});
-  const { resources } = useContext(AuthContext);
+  const { resources, user } = useContext(AuthContext);
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
   const [resource, setResource] = useState<any>(null);
@@ -236,7 +236,7 @@ const ProductForm = ({
       setForm({
         _id: product?._id,
         name: product?.name,
-        cod_internal: product?.cod_internal,
+        cod_internal: product?.cod_internal.slice(3),
         note: product?.note,
         mark: product?.mark,
         model: product?.model,
@@ -285,7 +285,14 @@ const ProductForm = ({
           {message.type && (
             <Alert variant={message.type}>{message.message}</Alert>
           )}
-
+          <Row className="mb-3">
+            <Col xs={3}>
+              <Form.Group as={Col} controlId="formGridArea">
+                <Form.Label>Tu area/sede es:</Form.Label>
+                <Form.Control disabled type="text" value={user.area.name} />
+              </Form.Group>
+            </Col>
+          </Row>
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridName">
               <Form.Label>

@@ -7,6 +7,7 @@ export interface Product {
   name: string;
   note?: string;
   mark: Mark | string;
+  area?: Mark | string;
   model: Model | string;
   unit: Unit | string;
   stock: number;

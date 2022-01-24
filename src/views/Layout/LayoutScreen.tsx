@@ -15,36 +15,49 @@ import UnitScreen from "../Units/UnitScreen";
 import ClientScreen from "../Client/ClientScreen";
 import SupplierScreen from "../Supplier/SupplierScreen";
 import FactScreen from "../Facts/FactScreen";
+import AreaScreen from "../Area/AreaScreen";
+import SequencesScreen from "../Sequences/SequencesScreen";
+import { useContext } from "react";
+import { AuthContext } from "../../context/auth";
+import { BsFillHouseDoorFill } from "react-icons/bs";
 
 const LayoutScreen = () => {
+  const { user } = useContext(AuthContext);
+
   return (
     <>
       <Header />
       <Aside />
+      <div
+        style={{
+          marginLeft: 350,
+          position: "absolute",
+          left: 50,
+          marginTop: 10,
+          display: "flex",
+          alignItems: "center",
+          color: "red",
+        }}
+      >
+        <BsFillHouseDoorFill /> <strong> SEDE: {user.area.name}</strong>
+      </div>
       <main className={styles.main}>
         <Routes>
+          {/* pendiente de graficar*/}
           <Route path="/dashboard" element={<Dashboard />} />
-          {/* sila VOFI*/}
           <Route path="/roles" element={<RoleScreen />} />
-          {/* sila VOFI*/}
           <Route path="/usuarios" element={<UserScreen />} />
-          {/* sila VOFI*/}
           <Route path="/modulos" element={<ModulesScreen />} />
-          {/* sila VOFI*/}
           <Route path="/permisos" element={<OptionsScreen />} />
-          {/* sila VOFI*/}
           <Route path="/marcas" element={<MarkScreen />} />
-          {/* sila VOFI*/}
           <Route path="/categorias" element={<ModelScreen />} />
-          {/* sila VOFI*/}
           <Route path="/productos" element={<ProductScreen />} />
-          {/* sila VOFI*/}
           <Route path="/unidad-medida" element={<UnitScreen />} />
-          {/* sila VOFI*/}
           <Route path="/clientes" element={<ClientScreen />} />
-          {/* sila VOFI*/}
           <Route path="/proveedores" element={<SupplierScreen />} />
-
+          <Route path="/areas" element={<AreaScreen />} />
+          <Route path="/secuencias" element={<SequencesScreen />} />
+          {/* revisando...*/}
           <Route path="/ventas" element={<FactScreen />} />
         </Routes>
       </main>

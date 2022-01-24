@@ -36,6 +36,7 @@ const UserListRemoves = ({
       <tr>
         <td>{remove._id}</td>
         <td>{remove.name}</td>
+        <td>{remove.area.name}</td>
         <td>{remove.lastname}</td>
         <td>{remove.tipDocument}</td>
         <td>{remove.nroDocument}</td>

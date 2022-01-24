@@ -5,7 +5,7 @@ import { useContext } from "react";
 import { AuthContext } from "../../context/auth";
 import { User } from "../../interface/User";
 import { deleteSesions } from "../../lib/helpers/sesion/sesion";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const Header = () => {
   const { user, setUser, setResource } = useContext(AuthContext);
@@ -37,6 +37,32 @@ const Header = () => {
       </div>
       <div className={styles.item}>
         <div className={styles.item__right}>
+          <ul className={styles.item__ul}>
+            <NavLink
+              className={(props: any) => {
+                return `${props.isActive ? "text-black" : ""} ${
+                  styles.item__ul__li
+                }`;
+              }}
+              end
+              to="/areas"
+              //className={styles.item__ul__li}
+            >
+              Areas / Sedes
+            </NavLink>
+            <NavLink
+              className={(props: any) => {
+                return `${props.isActive ? "text-black" : ""} ${
+                  styles.item__ul__li
+                }`;
+              }}
+              end
+              to="/secuencias"
+              //className={styles.item__ul__li}
+            >
+              Secuencias
+            </NavLink>
+          </ul>
           <label className={styles.item__user}>Bienvenido,</label>
           <strong className={styles.item__user}>
             {`${data.name.toUpperCase()} ${data.lastname.toUpperCase()}`}

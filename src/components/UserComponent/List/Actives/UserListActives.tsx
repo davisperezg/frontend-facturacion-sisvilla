@@ -47,6 +47,12 @@ const UserListActives = ({
             className={styles.table__td}
             onClick={() => openModalRE(true, user)}
           >
+            {user.area.name}
+          </td>
+          <td
+            className={styles.table__td}
+            onClick={() => openModalRE(true, user)}
+          >
             {user.name}
           </td>
           <td

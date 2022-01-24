@@ -14,7 +14,7 @@ const ProductListRemoves = ({
   remove: Product;
   restorePro: (id: string) => void;
 }) => {
-  const { mark, model, unit }: any = remove;
+  const { mark, model, unit, area }: any = remove;
 
   const { resources } = useContext(AuthContext);
   const location = useLocation();
@@ -37,6 +37,7 @@ const ProductListRemoves = ({
     <>
       <tr>
         <td>{remove._id}</td>
+        <td>{String(area.name)}</td>
         <td>{remove.cod_internal}</td>
         <td>{remove.name}</td>
         <td>{remove.note}</td>

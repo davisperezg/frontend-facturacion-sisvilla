@@ -7,6 +7,8 @@ import {
   useMemo,
   useRef,
   KeyboardEvent,
+  useContext,
+  useCallback,
 } from "react";
 import { Alert, Button, Col, Form, Modal, Row, Table } from "react-bootstrap";
 import { postCreateFact, updateFact } from "../../../api/fact/fact";
@@ -23,6 +25,12 @@ import PaginationComponent from "../../DatatableComponent/Pagination/Pagination"
 import TableHeader from "../../DatatableComponent/Header/TableHeader";
 import styles from "./FactForm.module.scss";
 import { IoMdClose } from "react-icons/io";
+import { getSequenceFact } from "../../../api/sequence/sequence";
+import { AuthContext } from "../../../context/auth";
+import { postCreateDetailsFact } from "../../../api/detail-fact/detail";
+import DetailItem from "../Detail/Item";
+import { DetailsFact } from "../../../interface/DetailsFact";
+import { formatter } from "../../../lib/helpers/functions/functions";
 
 const animatedComponents = makeAnimated();
 
@@ -46,14 +54,13 @@ const FactForm = ({
   listFacts: () => void;
 }) => {
   const initialStateFact = {
-    cod_fact: "",
+    cod_fact: 0,
     client: "",
     payment_type: "CONTADO",
     way_to_pay: "EFECTIVO COMPLETO",
     subtotal: 0,
     discount: 0,
     customer_payment: 0,
-    obs: "",
   };
 
   const initialStateAlert: IAlert = {
@@ -76,10 +83,36 @@ const FactForm = ({
   const [totalItems, setTotalItems] = useState(0);
   const [sorting, setSorting] = useState({ field: "", order: "" });
   const [currentPage, setCurrentPage] = useState(1);
+  const [numberFact, setNumberFact] = useState(0);
   const [selectCliente, setSelectClient] = useState<any>({
     label: "",
     value: "",
   });
+  const { user } = useContext(AuthContext);
+  const [showMoney, setShowMoney] = useState(false);
+
+  const handleCloseModalMoney = () => {
+    setShowMoney(false);
+    setDisabled(false);
+    setForm({ ...form, customer_payment: 0, subtotal: 0 });
+  };
+  const handleShowModalMoney = () => {
+    setShowMoney(true);
+    setForm({ ...form, subtotal: calSumSub() - form.discount });
+  };
+
+  const handleButtonFF = () => {
+    if (form.customer_payment === 0) {
+      setMessage({
+        type: "info",
+        message: `Si el cliente esta pagando con 0 soles, por favor cierre la ventana y cambie a la forma de pago a: "EFECTIVO COMPLETO"`,
+      });
+    } else {
+      saveFactAndDetail();
+      handleCloseModalMoney();
+    }
+  };
+
   const ITEMS_PER_PAGE = 5;
 
   const headers = [
@@ -98,6 +131,12 @@ const FactForm = ({
     setCurrentPage(1);
   };
 
+  const getFac = async () => {
+    const res = await getSequenceFact(user.area._id);
+    const { data } = res;
+    setNumberFact(data.sequence);
+  };
+
   const listClients = async () => {
     const res = await getClients();
     const { data } = res;
@@ -108,8 +147,8 @@ const FactForm = ({
       };
     });
     const getClientNO = filter.find((find: any) => find.value === "00000000");
-    setSelectClient({ label: getClientNO.label, value: getClientNO.value });
     setForm({ ...form, client: getClientNO.value });
+    setSelectClient({ label: getClientNO.label, value: getClientNO.value });
     setClients(filter);
   };
 
@@ -183,7 +222,7 @@ const FactForm = ({
   };
 
   const closeAndClear = () => {
-    setForm(initialStateFact);
+    setForm({ ...initialStateFact, client: selectCliente.value });
     closeModal();
     setMessage(initialStateAlert);
     setErrors({});
@@ -191,6 +230,7 @@ const FactForm = ({
     setShowProducts(false);
     setList([]);
     selected = [];
+    setDisabled(false);
   };
 
   const findFormErrors = () => {
@@ -209,13 +249,19 @@ const FactForm = ({
         ...errors,
         [e.target.name]: null,
       });
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]:
+        e.target.name === "discount" || e.target.name === "customer_payment"
+          ? Number(e.target.value)
+          : e.target.value,
+    });
   };
 
-  const onSubmit = async (e: FormEvent | any) => {
-    e.preventDefault();
+  const onSubmit = async () => {
+    //e.preventDefault();
     const newErrors = findFormErrors();
-
+    setMessage(initialStateAlert);
     if (Object.keys(newErrors).length > 0) {
       // We got errors!
       setErrors(newErrors);
@@ -238,16 +284,20 @@ const FactForm = ({
           setMessage({ type: "danger", message: msg.message });
         }
       } else {
-        try {
-          const res = await postCreateFact(form);
-          const { fact } = res.data;
+        if (list.length <= 0) {
           setMessage({
-            type: "success",
-            message: `La factura ha sido registrado existosamente.`,
+            type: "danger",
+            message: `No hay productos agregados.`,
           });
-          setForm(initialStateFact);
           setDisabled(false);
-          listFacts();
+          return;
+        }
+        try {
+          if (form.way_to_pay === "EFECTIVO CON VUELTO") {
+            handleShowModalMoney();
+            return;
+          }
+          saveFactAndDetail();
         } catch (e) {
           setDisabled(false);
           const error: any = e as Error;
@@ -259,12 +309,48 @@ const FactForm = ({
     }
   };
 
+  const saveFactAndDetail = async () => {
+    await postCreateFact({
+      ...form,
+      cod_fact: numberFact,
+      subtotal: calSumSub(),
+    });
+    for (let i = 0; i < list.length; i++) {
+      const addProduct = {
+        fact: numberFact,
+        product: list[i].product,
+        quantity: list[i].quantity,
+        price: list[i].price,
+        discount: list[i].discount,
+      };
+      await postCreateDetailsFact(addProduct);
+    }
+    getFac();
+    setMessage({
+      type: "success",
+      message: `La venta ha sido registrado existosamente.`,
+    });
+    //setForm({ ...initialStateFact, client: selectCliente.value });
+    setList([]);
+    const getClientNO: any = clients.find(
+      (find: any) => find.value === "00000000"
+    );
+    setForm({ ...initialStateFact, client: getClientNO!.value });
+    setSelectClient({
+      label: getClientNO!.label,
+      value: getClientNO!.value,
+    });
+    setDisabled(false);
+    listFacts();
+  };
+
   useEffect(() => {
     listClients();
     listProducts();
+    getFac();
   }, []);
 
-  const test = (e: any) => {
+  const onKeyDownDiv = (e: any) => {
     if (!showProducts) {
       if (e.key === "Enter") {
         setShowProducts(true);
@@ -301,17 +387,37 @@ const FactForm = ({
     }
   };
 
-  const handleKeyDownTr = (e: KeyChange, pro: Product) => {
+  const handleKeyDownTr = (e: KeyChange, pro: any) => {
     if (e.key === "Enter") {
+      const item = {
+        fact: numberFact,
+        cod_internal: pro.cod_internal,
+        product: String(pro!._id),
+        quantity: 1,
+        price: pro.price,
+        discount: 0,
+        name: pro.name,
+        unit: pro.unit.name,
+      };
       if (selected.length > 0) {
         const isFound = selected.find(
-          (product: Product) => product._id === pro._id
+          (product: any) => product.product === item.product
         );
         if (!isFound) {
-          selected.push(pro);
+          selected.push(item);
         }
       } else {
-        selected.push(pro);
+        if (list.length > 0) {
+          const isFound = list.find(
+            (product: any) => product.product === item.product
+          );
+          if (!isFound) {
+            setList([...list, item]);
+          }
+          return;
+        } else {
+          selected.push(item);
+        }
       }
       const allSelected = selected.map((product: Product) => product);
       setList(allSelected);
@@ -328,28 +434,129 @@ const FactForm = ({
     }
   };
 
-  const handleClickList = (pro: Product) => {
+  const handleClickList = (pro: any) => {
+    const item = {
+      fact: numberFact,
+      cod_internal: pro.cod_internal,
+      product: String(pro!._id),
+      quantity: 1,
+      price: pro.price,
+      discount: 0,
+      name: pro.name,
+      unit: pro.unit.name,
+    };
+
     if (selected.length > 0) {
       const isFound = selected.find(
-        (product: Product) => product._id === pro._id
+        (product: any) => product.product === item.product
       );
       if (!isFound) {
-        selected.push(pro);
+        selected.push(item);
       }
     } else {
-      selected.push(pro);
+      if (list.length > 0) {
+        const isFound = list.find(
+          (product: any) => product.product === item.product
+        );
+        if (!isFound) {
+          setList([...list, item]);
+        }
+        return;
+      } else {
+        selected.push(item);
+      }
     }
     const allSelected = selected.map((product: Product) => product);
     setList(allSelected);
   };
 
   const deleteItem = (id: string) => {
-    const filterItemDeleted = list.filter((item: any) => item._id !== id);
+    const filterItemDeleted = list.filter((item: any) => item.product !== id);
     setList(filterItemDeleted);
   };
 
+  const getProductByItem = (item: any[]) => {
+    setList(item);
+  };
+
+  const calSumSub = () => {
+    return list.reduce(
+      (previousValue: any, currentValue: any) =>
+        previousValue +
+        currentValue.price * currentValue.quantity -
+        currentValue.discount,
+
+      0
+    );
+  };
+
   return (
-    <div onKeyDown={test}>
+    <div onKeyDown={onKeyDownDiv}>
+      <Modal show={showMoney} onHide={handleCloseModalMoney} centered>
+        <Modal.Header closeButton style={{ background: "yellow" }}>
+          <Modal.Title>EFECTIVO CON VUELTO</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group as={Row} className="mb-3" controlId="formHorizontalTotal">
+            <Form.Label column sm={6}>
+              Total a pagar (S/)
+            </Form.Label>
+            <Col sm={6}>
+              <Form.Control
+                name="subtotal"
+                type="number"
+                defaultValue={`${formatter.format(form.subtotal)}`}
+                disabled
+              />
+            </Col>
+          </Form.Group>
+          <Form.Group as={Row} className="mb-3" controlId="formHorizontalPaga">
+            <Form.Label column sm={6}>
+              Paga con (S/)
+            </Form.Label>
+            <Col sm={6}>
+              <Form.Control
+                type="number"
+                name="customer_payment"
+                value={form.customer_payment}
+                onChange={handleChange}
+              />
+            </Col>
+          </Form.Group>
+          <Form.Group
+            as={Row}
+            className="mb-3"
+            controlId="formHorizontalVuelto"
+          >
+            <Form.Label column sm={6}>
+              Vuelto (S/)
+            </Form.Label>
+            <Col sm={6}>
+              <Form.Control
+                type="number"
+                value={
+                  form.customer_payment
+                    ? `${formatter.format(
+                        Number(form.subtotal) - Number(form.customer_payment)
+                      )}`
+                    : formatter.format(0)
+                }
+                disabled
+                min="0"
+              />
+            </Col>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModalMoney}>
+            Cerrar
+          </Button>
+          <Button variant="success" onClick={handleButtonFF}>
+            Finalizar venta
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <Modal
         show={show}
         onHide={closeAndClear}
@@ -417,6 +624,7 @@ const FactForm = ({
                               }
                         }
                         onChange={(values: any) => {
+                          setMessage(initialStateAlert);
                           const { label, value } = values;
                           setSelectClient({ label, value });
                           setForm({ ...form, client: value });
@@ -460,7 +668,7 @@ const FactForm = ({
                       <h3>
                         <strong>GUIA DE VENTA</strong>
                       </h3>
-                      <h3>N° 5896</h3>
+                      <h3>N° 000{numberFact}</h3>
                     </div>
                   </div>
                 </div>
@@ -472,8 +680,7 @@ const FactForm = ({
                     <th>Item</th>
                     <th>Cod Barra/interno</th>
                     <th>Producto</th>
-                    <th>Marca</th>
-                    <th>Modelo</th>
+                    <th>U. Medida</th>
                     <th>Cantidad</th>
                     <th>Precio</th>
                     <th>Descuento</th>
@@ -483,34 +690,25 @@ const FactForm = ({
                 </thead>
                 <tbody>
                   {list.map((listed, i: number) => (
-                    <tr
-                      className={styles.tr}
-                      key={listed._id}
-                      // onKeyDown={(e) => handleKeyDown(e, listed)}
-                    >
-                      <td>{i + 1}</td>
-                      <td>{listed.cod_internal}</td>
-                      <td>{listed.name}</td>
-                      <td>{listed.mark.name}</td>
-                      <td>{listed.model.name}</td>
-                      <td>1</td>
-                      <td>S/ {listed.price}</td>
-                      <td>S/ 0</td>
-                      <td>S/ {listed.price * 1}</td>
-                      <td
-                        className="text-center"
-                        onClick={() => deleteItem(listed._id)}
-                      >
-                        <IoMdClose className={styles.table__iconClose} />
-                      </td>
-                    </tr>
+                    <DetailItem
+                      key={listed.product}
+                      listed={listed}
+                      item={i}
+                      list={list}
+                      deleteItem={deleteItem}
+                      numberFact={numberFact}
+                      getProductByItem={getProductByItem}
+                    />
                   ))}
                   <tr>
                     <td>
                       <button
                         className="btn btn-success"
                         type="button"
-                        onClick={() => setShowProducts(!showProducts)}
+                        onClick={() => {
+                          setMessage(initialStateAlert);
+                          setShowProducts(!showProducts);
+                        }}
                         style={{
                           width: 40,
                           height: 40,
@@ -522,7 +720,55 @@ const FactForm = ({
                     </td>
                   </tr>
                 </tbody>
-                <tfoot></tfoot>
+                <tfoot>
+                  <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                      <strong>SubTotal</strong>
+                    </td>
+                    <td>{`S/ ${formatter.format(calSumSub())}`}</td>
+                  </tr>
+                  <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                      <strong>Descuento</strong>
+                    </td>
+                    <td>
+                      <Form.Control
+                        name="discount"
+                        value={form.discount}
+                        type="number"
+                        onChange={handleChange}
+                        step="0.01"
+                        min="0"
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                      <strong>Total</strong>
+                    </td>
+                    <td>{`S/ ${formatter.format(
+                      calSumSub() - form.discount
+                    )}`}</td>
+                  </tr>
+                </tfoot>
               </Table>
               {showProducts && (
                 <div
@@ -600,7 +846,10 @@ const FactForm = ({
                       <Button
                         onKeyDown={handleKeyDownButton}
                         variant="danger"
-                        onClick={() => setShowProducts(false)}
+                        onClick={() => {
+                          setShowProducts(false);
+                          selected = [];
+                        }}
                       >
                         Cerrar
                       </Button>
@@ -622,7 +871,12 @@ const FactForm = ({
             <Button type="button" variant="secondary" onClick={closeAndClear}>
               Cerrar
             </Button>
-            <Button type="button" variant="primary" disabled={disabled}>
+            <Button
+              type="button"
+              variant="primary"
+              disabled={disabled}
+              onClick={onSubmit}
+            >
               {form?._id ? "Actualizar" : "Registrar"}
             </Button>
           </Modal.Footer>

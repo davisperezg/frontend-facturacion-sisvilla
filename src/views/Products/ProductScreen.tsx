@@ -180,6 +180,7 @@ const ProductScreen = () => {
               <thead>
                 <tr>
                   <th>#</th>
+                  <th>Area / Sede</th>
                   <th>Cod interno</th>
                   <th>Nombre</th>
                   <th>Nota</th>

@@ -11,3 +11,8 @@ export const randomColors = () => {
   const random = Math.floor(Math.random() * 7);
   return arrayColors[random];
 };
+
+export const formatter = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});

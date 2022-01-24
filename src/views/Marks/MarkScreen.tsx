@@ -165,43 +165,45 @@ const MarkScreen = () => {
             )
           )}
 
-          <Table
-            striped
-            bordered
-            hover
-            responsive="sm"
-            className={styles.table}
-          >
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Nombre</th>
-                <th className={`${styles["table--center"]}`}>Estado</th>
-                {resource && resource.canDelete && (
-                  <th className={`${styles["table--center"]}`}>Eliminar</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {marks.map((mark) => (
-                <MarkListActives
-                  key={mark._id}
-                  mark={mark}
-                  openModalRE={openModalRE}
-                  deleteMark={_deleteMark}
-                />
-              ))}
-            </tbody>
-            <tfoot>
-              {removes.map((remove) => (
-                <MarkListRemoves
-                  key={remove._id}
-                  remove={remove}
-                  restoreMark={_restoreMark}
-                />
-              ))}
-            </tfoot>
-          </Table>
+          {resource && resource.canRead && (
+            <Table
+              striped
+              bordered
+              hover
+              responsive="sm"
+              className={styles.table}
+            >
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nombre</th>
+                  <th className={`${styles["table--center"]}`}>Estado</th>
+                  {resource && resource.canDelete && (
+                    <th className={`${styles["table--center"]}`}>Eliminar</th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {marks.map((mark) => (
+                  <MarkListActives
+                    key={mark._id}
+                    mark={mark}
+                    openModalRE={openModalRE}
+                    deleteMark={_deleteMark}
+                  />
+                ))}
+              </tbody>
+              <tfoot>
+                {removes.map((remove) => (
+                  <MarkListRemoves
+                    key={remove._id}
+                    remove={remove}
+                    restoreMark={_restoreMark}
+                  />
+                ))}
+              </tfoot>
+            </Table>
+          )}
         </Card.Body>
       </Card>
     </>

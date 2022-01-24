@@ -16,7 +16,7 @@ const ProductListActive = ({
   deleteProd: (id: string) => void;
   openModalRE: (props: boolean, value?: any) => void;
 }) => {
-  const { mark, model, unit }: any = product;
+  const { mark, model, unit, area }: any = product;
 
   const { resources } = useContext(AuthContext);
   const location = useLocation();
@@ -45,7 +45,12 @@ const ProductListActive = ({
           >
             {product._id}
           </td>
-
+          <td
+            className={styles.table__td}
+            onClick={() => openModalRE(true, product)}
+          >
+            {String(area.name)}
+          </td>
           <td
             className={styles.table__td}
             onClick={() => openModalRE(true, product)}
@@ -112,6 +117,7 @@ const ProductListActive = ({
       ) : (
         <tr>
           <td>{product._id}</td>
+          <td>{String(area.name)}</td>
           <td>{product.cod_internal}</td>
           <td>{product.name}</td>
           <td>{product.note}</td>

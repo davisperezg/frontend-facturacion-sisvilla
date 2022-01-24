@@ -1,3 +1,4 @@
+import { Area } from "./Area";
 import { Rol } from "./Rol";
 
 export interface User {
@@ -10,6 +11,7 @@ export interface User {
   username: string;
   password: string;
   role: Rol;
+  area: Area;
   createdAt?: Date;
   updatedAt?: Date;
   status: boolean;

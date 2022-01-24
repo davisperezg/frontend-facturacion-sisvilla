@@ -16,6 +16,8 @@ import { getRoles } from "../../../api/role/role";
 import { AuthContext } from "../../../context/auth";
 import { useLocation } from "react-router-dom";
 import { getModuleByMenu } from "../../../api/module/module";
+import { getAreas } from "../../../api/area/area";
+import { Area } from "../../../interface/Area";
 
 type InputChange = ChangeEvent<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -57,6 +59,7 @@ const UserForm = ({
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
   const [resource, setResource] = useState<any>(null);
+  const [areas, setAreas] = useState<Area[]>([]);
 
   const getMyModule = useCallback(async () => {
     const mymodule = await getModuleByMenu(getNameLocation);
@@ -79,6 +82,12 @@ const UserForm = ({
     setRoles(data);
   };
 
+  const listAreas = async () => {
+    const res = await getAreas();
+    const { data } = res;
+    setAreas(data);
+  };
+
   const handleChange = (e: InputChange) => {
     setMessage(initialState);
     // Check and see if errors exist, and remove them from the error object:
@@ -94,6 +103,7 @@ const UserForm = ({
     const {
       name,
       role,
+      area,
       lastname,
       tipDocument,
       nroDocument,
@@ -102,7 +112,7 @@ const UserForm = ({
       password,
     } = form;
     const newErrors: any = {};
-    // name errors
+    if (!area || area === "") newErrors.area = "Por favor seleccione el area.";
     if (!name || name === "") newErrors.name = "Por favor ingrese el nombre.";
     if (!role || role === "") newErrors.role = "Por favor seleccione el rol.";
     if (!lastname || lastname === "")
@@ -202,6 +212,7 @@ const UserForm = ({
         _id: user?._id,
         name: user?.name,
         lastname: user?.lastname,
+        area: user?.area,
         role: user?.role,
         tipDocument: user?.tipDocument,
         nroDocument: user?.nroDocument,
@@ -213,6 +224,7 @@ const UserForm = ({
     user?._id,
     user?.name,
     user?.lastname,
+    user?.area,
     user?.role,
     user?.tipDocument,
     user?.nroDocument,
@@ -224,6 +236,7 @@ const UserForm = ({
     listRoles();
     getUser();
     getMyModule();
+    listAreas();
   }, [getUser, getMyModule]);
 
   return (
@@ -246,6 +259,29 @@ const UserForm = ({
           {message.type && (
             <Alert variant={message.type}>{message.message}</Alert>
           )}
+          <Row className="mb-3">
+            <Form.Group as={Col} controlId="formGridRole">
+              <Form.Label>
+                Area <strong className="text-danger">*</strong>
+              </Form.Label>
+              <Form.Select
+                name="area"
+                onChange={handleChange}
+                value={form?.area}
+                isInvalid={!!errors?.area}
+              >
+                <option value="">[Seleccione el area]</option>
+                {areas.map((area) => (
+                  <option key={area._id} value={area.name}>
+                    {area.name}
+                  </option>
+                ))}
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                {errors?.area}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Row>
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridRole">
               <Form.Label>
