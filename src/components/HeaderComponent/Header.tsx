@@ -37,32 +37,34 @@ const Header = () => {
       </div>
       <div className={styles.item}>
         <div className={styles.item__right}>
-          <ul className={styles.item__ul}>
-            <NavLink
-              className={(props: any) => {
-                return `${props.isActive ? "text-black" : ""} ${
-                  styles.item__ul__li
-                }`;
-              }}
-              end
-              to="/areas"
-              //className={styles.item__ul__li}
-            >
-              Areas / Sedes
-            </NavLink>
-            <NavLink
-              className={(props: any) => {
-                return `${props.isActive ? "text-black" : ""} ${
-                  styles.item__ul__li
-                }`;
-              }}
-              end
-              to="/secuencias"
-              //className={styles.item__ul__li}
-            >
-              Secuencias
-            </NavLink>
-          </ul>
+          {user.role.name === "SUPER ADMINISTRADOR" && (
+            <ul className={styles.item__ul}>
+              <NavLink
+                className={(props: any) => {
+                  return `${props.isActive ? "text-black" : ""} ${
+                    styles.item__ul__li
+                  }`;
+                }}
+                end
+                to="/areas"
+                //className={styles.item__ul__li}
+              >
+                Areas / Sedes
+              </NavLink>
+              <NavLink
+                className={(props: any) => {
+                  return `${props.isActive ? "text-black" : ""} ${
+                    styles.item__ul__li
+                  }`;
+                }}
+                end
+                to="/secuencias"
+                //className={styles.item__ul__li}
+              >
+                Secuencias
+              </NavLink>
+            </ul>
+          )}
           <label className={styles.item__user}>Bienvenido,</label>
           <strong className={styles.item__user}>
             {`${data.name.toUpperCase()} ${data.lastname.toUpperCase()}`}

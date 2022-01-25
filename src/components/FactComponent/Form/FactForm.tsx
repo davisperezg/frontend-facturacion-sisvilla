@@ -11,7 +11,7 @@ import {
   useCallback,
 } from "react";
 import { Alert, Button, Col, Form, Modal, Row, Table } from "react-bootstrap";
-import { postCreateFact, updateFact } from "../../../api/fact/fact";
+import { postCreateFact } from "../../../api/fact/fact";
 import { IAlert } from "../../../interface/IAlert";
 import { Fact } from "../../../interface/Fact";
 import Select from "react-select";
@@ -113,8 +113,13 @@ const FactForm = ({
         message: `Si el cliente esta pagando con 0 soles, por favor cierre la ventana y cambie a la forma de pago a: "EFECTIVO COMPLETO"`,
       });
     } else {
-      saveFactAndDetail();
-      handleCloseModalMoney();
+      const confirm = window.confirm(
+        " ¿Estas seguro que quieres registrar la venta?"
+      );
+      if (confirm) {
+        saveFactAndDetail();
+        handleCloseModalMoney();
+      }
     }
   };
 
@@ -272,43 +277,32 @@ const FactForm = ({
       setErrors(newErrors);
     } else {
       setDisabled(true);
-      if (form?._id) {
-        try {
-          const res = await updateFact(form!._id, form);
-          const { factUpdated } = res.data;
-          setMessage({
-            type: "success",
-            message: `La factura ${factUpdated.name} ha sido actualizado existosamente.`,
-          });
-          setDisabled(false);
-          listFacts();
-        } catch (e) {
-          setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
-        }
-      } else {
-        if (list.length <= 0) {
-          setMessage({
-            type: "danger",
-            message: `No hay productos agregados.`,
-          });
-          setDisabled(false);
+      if (list.length <= 0) {
+        setMessage({
+          type: "danger",
+          message: `No hay productos agregados.`,
+        });
+        setDisabled(false);
+        return;
+      }
+      try {
+        if (form.way_to_pay === "EFECTIVO CON VUELTO") {
+          handleShowModalMoney();
           return;
         }
-        try {
-          if (form.way_to_pay === "EFECTIVO CON VUELTO") {
-            handleShowModalMoney();
-            return;
-          }
+        const confirm = window.confirm(
+          " ¿Estas seguro que quieres registrar la venta?"
+        );
+        if (confirm) {
           saveFactAndDetail();
-        } catch (e) {
+        } else {
           setDisabled(false);
-          const error: any = e as Error;
-          const msg = error.response.data;
-          setMessage({ type: "danger", message: msg.message });
         }
+      } catch (e) {
+        setDisabled(false);
+        const error: any = e as Error;
+        const msg = error.response.data;
+        setMessage({ type: "danger", message: msg.message });
       }
       setErrors({});
     }

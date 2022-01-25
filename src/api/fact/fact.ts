@@ -17,7 +17,3 @@ export const getFactDeleted = async () => {
 export const deleteFact = async (id: string) => {
   return await axios.delete(`${API}/api/v1/facts/${id}`);
 };
-
-export const updateFact = async (id: string, fact: Fact) => {
-  return await axios.put(`${API}/api/v1/facts/${id}`, fact);
-};
