@@ -20,13 +20,11 @@ import { whois } from "./api/user/user";
 function App() {
   const initialValue = JSON.parse(String(getsesionLocal("user")));
   const initialResources = JSON.parse(String(getsesionLocal("resources")));
-  const initialResourceAux = JSON.parse(String(getsesionLocal("resource")));
 
   const [user, setUser] = useState<User | any>(initialValue);
   const [resources, setResources] = useState<Resources[] | any>(
     initialResources
   );
-  const [resource, setResource] = useState<Resources | any>(initialResourceAux);
 
   const getInfo = async () => {
     if (user) {
@@ -42,26 +40,6 @@ function App() {
       setsesionLocal("resources", JSON.stringify(resbyRol.data));
       setUser(res.data);
       setResources(resbyRol.data);
-
-      const getResources = JSON.parse(String(getsesionLocal("resources"))).find(
-        (res: any) => {
-          return res.module.name === initialResourceAux.module;
-        }
-      );
-
-      if (!getResources) {
-        setResource(null);
-      } else {
-        const initialResource = {
-          module: getResources.module.name,
-          canCreate: getResources.canCreate,
-          canUpdate: getResources.canUpdate,
-          canRead: getResources.canRead,
-          canDelete: getResources.canDelete,
-        };
-        setsesionLocal("resource", JSON.stringify(initialResource));
-        setResource(initialResource);
-      }
     }
   };
 
@@ -71,9 +49,7 @@ function App() {
   }, []);
 
   return (
-    <AuthContext.Provider
-      value={{ user, setUser, resources, setResources, resource, setResource }}
-    >
+    <AuthContext.Provider value={{ user, setUser, resources, setResources }}>
       <AppRouter />
     </AuthContext.Provider>
   );

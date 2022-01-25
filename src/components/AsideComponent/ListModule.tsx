@@ -9,28 +9,10 @@ import { setsesionLocal } from "../../lib/helpers/sesion/sesion";
 
 const ListModule = ({ mod }: { mod: Module }) => {
   const [menus, setMenus] = useState<Menu[]>([]);
-  const { resources, setResource } = useContext(AuthContext);
 
   const listMenus = useCallback(() => {
     setMenus(mod.menu || []);
   }, [mod.menu]);
-
-  const getResource = (value: string) => {
-    const getResources = resources.find((res: any) => {
-      return res.module.name === value;
-    });
-
-    const initialResource = {
-      module: getResources?.module.name || value,
-      canCreate: getResources?.canCreate || false,
-      canUpdate: getResources?.canUpdate || false,
-      canRead: getResources?.canRead || false,
-      canDelete: getResources?.canDelete || false,
-    };
-
-    setsesionLocal("resource", JSON.stringify(initialResource));
-    setResource(initialResource);
-  };
 
   useEffect(() => {
     listMenus();
@@ -43,11 +25,7 @@ const ListModule = ({ mod }: { mod: Module }) => {
   //<input type="text" value={value} onChange={handleChange} />
 
   return (
-    <Accordion.Item
-      key={mod._id}
-      eventKey={String(mod._id)}
-      onClick={() => getResource(mod.name)}
-    >
+    <Accordion.Item key={mod._id} eventKey={String(mod._id)}>
       <Accordion.Header>{mod.name}</Accordion.Header>
       <Accordion.Body className={`${styles["aside--noPaddin"]}`}>
         <ListGroup variant="flush" as="ul">
