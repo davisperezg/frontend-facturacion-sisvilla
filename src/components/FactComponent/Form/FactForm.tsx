@@ -19,7 +19,6 @@ import makeAnimated from "react-select/animated";
 import { Client } from "../../../interface/Client";
 import { getClients } from "../../../api/client/client";
 import { Product } from "../../../interface/Product";
-import { getProducts } from "../../../api/product/product";
 import { BsFillCartFill } from "react-icons/bs";
 import PaginationComponent from "../../DatatableComponent/Pagination/Pagination";
 import TableHeader from "../../DatatableComponent/Header/TableHeader";
@@ -51,11 +50,17 @@ const FactForm = ({
   fact,
   closeModal,
   listFacts,
+  listProducts,
+  products,
+  listFactDeleted,
 }: {
   show: boolean;
   fact?: Fact;
   closeModal: () => void;
   listFacts: () => void;
+  listProducts: () => void;
+  products: Product[];
+  listFactDeleted: () => void;
 }) => {
   const initialStateFact = {
     cod_fact: 0,
@@ -77,7 +82,6 @@ const FactForm = ({
   const [disabled, setDisabled] = useState<boolean>(false);
   const [errors, setErrors] = useState<any>({});
   const [clients, setClients] = useState<Client[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
   const [showProducts, setShowProducts] = useState<boolean>(false);
   const [list, setList] = useState<any[]>([]);
   const [search, setSearch] = useState<string | any>("");
@@ -129,7 +133,7 @@ const FactForm = ({
     { name: "Cod Barra/interno", field: "cod_internal", sortable: true },
     { name: "Producto", field: "name", sortable: true },
     { name: "Marca", field: "mark", sortable: true },
-    { name: "Modelo", field: "model", sortable: true },
+    { name: "Categoria", field: "model", sortable: true },
     { name: "Unidad", field: "unit", sortable: true },
     { name: "Stock", field: "stock", sortable: true },
     { name: "Precio", field: "price", sortable: true },
@@ -160,12 +164,6 @@ const FactForm = ({
     setForm({ ...form, client: getClientNO.value });
     setSelectClient({ label: getClientNO.label, value: getClientNO.value });
     setClients(filter);
-  };
-
-  const listProducts = async () => {
-    const res = await getProducts();
-    const { data } = res;
-    setProducts(data);
   };
 
   const productsFiltered = useMemo(() => {
@@ -309,38 +307,57 @@ const FactForm = ({
   };
 
   const saveFactAndDetail = async () => {
-    await postCreateFact({
-      ...form,
-      cod_fact: numberFact,
-      subtotal: calSumSub(),
-    });
-    for (let i = 0; i < list.length; i++) {
-      const addProduct = {
-        fact: numberFact,
-        product: list[i].product,
-        quantity: list[i].quantity,
-        price: list[i].price,
-        discount: list[i].discount,
-      };
-      await postCreateDetailsFact(addProduct);
+    try {
+      await postCreateFact({
+        ...form,
+        cod_fact: numberFact,
+        subtotal: calSumSub(),
+      });
+      for (let i = 0; i < list.length; i++) {
+        const addProduct = {
+          fact: numberFact,
+          product: list[i].product,
+          quantity: list[i].quantity,
+          price: list[i].price,
+          discount: list[i].discount,
+        };
+        const res = await postCreateDetailsFact(addProduct);
+        if (res.data.details === true) {
+          //tomandolo como si hubiera un error
+          setMessage({
+            type: "danger",
+            message: `Venta anulada. Hay productos del cliente que sobrepasa el stock disponible. Los productos han sido devueltos al inventario.`,
+          });
+          getFac();
+          listFactDeleted();
+          setDisabled(false);
+          return;
+        }
+      }
+      getFac();
+      setMessage({
+        type: "success",
+        message: `La venta ha sido registrado existosamente.`,
+      });
+      //setForm({ ...initialStateFact, client: selectCliente.value });
+      setList([]);
+      const getClientNO: any = clients.find(
+        (find: any) => find.value === "00000000"
+      );
+      setForm({ ...initialStateFact, client: getClientNO!.value });
+      setSelectClient({
+        label: getClientNO!.label,
+        value: getClientNO!.value,
+      });
+      setDisabled(false);
+      listProducts();
+      listFacts();
+    } catch (e) {
+      setDisabled(false);
+      const error: any = e as Error;
+      const msg = error.response.data;
+      setMessage({ type: "danger", message: msg.message });
     }
-    getFac();
-    setMessage({
-      type: "success",
-      message: `La venta ha sido registrado existosamente.`,
-    });
-    //setForm({ ...initialStateFact, client: selectCliente.value });
-    setList([]);
-    const getClientNO: any = clients.find(
-      (find: any) => find.value === "00000000"
-    );
-    setForm({ ...initialStateFact, client: getClientNO!.value });
-    setSelectClient({
-      label: getClientNO!.label,
-      value: getClientNO!.value,
-    });
-    setDisabled(false);
-    listFacts();
   };
 
   const onKeyDownDiv = (e: any) => {
@@ -364,6 +381,7 @@ const FactForm = ({
       searchProducts.current!.focus();
       setSearch("");
       setCurrentPage(1);
+      selected = [];
     }
   };
 
@@ -377,6 +395,7 @@ const FactForm = ({
     if (e.key === "Escape") {
       setShowProducts(false);
       searchProducts.current!.focus();
+      selected = [];
     }
   };
 
@@ -391,6 +410,7 @@ const FactForm = ({
         discount: 0,
         name: pro.name,
         unit: pro.unit.name,
+        stock: pro.stock,
       };
       if (selected.length > 0) {
         const isFound = selected.find(
@@ -418,6 +438,7 @@ const FactForm = ({
     if (e.key === "Escape") {
       setShowProducts(false);
       searchProducts.current!.focus();
+      selected = [];
     }
 
     if (e.key === "F2") {
@@ -437,6 +458,7 @@ const FactForm = ({
       discount: 0,
       name: pro.name,
       unit: pro.unit.name,
+      stock: pro.stock,
     };
 
     if (selected.length > 0) {
@@ -529,7 +551,6 @@ const FactForm = ({
     }
     getFac();
     listClients();
-    listProducts();
   }, [getFactById, getFactById, fact?._id]);
 
   return (
@@ -747,6 +768,7 @@ const FactForm = ({
                     <th>Cod Barra/interno</th>
                     <th>Producto</th>
                     <th>U. Medida</th>
+                    {!fact?._id && <th>Stock</th>}
                     <th>Cantidad</th>
                     <th>Precio</th>
                     <th>Descuento</th>
@@ -806,12 +828,14 @@ const FactForm = ({
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td></td>
                     <td>
                       <strong>SubTotal</strong>
                     </td>
                     <td>{`S/ ${formatter.format(calSumSub())}`}</td>
                   </tr>
                   <tr>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -834,6 +858,7 @@ const FactForm = ({
                     </td>
                   </tr>
                   <tr>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>

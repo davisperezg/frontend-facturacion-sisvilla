@@ -1,12 +1,14 @@
 import { Alert, Button, Card, Modal, Table } from "react-bootstrap";
 import { useCallback, useState, useEffect } from "react";
 import { Fact } from "../../interface/Fact";
+import { Product } from "../../interface/Product";
 import { deleteFact, getFactDeleted, getFacts } from "../../api/fact/fact";
 import styles from "./Fact.module.scss";
 import FactForm from "../../components/FactComponent/Form/FactForm";
 import FactListActives from "../../components/FactComponent/List/Actives/FactListActives";
 import FactListRemoves from "../../components/FactComponent/List/Removes/FactListRemoves";
 import { IAlert } from "../../interface/IAlert";
+import { getProducts } from "../../api/product/product";
 
 const initialState: IAlert = {
   type: "",
@@ -17,6 +19,7 @@ const FactScreen = () => {
   const [show, setShow] = useState(false);
   const [state, setState] = useState<any>();
   const [facts, setFacts] = useState<Fact[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [removes, setRemoves] = useState<Fact[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [idFact, setIdFact] = useState({
@@ -68,11 +71,13 @@ const FactScreen = () => {
       message: `Venta 000${idFact.cod}. anulada correctamente.`,
     });
     closeModalConfirm();
+    listProducts();
   };
 
   useEffect(() => {
     listFacts();
     listFactDeleted();
+    listProducts();
   }, [listFacts, listFactDeleted]);
 
   const closeModalConfirm = () => {
@@ -94,12 +99,22 @@ const FactScreen = () => {
     });
   };
 
+  const listProducts = async () => {
+    const res = await getProducts();
+    const { data } = res;
+    const filterJustMayor0 = data.filter((product: any) => product.stock > 0);
+    setProducts(filterJustMayor0);
+  };
+
   return (
     <>
       <FactForm
         show={show}
         closeModal={closeModal}
         listFacts={listFacts}
+        listProducts={listProducts}
+        listFactDeleted={listFactDeleted}
+        products={products}
         fact={state}
       />
       <Modal show={showModal} onHide={closeModalConfirm} centered>

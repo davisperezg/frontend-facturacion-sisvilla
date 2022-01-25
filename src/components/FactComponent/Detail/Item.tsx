@@ -18,15 +18,16 @@ const DetailItem = ({
   list,
   view,
 }: any) => {
-  const initialState: DetailsFact = {
+  const initialState = {
     fact: numberFact,
     product: listed.product,
     quantity: view ? listed.quantity : 1,
     price: listed.price,
     discount: view ? listed.discount : 0,
+    stock: listed.stock,
   };
 
-  const [product, setProduct] = useState<DetailsFact>(initialState);
+  const [product, setProduct] = useState<DetailsFact | any>(initialState);
 
   return (
     <>
@@ -36,6 +37,7 @@ const DetailItem = ({
           <td>{listed.cod_internal}</td>
           <td>{listed.name}</td>
           <td>{listed.unit}</td>
+
           <td>
             <Form.Control
               name="quantity"
@@ -78,6 +80,7 @@ const DetailItem = ({
           <td>{listed.cod_internal}</td>
           <td>{listed.name}</td>
           <td>{listed.unit}</td>
+          <td>{listed.stock}</td>
           <td>
             <Form.Control
               name="quantity"
@@ -86,17 +89,21 @@ const DetailItem = ({
               min="1"
               disabled={view ? true : false}
               onChange={(e) => {
-                const element = list.map((res: any) => {
-                  return {
-                    ...res,
-                    quantity:
-                      res.product === product.product
-                        ? Number(e.target.value)
-                        : res.quantity,
-                  };
-                });
-                getProductByItem(element);
-                setProduct({ ...product, quantity: Number(e.target.value) });
+                if (Number(e.target.value) > product.stock) {
+                  return;
+                } else {
+                  const element = list.map((res: any) => {
+                    return {
+                      ...res,
+                      quantity:
+                        res.product === product.product
+                          ? Number(e.target.value)
+                          : res.quantity,
+                    };
+                  });
+                  getProductByItem(element);
+                  setProduct({ ...product, quantity: Number(e.target.value) });
+                }
               }}
             />
           </td>
