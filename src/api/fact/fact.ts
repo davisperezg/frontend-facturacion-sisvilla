@@ -17,3 +17,7 @@ export const getFactDeleted = async () => {
 export const deleteFact = async (id: string) => {
   return await axios.delete(`${API}/api/v1/facts/${id}`);
 };
+
+export const getFactById = async (id: string) => {
+  return await axios.get(`${API}/api/v1/facts/checking/${id}`);
+};

@@ -1,0 +1,87 @@
+.ticket {
+  width: 195px;
+  max-width: 195px;
+  font-size: 12px;
+  font-family: "Times New Roman";
+
+  &__img {
+    max-width: inherit;
+    width: inherit;
+  }
+
+  &__centrado {
+    text-align: center;
+    align-content: center;
+    margin-top: 1rem;
+  }
+
+  &__caja {
+    width: 195px;
+    max-width: 195px;
+    margin-bottom: 1rem;
+  }
+
+  &__titulo_pago {
+    margin-left: 40px;
+    width: 75px;
+    max-width: 75px;
+    float: left;
+  }
+
+  &__numeros {
+    margin-left: 40px;
+    width: 40px;
+    max-width: 40px;
+    float: left;
+  }
+
+  .cantidad {
+    width: 40px;
+    max-width: 40px;
+    word-break: break-all;
+  }
+
+  .producto {
+    width: 75px;
+    max-width: 75px;
+  }
+
+  .descuento {
+    width: 40px;
+    max-width: 40px;
+    word-break: break-all;
+  }
+
+  .precio {
+    width: 40px;
+    max-width: 40px;
+    word-break: break-all;
+    text-align: center;
+  }
+
+  &__tr {
+    border: hidden;
+  }
+
+  &__soles {
+    text-align: end;
+  }
+
+  .iconAndSoles {
+    display: flex;
+
+    &__soles {
+      display: flex;
+      width: 100%;
+      justify-content: end;
+    }
+  }
+}
+
+td,
+th,
+tr,
+table {
+  border-top: 1px solid black;
+  border-collapse: collapse;
+}

@@ -19,7 +19,7 @@ export const AppRouter = () => {
           }
         />
         <Route
-          path="/comprobantes/ventas/venta-generada/nro/:id"
+          path="/comprobantes/ventas/venta-generada/:id"
           element={<PrintScreen />}
         />
 

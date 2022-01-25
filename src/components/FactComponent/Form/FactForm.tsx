@@ -32,7 +32,10 @@ import {
 } from "../../../api/detail-fact/detail";
 import DetailItem from "../Detail/Item";
 import { DetailsFact } from "../../../interface/DetailsFact";
-import { formatter } from "../../../lib/helpers/functions/functions";
+import {
+  formatDate,
+  formatter,
+} from "../../../lib/helpers/functions/functions";
 import ClientForm from "../../ClientComponent/Form/ClientForm";
 
 const animatedComponents = makeAnimated();
@@ -111,10 +114,13 @@ const FactForm = ({
   };
 
   const handleButtonFF = () => {
-    if (form.customer_payment === 0) {
+    if (
+      form.customer_payment === 0 ||
+      form.customer_payment === form.subtotal
+    ) {
       setMessage({
         type: "info",
-        message: `Si el cliente esta pagando con 0 soles, por favor cierre la ventana y cambie a la forma de pago a: "EFECTIVO COMPLETO"`,
+        message: `Si el cliente esta pagando con 0 soles o la misma cantidad del total a pagar, por favor cierre la ventana y cambie a la forma de pago a: "EFECTIVO COMPLETO"`,
       });
     } else {
       const confirm = window.confirm(
@@ -267,48 +273,54 @@ const FactForm = ({
   };
 
   const onSubmit = async () => {
-    //e.preventDefault();
     const newErrors = findFormErrors();
     setMessage(initialStateAlert);
+
     if (Object.keys(newErrors).length > 0) {
-      // We got errors!
       setErrors(newErrors);
     } else {
-      setDisabled(true);
-      if (list.length <= 0) {
-        setMessage({
-          type: "danger",
-          message: `No hay productos agregados.`,
-        });
-        setDisabled(false);
-        return;
-      }
-      try {
-        if (form.way_to_pay === "EFECTIVO CON VUELTO") {
-          handleShowModalMoney();
+      if (fact?._id) {
+        window.open(
+          `/comprobantes/ventas/venta-generada/${fact?._id}`,
+          "_blank"
+        );
+      } else {
+        setDisabled(true);
+        if (list.length <= 0) {
+          setMessage({
+            type: "danger",
+            message: `No hay productos agregados.`,
+          });
+          setDisabled(false);
           return;
         }
-        const confirm = window.confirm(
-          " ¿Estas seguro que quieres registrar la venta?"
-        );
-        if (confirm) {
-          saveFactAndDetail();
-        } else {
+        try {
+          if (form.way_to_pay === "EFECTIVO CON VUELTO") {
+            handleShowModalMoney();
+            return;
+          }
+          const confirm = window.confirm(
+            " ¿Estas seguro que quieres registrar la venta?"
+          );
+          if (confirm) {
+            saveFactAndDetail();
+          } else {
+            setDisabled(false);
+          }
+        } catch (e) {
           setDisabled(false);
+          const error: any = e as Error;
+          const msg = error.response.data;
+          setMessage({ type: "danger", message: msg.message });
         }
-      } catch (e) {
-        setDisabled(false);
-        const error: any = e as Error;
-        const msg = error.response.data;
-        setMessage({ type: "danger", message: msg.message });
+        setErrors({});
       }
-      setErrors({});
     }
   };
 
   const saveFactAndDetail = async () => {
     try {
-      await postCreateFact({
+      const dataFact = await postCreateFact({
         ...form,
         cod_fact: numberFact,
         subtotal: calSumSub(),
@@ -352,6 +364,10 @@ const FactForm = ({
       setDisabled(false);
       listProducts();
       listFacts();
+      window.open(
+        `/comprobantes/ventas/venta-generada/${dataFact.data.fact._id}`,
+        "_blank"
+      );
     } catch (e) {
       setDisabled(false);
       const error: any = e as Error;
@@ -660,7 +676,11 @@ const FactForm = ({
                       <Form.Label>Fecha</Form.Label>
                       <Form.Control
                         name="fech"
-                        value={getDate()}
+                        value={
+                          fact?._id
+                            ? formatDate(new Date(String(fact?.createdAt)))
+                            : getDate()
+                        }
                         type="text"
                         disabled
                       />
@@ -899,7 +919,7 @@ const FactForm = ({
                           <strong>Vuelto</strong>
                         </td>
                         <td>{`S/ ${formatter.format(
-                          form.subtotal - form.customer_payment
+                          form.subtotal - form.discount - form.customer_payment
                         )}`}</td>
                       </tr>
                     </>

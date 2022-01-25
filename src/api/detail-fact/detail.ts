@@ -9,3 +9,7 @@ export const postCreateDetailsFact = async (details: DetailsFact) => {
 export const getDetailsFacts = async (id: string) => {
   return await axios.get(`${API}/api/v1/fact-details/nro/${id}`);
 };
+
+export const getDetailsByIdFact = async (id: string) => {
+  return await axios.get(`${API}/api/v1/fact-details/checking/${id}`);
+};
