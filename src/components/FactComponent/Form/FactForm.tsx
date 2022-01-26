@@ -34,6 +34,8 @@ import {
   formatter,
 } from "../../../lib/helpers/functions/functions";
 import ClientForm from "../../ClientComponent/Form/ClientForm";
+import { useLocation } from "react-router-dom";
+import { getModuleByMenu } from "../../../api/module/module";
 
 const animatedComponents = makeAnimated();
 
@@ -96,9 +98,21 @@ const FactForm = ({
     label: "",
     value: "",
   });
-  const { user } = useContext(AuthContext);
+  const { user, resources } = useContext(AuthContext);
   const [showMoney, setShowMoney] = useState(false);
   const [showModalClient, setShowModalClient] = useState(false);
+
+  const location = useLocation();
+  const getNameLocation = location.pathname.slice(1);
+  const [resource, setResource] = useState<any>(null);
+
+  const getMyModule = useCallback(async () => {
+    const mymodule = await getModuleByMenu(getNameLocation);
+    const findResource = resources.find(
+      (res: any) => res.module.name === mymodule.data.name
+    );
+    setResource(findResource);
+  }, [resources, getNameLocation]);
 
   const handleCloseModalMoney = () => {
     setShowMoney(false);
@@ -277,7 +291,7 @@ const FactForm = ({
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
     } else {
-      if (fact?._id) {
+      if (fact?._id && resource && resource.canUpdate) {
         window.open(
           `/comprobantes/ventas/venta-generada/${fact?._id}`,
           "_blank"
@@ -317,60 +331,69 @@ const FactForm = ({
   };
 
   const saveFactAndDetail = async () => {
-    try {
-      const dataFact = await postCreateFact({
-        ...form,
-        cod_fact: numberFact,
-        subtotal: calSumSub(),
-      });
-      for (let i = 0; i < list.length; i++) {
-        const addProduct = {
-          fact: numberFact,
-          product: list[i].product,
-          quantity: list[i].quantity,
-          price: list[i].price,
-          discount: list[i].discount,
-        };
-        const res = await postCreateDetailsFact(addProduct);
-        if (res.data.details === true) {
-          //tomandolo como si hubiera un error
-          setMessage({
-            type: "danger",
-            message: `Venta anulada. Hay productos del cliente que sobrepasa el stock disponible. Los productos han sido devueltos al inventario.`,
-          });
-          getFac();
-          listFactDeleted();
-          setDisabled(false);
-          return;
+    if (resource && resource.canCreate) {
+      try {
+        const dataFact = await postCreateFact({
+          ...form,
+          cod_fact: numberFact,
+          subtotal: calSumSub(),
+        });
+        for (let i = 0; i < list.length; i++) {
+          const addProduct = {
+            fact: numberFact,
+            product: list[i].product,
+            quantity: list[i].quantity,
+            price: list[i].price,
+            discount: list[i].discount,
+          };
+          const res = await postCreateDetailsFact(addProduct);
+          if (res.data.details === true) {
+            //tomandolo como si hubiera un error
+            setMessage({
+              type: "danger",
+              message: `Venta anulada. Hay productos del cliente que sobrepasa el stock disponible. Los productos han sido devueltos al inventario.`,
+            });
+            getFac();
+            listFactDeleted();
+            setDisabled(false);
+            return;
+          }
         }
+        getFac();
+        setMessage({
+          type: "success",
+          message: `La venta ha sido registrado existosamente.`,
+        });
+        //setForm({ ...initialStateFact, client: selectCliente.value });
+        setList([]);
+        const getClientNO: any = clients.find(
+          (find: any) => find.value === "00000000"
+        );
+        setForm({ ...initialStateFact, client: getClientNO!.value });
+        setSelectClient({
+          label: getClientNO!.label,
+          value: getClientNO!.value,
+        });
+        setDisabled(false);
+        listProducts();
+        listFacts();
+        window.open(
+          `/comprobantes/ventas/venta-generada/${dataFact.data.fact._id}`,
+          "_blank"
+        );
+      } catch (e) {
+        setDisabled(false);
+        const error: any = e as Error;
+        const msg = error.response.data;
+        setMessage({ type: "danger", message: msg.message });
       }
-      getFac();
+    } else {
       setMessage({
-        type: "success",
-        message: `La venta ha sido registrado existosamente.`,
-      });
-      //setForm({ ...initialStateFact, client: selectCliente.value });
-      setList([]);
-      const getClientNO: any = clients.find(
-        (find: any) => find.value === "00000000"
-      );
-      setForm({ ...initialStateFact, client: getClientNO!.value });
-      setSelectClient({
-        label: getClientNO!.label,
-        value: getClientNO!.value,
+        type: "danger",
+        message: "No tienes acceso a este recurso.",
       });
       setDisabled(false);
-      listProducts();
-      listFacts();
-      window.open(
-        `/comprobantes/ventas/venta-generada/${dataFact.data.fact._id}`,
-        "_blank"
-      );
-    } catch (e) {
-      setDisabled(false);
-      const error: any = e as Error;
-      const msg = error.response.data;
-      setMessage({ type: "danger", message: msg.message });
+      return;
     }
   };
 
@@ -564,9 +587,10 @@ const FactForm = ({
       getFactById();
       return;
     }
+    getMyModule();
     getFac();
     listClients();
-  }, [getFactById, getFactById, fact?._id]);
+  }, [getFactById, getFactById, fact?._id, getMyModule]);
 
   return (
     <div onKeyDown={onKeyDownDiv}>
@@ -1047,6 +1071,7 @@ const FactForm = ({
             <Button type="button" variant="secondary" onClick={closeAndClear}>
               Cerrar
             </Button>
+
             <Button
               type="button"
               variant="primary"

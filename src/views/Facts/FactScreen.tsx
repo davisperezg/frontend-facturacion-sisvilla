@@ -1,5 +1,12 @@
 import { Alert, Button, Card, Modal, Table, Form } from "react-bootstrap";
-import { useCallback, useState, useEffect, useRef, useMemo } from "react";
+import {
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useContext,
+} from "react";
 import { Fact } from "../../interface/Fact";
 import { Product } from "../../interface/Product";
 import { deleteFact, getFactDeleted, getFacts } from "../../api/fact/fact";
@@ -10,6 +17,9 @@ import FactListRemoves from "../../components/FactComponent/List/Removes/FactLis
 import { IAlert } from "../../interface/IAlert";
 import { getProducts } from "../../api/product/product";
 import TableHeader from "../../components/DatatableComponent/Header/TableHeader";
+import { AuthContext } from "../../context/auth";
+import { useLocation } from "react-router-dom";
+import { getModuleByMenu } from "../../api/module/module";
 
 const initialState: IAlert = {
   type: "",
@@ -28,13 +38,26 @@ const FactScreen = () => {
     cod: 0,
   });
   const [message, setMessage] = useState<IAlert>(initialState);
+  const { resources } = useContext(AuthContext);
+  const [resource, setResource] = useState<any>(null);
+  const location = useLocation();
+  const getNameLocation = location.pathname.slice(1);
 
+  //ordenar y buscar de la tabla
   const [sorting, setSorting] = useState({ field: "", order: "" });
   const [search, setSearch] = useState<string | any>("");
   const searchInput = useRef<HTMLInputElement | null>(null);
   // const [totalItems, setTotalItems] = useState(0);
   // const [currentPage, setCurrentPage] = useState(1);
   // const ITEMS_PER_PAGE = 5;
+
+  const getMyModule = useCallback(async () => {
+    const mymodule = await getModuleByMenu(getNameLocation);
+    const findResource = resources.find(
+      (res: any) => res.module.name === mymodule.data.name
+    );
+    setResource(findResource);
+  }, [resources, getNameLocation]);
 
   const handleSearch = () => {
     setSearch(searchInput.current?.value);
@@ -43,7 +66,6 @@ const FactScreen = () => {
   const openModalRE = useCallback((props: boolean, value?: any) => {
     setShow(true);
     if (props) {
-      console.log(value);
       setState(value);
     }
   }, []);
@@ -81,6 +103,13 @@ const FactScreen = () => {
   }, []);
 
   const _deleteFact = async () => {
+    if (resource && resource.canDelete === false) {
+      setMessage({
+        type: "danger",
+        message: "No tienes acceso a este recurso.",
+      });
+      return;
+    }
     const __deletedFact = await deleteFact(idFact.id);
     const { data } = __deletedFact;
     const { factDeleted } = data;
@@ -97,10 +126,13 @@ const FactScreen = () => {
   };
 
   useEffect(() => {
-    listFacts();
+    if (resource && resource.canRead) {
+      listFacts();
+    }
     listFactDeleted();
     listProducts();
-  }, [listFacts, listFactDeleted]);
+    getMyModule();
+  }, [listFacts, listFactDeleted, getMyModule, resource]);
 
   const closeModalConfirm = () => {
     setShowModal(false);
@@ -138,7 +170,11 @@ const FactScreen = () => {
     { name: "Forma de pago", field: "way_to_pay", sortable: true },
     { name: "Total", field: "subtotal", sortable: true },
     { name: "Estado", field: "status", sortable: false },
-    { name: "Eliminar", field: "delete", sortable: false },
+    {
+      name: "Eliminar",
+      field: "delete",
+      sortable: false,
+    },
   ];
 
   const onSorting = (field: string, order: string) =>
@@ -200,15 +236,6 @@ const FactScreen = () => {
 
   return (
     <>
-      <FactForm
-        show={show}
-        closeModal={closeModal}
-        listFacts={listFacts}
-        listProducts={listProducts}
-        listFactDeleted={listFactDeleted}
-        products={products}
-        fact={state}
-      />
       <Modal show={showModal} onHide={closeModalConfirm} centered>
         <Modal.Header closeButton>
           <Modal.Title>AVISA DE CONFIRMACION</Modal.Title>
@@ -234,50 +261,104 @@ const FactScreen = () => {
             <Alert variant={message.type}>{message.message}</Alert>
           )}
 
-          <Button
-            type="button"
-            variant="primary"
-            autoFocus
-            onClick={() => openModalRE(false)}
-          >
-            Agregar nueva venta
-          </Button>
+          {resource && resource.canCreate && resource.canUpdate ? (
+            <>
+              <Button
+                type="button"
+                variant="primary"
+                autoFocus
+                onClick={() => openModalRE(false)}
+              >
+                Agregar nueva venta
+              </Button>
+              <FactForm
+                show={show}
+                closeModal={closeModal}
+                listFacts={listFacts}
+                listProducts={listProducts}
+                listFactDeleted={listFactDeleted}
+                products={products}
+                fact={state}
+              />
+            </>
+          ) : resource && resource.canCreate ? (
+            <>
+              <Button
+                type="button"
+                variant="primary"
+                autoFocus
+                onClick={() => openModalRE(false)}
+              >
+                Agregar nueva venta
+              </Button>
+              <FactForm
+                show={show}
+                closeModal={closeModal}
+                listFacts={listFacts}
+                listProducts={listProducts}
+                listFactDeleted={listFactDeleted}
+                products={products}
+                fact={state}
+              />
+            </>
+          ) : (
+            resource &&
+            resource.canUpdate && (
+              <FactForm
+                show={show}
+                closeModal={closeModal}
+                listFacts={listFacts}
+                listProducts={listProducts}
+                listFactDeleted={listFactDeleted}
+                products={products}
+                fact={state}
+              />
+            )
+          )}
 
-          <Form.Control
-            className="mt-3"
-            type="text"
-            autoFocus
-            placeholder="Busca por código de venta"
-            value={search}
-            ref={searchInput}
-            onChange={handleSearch}
-          />
+          {resource && resource.canRead && (
+            <>
+              <Form.Control
+                className="mt-3"
+                type="text"
+                autoFocus
+                placeholder="Busca por código de venta"
+                value={search}
+                ref={searchInput}
+                onChange={handleSearch}
+              />
 
-          <Table
-            striped
-            bordered
-            hover
-            responsive="sm"
-            className={styles.table}
-          >
-            <TableHeader headers={headers} onSorting={onSorting} />
-            <tbody>
-              {factsFiltered.map((fact: any, i: number) => (
-                <FactListActives
-                  key={fact._id}
-                  item={i}
-                  fact={fact}
-                  openModalRE={openModalRE}
-                  deleteFact={openModalConfirm}
-                />
-              ))}
-            </tbody>
-            <tfoot>
-              {removes.map((remove, i: number) => (
-                <FactListRemoves item={i} key={remove._id} remove={remove} />
-              ))}
-            </tfoot>
-          </Table>
+              <Table
+                striped
+                bordered
+                hover
+                responsive="sm"
+                className={styles.table}
+              >
+                <TableHeader headers={headers} onSorting={onSorting} />
+                <tbody>
+                  {factsFiltered.map((fact: any, i: number) => (
+                    <FactListActives
+                      key={fact._id}
+                      item={i}
+                      fact={fact}
+                      openModalRE={openModalRE}
+                      deleteFact={openModalConfirm}
+                    />
+                  ))}
+                </tbody>
+                <tfoot>
+                  {removes.map((remove, i: number) => (
+                    <FactListRemoves
+                      item={i}
+                      key={remove._id}
+                      remove={remove}
+                    />
+                  ))}
+                </tfoot>
+              </Table>
+            </>
+          )}
         </Card.Body>
       </Card>
     </>
