@@ -1,5 +1,5 @@
-import { Alert, Button, Card, Modal, Table } from "react-bootstrap";
-import { useCallback, useState, useEffect } from "react";
+import { Alert, Button, Card, Modal, Table, Form } from "react-bootstrap";
+import { useCallback, useState, useEffect, useRef, useMemo } from "react";
 import { Fact } from "../../interface/Fact";
 import { Product } from "../../interface/Product";
 import { deleteFact, getFactDeleted, getFacts } from "../../api/fact/fact";
@@ -9,6 +9,7 @@ import FactListActives from "../../components/FactComponent/List/Actives/FactLis
 import FactListRemoves from "../../components/FactComponent/List/Removes/FactListRemoves";
 import { IAlert } from "../../interface/IAlert";
 import { getProducts } from "../../api/product/product";
+import TableHeader from "../../components/DatatableComponent/Header/TableHeader";
 
 const initialState: IAlert = {
   type: "",
@@ -27,6 +28,17 @@ const FactScreen = () => {
     cod: 0,
   });
   const [message, setMessage] = useState<IAlert>(initialState);
+
+  const [sorting, setSorting] = useState({ field: "", order: "" });
+  const [search, setSearch] = useState<string | any>("");
+  const searchInput = useRef<HTMLInputElement | null>(null);
+  const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  const handleSearch = () => {
+    setSearch(searchInput.current?.value);
+  };
 
   const openModalRE = useCallback((props: boolean, value?: any) => {
     setShow(true);
@@ -49,7 +61,22 @@ const FactScreen = () => {
   const listFacts = useCallback(async () => {
     const res = await getFacts();
     const { data } = res;
-    setFacts(data);
+    const filter = data.map((fact: any) => {
+      return {
+        _id: fact._id,
+        cod_fact: fact.cod_fact,
+        createdAt: fact.createdAt,
+        client: fact.client.name + " " + fact.client.lastname,
+        user: fact?.user.name + " " + fact.user.lastname,
+        payment_type: fact.payment_type,
+        way_to_pay: fact.way_to_pay,
+        subtotal: fact.subtotal,
+        discount: fact.discount,
+        status: fact.status,
+        customer_payment: fact.customer_payment,
+      };
+    });
+    setFacts(filter);
   }, []);
 
   const listFactDeleted = useCallback(async () => {
@@ -106,6 +133,76 @@ const FactScreen = () => {
     setProducts(filterJustMayor0);
   };
 
+  const headers = [
+    { name: "#", field: "item", sortable: false },
+    { name: "Cod", field: "cod_fact", sortable: true },
+    { name: "Fecha", field: "createdAt", sortable: true },
+    { name: "Cliente", field: "client", sortable: true },
+    { name: "Vendedor", field: "user", sortable: true },
+    { name: "Tipo de pago", field: "payment_type", sortable: true },
+    { name: "Forma de pago", field: "way_to_pay", sortable: true },
+    { name: "Total", field: "subtotal", sortable: true },
+    { name: "Estado", field: "status", sortable: false },
+    { name: "Eliminar", field: "delete", sortable: false },
+  ];
+
+  const onSorting = (field: string, order: string) =>
+    setSorting({ field, order });
+
+  const factsFiltered = useMemo(() => {
+    let computedFacts: any = facts;
+
+    if (search) {
+      computedFacts = computedFacts.filter((fact: any) => {
+        return fact.cod_fact
+          .toString()
+          .toLowerCase()
+          .includes(search.toLowerCase());
+      });
+    }
+    //setTotalItems(computedFacts.length);
+
+    //Sorting comments
+    if (sorting.field) {
+      const reversed = sorting.order === "asc" ? 1 : -1;
+      computedFacts = computedFacts
+        .map((format: any) => {
+          return {
+            ...format,
+            subtotal: format.subtotal - format.discount,
+          };
+        })
+        .sort((a: any, b: any) => {
+          if (typeof a[sorting.field] === "object") {
+            return (
+              reversed *
+              a[sorting.field].name
+                .toString()
+                .localeCompare(b[sorting.field].name.toString())
+            );
+          } else {
+            if (typeof a[sorting.field] === "number") {
+              return reversed * (a[sorting.field] - b[sorting.field]);
+            } else {
+              return (
+                reversed *
+                a[sorting.field]
+                  .toString()
+                  .localeCompare(b[sorting.field].toString())
+              );
+            }
+          }
+        });
+    }
+    //Current Page slice
+    // computedFacts.slice(
+    //   (currentPage - 1) * ITEMS_PER_PAGE,
+    //   (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+    // );
+
+    return computedFacts;
+  }, [facts, search, sorting]);
+
   return (
     <>
       <FactForm
@@ -151,6 +248,16 @@ const FactScreen = () => {
             Agregar nueva venta
           </Button>
 
+          <Form.Control
+            className="mt-3"
+            type="text"
+            autoFocus
+            placeholder="Busca por código de venta"
+            value={search}
+            ref={searchInput}
+            onChange={handleSearch}
+          />
+
           <Table
             striped
             bordered
@@ -158,22 +265,9 @@ const FactScreen = () => {
             responsive="sm"
             className={styles.table}
           >
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>COD</th>
-                <th>Fecha</th>
-                <th>Cliente</th>
-                <th>Vendedor</th>
-                <th>Tipo de pago</th>
-                <th>Forma de pago</th>
-                <th>Total</th>
-                <th className={`${styles["table--center"]}`}>Estado Factura</th>
-                <th className={`${styles["table--center"]}`}>Eliminar</th>
-              </tr>
-            </thead>
+            <TableHeader headers={headers} onSorting={onSorting} />
             <tbody>
-              {facts.map((fact, i: number) => (
+              {factsFiltered.map((fact: any, i: number) => (
                 <FactListActives
                   key={fact._id}
                   item={i}

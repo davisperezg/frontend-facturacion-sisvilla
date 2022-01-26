@@ -13,13 +13,11 @@ const FactListActives = ({
   deleteFact,
   openModalRE,
 }: {
-  fact: Fact;
+  fact: Fact | any;
   item: number;
   deleteFact: (id: string, cod: number) => void;
   openModalRE: (props: boolean, value?: any) => void;
 }) => {
-  const { client, user }: any = fact;
-
   return (
     <tr>
       <td className={styles.table__td} onClick={() => openModalRE(true, fact)}>
@@ -32,10 +30,10 @@ const FactListActives = ({
         {formatDate(new Date(String(fact.createdAt)))}
       </td>
       <td className={styles.table__td} onClick={() => openModalRE(true, fact)}>
-        {client.name} {client.lastname}
+        {fact.client}
       </td>
       <td className={styles.table__td} onClick={() => openModalRE(true, fact)}>
-        {user.name} {user.lastname}
+        {fact.user}
       </td>
       <td className={styles.table__td} onClick={() => openModalRE(true, fact)}>
         {fact.payment_type}
@@ -44,7 +42,7 @@ const FactListActives = ({
         {fact.way_to_pay}
       </td>
       <td className={styles.table__td} onClick={() => openModalRE(true, fact)}>
-        S/ {formatter.format(fact.subtotal - fact.discount)}
+        S/ {formatter.format(fact.subtotal)}
       </td>
       <td
         className={`${styles.table__td} ${styles["table--center"]}`}
