@@ -32,9 +32,9 @@ const FactScreen = () => {
   const [sorting, setSorting] = useState({ field: "", order: "" });
   const [search, setSearch] = useState<string | any>("");
   const searchInput = useRef<HTMLInputElement | null>(null);
-  const [totalItems, setTotalItems] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 5;
+  // const [totalItems, setTotalItems] = useState(0);
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const ITEMS_PER_PAGE = 5;
 
   const handleSearch = () => {
     setSearch(searchInput.current?.value);
@@ -43,13 +43,8 @@ const FactScreen = () => {
   const openModalRE = useCallback((props: boolean, value?: any) => {
     setShow(true);
     if (props) {
-      setState({
-        ...value,
-        client: {
-          label: value.client.name + " " + value.client.lastname,
-          value: value.client.nroDocument,
-        },
-      });
+      console.log(value);
+      setState(value);
     }
   }, []);
 

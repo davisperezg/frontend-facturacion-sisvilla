@@ -8,7 +8,7 @@ import { deleteSesions } from "../../lib/helpers/sesion/sesion";
 import { NavLink, useNavigate } from "react-router-dom";
 
 const Header = () => {
-  const { user, setUser, setResource } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const data: User = user;
 
@@ -19,7 +19,6 @@ const Header = () => {
   const logout = () => {
     deleteSesions();
     setUser(null);
-    setResource(null);
     goLogin();
   };
 
@@ -28,10 +27,7 @@ const Header = () => {
       <div className={styles.item}>
         <div className={styles.item__left}>
           <h1>
-            Comercial <strong>SARAI</strong>{" "}
-            <span style={{ color: "red", background: "yellow" }}>
-              Version (<strong>Beta</strong>)
-            </span>
+            Comercial <strong>SARAI</strong>
           </h1>
         </div>
       </div>

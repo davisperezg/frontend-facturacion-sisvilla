@@ -1,6 +1,5 @@
 import {
   ChangeEvent,
-  FormEvent,
   memo,
   useEffect,
   useState,
@@ -23,7 +22,6 @@ import { BsFillCartFill } from "react-icons/bs";
 import PaginationComponent from "../../DatatableComponent/Pagination/Pagination";
 import TableHeader from "../../DatatableComponent/Header/TableHeader";
 import styles from "./FactForm.module.scss";
-import { IoMdClose } from "react-icons/io";
 import { getSequenceFact } from "../../../api/sequence/sequence";
 import { AuthContext } from "../../../context/auth";
 import {
@@ -31,7 +29,6 @@ import {
   postCreateDetailsFact,
 } from "../../../api/detail-fact/detail";
 import DetailItem from "../Detail/Item";
-import { DetailsFact } from "../../../interface/DetailsFact";
 import {
   formatDate,
   formatter,
@@ -263,6 +260,7 @@ const FactForm = ({
         ...errors,
         [e.target.name]: null,
       });
+
     setForm({
       ...form,
       [e.target.name]:
@@ -528,7 +526,7 @@ const FactForm = ({
   const getFactById = useCallback(async () => {
     setForm({
       cod_fact: fact?.cod_fact || 0,
-      client: String(fact?.client.value) || "",
+      client: String(fact?.client) || "",
       payment_type: fact?.payment_type || "",
       way_to_pay: fact?.way_to_pay || "",
       subtotal: fact?.subtotal || 0,
@@ -551,6 +549,7 @@ const FactForm = ({
     });
     setList(filter);
   }, [
+    fact?._id,
     fact?.cod_fact,
     fact?.client,
     fact?.payment_type,
@@ -689,7 +688,21 @@ const FactForm = ({
                       <Form.Label>Tipo de pago</Form.Label>
                       <Form.Select
                         name="payment_type"
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          if (e.target.value === "CREDITO") {
+                            setForm({
+                              ...form,
+                              payment_type: e.target.value,
+                              way_to_pay: "POR PAGAR",
+                            });
+                          } else {
+                            setForm({
+                              ...form,
+                              payment_type: e.target.value,
+                              way_to_pay: "EFECTIVO COMPLETO",
+                            });
+                          }
+                        }}
                         value={form?.payment_type}
                         isInvalid={!!errors?.payment_type}
                         disabled={fact?._id ? true : false}
@@ -722,10 +735,10 @@ const FactForm = ({
                             ? []
                             : {
                                 label: fact?._id
-                                  ? String(fact?.client.label)
+                                  ? String(fact?.client)
                                   : selectCliente.label,
                                 value: fact?._id
-                                  ? String(fact.client.value)
+                                  ? String(fact.client)
                                   : selectCliente.value,
                               }
                         }
@@ -745,8 +758,15 @@ const FactForm = ({
                         onChange={handleChange}
                         value={form?.way_to_pay}
                         isInvalid={!!errors?.way_to_pay}
-                        disabled={fact?._id ? true : false}
+                        disabled={
+                          fact?._id || form?.payment_type === "CREDITO"
+                            ? true
+                            : false
+                        }
                       >
+                        {form?.payment_type === "CREDITO" && (
+                          <option value="POR PAGAR">POR PAGAR</option>
+                        )}
                         <option value="EFECTIVO COMPLETO">
                           EFECTIVO COMPLETO
                         </option>
@@ -848,7 +868,7 @@ const FactForm = ({
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td></td>
+                    {!fact?._id && <td></td>}
                     <td>
                       <strong>SubTotal</strong>
                     </td>
@@ -861,7 +881,7 @@ const FactForm = ({
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td></td>
+                    {!fact?._id && <td></td>}
                     <td>
                       <strong>Descuento</strong>
                     </td>
@@ -884,7 +904,7 @@ const FactForm = ({
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td></td>
+                    {!fact?._id && <td></td>}
                     <td>
                       <strong>Total</strong>
                     </td>

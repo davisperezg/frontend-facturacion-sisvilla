@@ -11,3 +11,13 @@ export const postLogin = async (
     password,
   });
 };
+
+export const getRefresh = async (
+  username: string,
+  refreshToken: string
+): Promise<Token> => {
+  return await axios.post(`${API}/api/v1/auth/token`, {
+    username,
+    refreshToken,
+  });
+};
