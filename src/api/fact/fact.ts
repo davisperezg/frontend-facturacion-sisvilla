@@ -21,3 +21,7 @@ export const deleteFact = async (id: string) => {
 export const getFactById = async (id: string) => {
   return await axios.get(`${API}/api/v1/facts/checking/${id}`);
 };
+
+export const getFactByRange = async (start: string, end: string) => {
+  return await axios.get(`${API}/api/v1/facts/consult/range/${start}/${end}`);
+};

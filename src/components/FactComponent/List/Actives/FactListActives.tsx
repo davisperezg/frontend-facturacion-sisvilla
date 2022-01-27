@@ -19,8 +19,8 @@ const FactListActives = ({
 }: {
   fact: Fact | any;
   item: number;
-  deleteFact: (id: string, cod: number) => void;
   openModalRE: (props: boolean, value?: any) => void;
+  deleteFact?: (id: string, cod: number) => void;
 }) => {
   const { resources } = useContext(AuthContext);
   const location = useLocation();
@@ -102,6 +102,7 @@ const FactListActives = ({
               <IoMdClose
                 className={styles.table__iconClose}
                 onClick={() =>
+                  deleteFact &&
                   deleteFact(String(fact._id), Number(fact.cod_fact))
                 }
               />
@@ -126,6 +127,7 @@ const FactListActives = ({
               <IoMdClose
                 className={styles.table__iconClose}
                 onClick={() =>
+                  deleteFact &&
                   deleteFact(String(fact._id), Number(fact.cod_fact))
                 }
               />

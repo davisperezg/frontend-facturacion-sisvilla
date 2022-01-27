@@ -57,12 +57,12 @@ const FactForm = ({
   listFactDeleted,
 }: {
   show: boolean;
-  fact?: Fact;
   closeModal: () => void;
-  listFacts: () => void;
-  listProducts: () => void;
-  products: Product[];
-  listFactDeleted: () => void;
+  fact?: Fact;
+  listFacts?: () => void;
+  listProducts?: () => void;
+  products?: Product[];
+  listFactDeleted?: () => void;
 }) => {
   const initialStateFact = {
     cod_fact: 0,
@@ -184,7 +184,7 @@ const FactForm = ({
   };
 
   const productsFiltered = useMemo(() => {
-    let computedProducts = products;
+    let computedProducts = products! || [];
 
     if (search) {
       computedProducts = computedProducts.filter((product) => {
@@ -354,7 +354,7 @@ const FactForm = ({
               message: `Venta anulada. Hay productos del cliente que sobrepasa el stock disponible. Los productos han sido devueltos al inventario.`,
             });
             getFac();
-            listFactDeleted();
+            listFactDeleted!();
             setDisabled(false);
             return;
           }
@@ -375,8 +375,8 @@ const FactForm = ({
           value: getClientNO!.value,
         });
         setDisabled(false);
-        listProducts();
-        listFacts();
+        listProducts!();
+        listFacts!();
         window.open(
           `/comprobantes/ventas/venta-generada/${dataFact.data.fact._id}`,
           "_blank"

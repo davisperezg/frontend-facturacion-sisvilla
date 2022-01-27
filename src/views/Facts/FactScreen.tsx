@@ -26,6 +26,23 @@ const initialState: IAlert = {
   message: "",
 };
 
+const headers = [
+  { name: "#", field: "item", sortable: false },
+  { name: "Cod", field: "cod_fact", sortable: true },
+  { name: "Fecha", field: "createdAt", sortable: true },
+  { name: "Cliente", field: "client", sortable: true },
+  { name: "Vendedor", field: "user", sortable: true },
+  { name: "Tipo de pago", field: "payment_type", sortable: true },
+  { name: "Forma de pago", field: "way_to_pay", sortable: true },
+  { name: "Total", field: "subtotal", sortable: true },
+  { name: "Estado", field: "status", sortable: false },
+  {
+    name: "Eliminar",
+    field: "delete",
+    sortable: false,
+  },
+];
+
 const FactScreen = () => {
   const [show, setShow] = useState(false);
   const [state, setState] = useState<any>();
@@ -159,23 +176,6 @@ const FactScreen = () => {
     const filterJustMayor0 = data.filter((product: any) => product.stock > 0);
     setProducts(filterJustMayor0);
   };
-
-  const headers = [
-    { name: "#", field: "item", sortable: false },
-    { name: "Cod", field: "cod_fact", sortable: true },
-    { name: "Fecha", field: "createdAt", sortable: true },
-    { name: "Cliente", field: "client", sortable: true },
-    { name: "Vendedor", field: "user", sortable: true },
-    { name: "Tipo de pago", field: "payment_type", sortable: true },
-    { name: "Forma de pago", field: "way_to_pay", sortable: true },
-    { name: "Total", field: "subtotal", sortable: true },
-    { name: "Estado", field: "status", sortable: false },
-    {
-      name: "Eliminar",
-      field: "delete",
-      sortable: false,
-    },
-  ];
 
   const onSorting = (field: string, order: string) =>
     setSorting({ field, order });
