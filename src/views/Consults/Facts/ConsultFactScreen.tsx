@@ -1,14 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import {
-  Alert,
-  Button,
-  Card,
-  Modal,
-  Table,
-  Form,
-  Row,
-  Col,
-} from "react-bootstrap";
+import { Alert, Button, Card, Table, Form, Row, Col } from "react-bootstrap";
 import TableHeader from "../../../components/DatatableComponent/Header/TableHeader";
 import { Fact } from "../../../interface/Fact";
 import { InputChange } from "../../../lib/types/types";
@@ -27,11 +18,6 @@ const headers = [
   { name: "Forma de pago", field: "way_to_pay", sortable: true },
   { name: "Total", field: "subtotal", sortable: true },
   { name: "Estado", field: "status", sortable: false },
-  {
-    name: "Eliminar",
-    field: "delete",
-    sortable: false,
-  },
 ];
 
 const ConsultFactScreen = () => {
@@ -45,7 +31,7 @@ const ConsultFactScreen = () => {
     start: "",
     end: "",
   });
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 50;
 
   const onSorting = (field: string, order: string) =>
     setSorting({ field, order });

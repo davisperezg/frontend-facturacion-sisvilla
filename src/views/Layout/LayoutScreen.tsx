@@ -21,6 +21,7 @@ import { useContext } from "react";
 import { AuthContext } from "../../context/auth";
 import { BsFillHouseDoorFill } from "react-icons/bs";
 import ConsultFactScreen from "../Consults/Facts/ConsultFactScreen";
+import ConsultProductScreen from "../Consults/Products/ConsultProduct";
 
 const LayoutScreen = () => {
   const { user } = useContext(AuthContext);
@@ -60,6 +61,10 @@ const LayoutScreen = () => {
           <Route path="/secuencias" element={<SequencesScreen />} />
           <Route path="/ventas" element={<FactScreen />} />
           <Route path="/consultar-ventas" element={<ConsultFactScreen />} />
+          <Route
+            path="/consultar-productos"
+            element={<ConsultProductScreen />}
+          />
         </Routes>
       </main>
       <Footer />
