@@ -5,6 +5,8 @@ import { Product } from "../../../interface/Product";
 import ConsultProductList from "../../../components/ConsultComponent/Product/List/ConsultProductList";
 import PaginationComponent from "../../../components/DatatableComponent/Pagination/Pagination";
 import { getProducts } from "../../../api/product/product";
+import useResource from "../../../hooks/resource/resourceHook";
+import { IAlert } from "../../../interface/IAlert";
 
 const headers = [
   { name: "#", field: "item", sortable: false },
@@ -17,6 +19,11 @@ const headers = [
   { name: "Estado", field: "status", sortable: false },
 ];
 
+const initialStateAlert: IAlert = {
+  type: "",
+  message: "",
+};
+
 const ConsultProductScreen = () => {
   const [sorting, setSorting] = useState({ field: "", order: "" });
   const [products, setProducts] = useState<Product[]>([]);
@@ -26,11 +33,14 @@ const ConsultProductScreen = () => {
     filter: false,
   });
   const ITEMS_PER_PAGE = 50;
+  const [resource] = useResource();
+  const [message, setMessage] = useState<IAlert>(initialStateAlert);
 
   const onSorting = (field: string, order: string) =>
     setSorting({ field, order });
 
   const handleChange = (e: any) => {
+    setMessage(initialStateAlert);
     setConsult({ ...consult, [e.target.name]: e.target.checked });
   };
 
@@ -43,9 +53,16 @@ const ConsultProductScreen = () => {
     let computedProducts: any = products;
 
     if (consult.filter) {
-      computedProducts = computedProducts.filter(
-        (product: any) => product.stock === 0
-      );
+      if (resource.canRead) {
+        computedProducts = computedProducts.filter(
+          (product: any) => product.stock === 0
+        );
+      } else {
+        setMessage({
+          type: "danger",
+          message: `No tienes acceso a este recurso.`,
+        });
+      }
     }
 
     setTotalItems(computedProducts.length);
@@ -76,22 +93,27 @@ const ConsultProductScreen = () => {
       });
     }
 
-    return computedProducts.slice(
-      (currentPage - 1) * ITEMS_PER_PAGE,
-      (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
-    );
-  }, [products, sorting, currentPage, consult.filter]);
+    if (resource.canRead)
+      return computedProducts.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+      );
+    else return [];
+  }, [products, sorting, currentPage, consult.filter, resource.canRead]);
 
   const onPageChange = (page: number) => setCurrentPage(page);
 
   useEffect(() => {
-    listProduct();
-  }, []);
+    if (resource.canRead) listProduct();
+  }, [resource.canRead]);
 
   return (
     <Card>
       <Card.Header as="h5">Consulta de productos</Card.Header>
       <Card.Body>
+        {message.type && (
+          <Alert variant={message.type}>{message.message}</Alert>
+        )}
         <Row className="mb-3">
           <Form.Group
             md="2"
@@ -124,18 +146,20 @@ const ConsultProductScreen = () => {
             </span>
           </div>
         </div>
-        <Table striped bordered hover responsive="sm">
-          <TableHeader headers={headers} onSorting={onSorting} />
-          <tbody>
-            {productsFiltered.map((product: any, i: number) => (
-              <ConsultProductList
-                key={product._id}
-                item={i}
-                product={product}
-              />
-            ))}
-          </tbody>
-        </Table>
+        {resource.canRead && (
+          <Table striped bordered hover responsive="sm">
+            <TableHeader headers={headers} onSorting={onSorting} />
+            <tbody>
+              {productsFiltered.map((product: any, i: number) => (
+                <ConsultProductList
+                  key={product._id}
+                  item={i}
+                  product={product}
+                />
+              ))}
+            </tbody>
+          </Table>
+        )}
       </Card.Body>
     </Card>
   );

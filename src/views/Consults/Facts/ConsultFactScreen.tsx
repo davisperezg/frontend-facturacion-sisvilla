@@ -7,6 +7,8 @@ import { getFactByRange } from "../../../api/fact/fact";
 import FactListActives from "../../../components/FactComponent/List/Actives/FactListActives";
 import PaginationComponent from "../../../components/DatatableComponent/Pagination/Pagination";
 import FactForm from "../../../components/FactComponent/Form/FactForm";
+import useResource from "../../../hooks/resource/resourceHook";
+import { IAlert } from "../../../interface/IAlert";
 
 const headers = [
   { name: "#", field: "item", sortable: false },
@@ -20,6 +22,11 @@ const headers = [
   { name: "Estado", field: "status", sortable: false },
 ];
 
+const initialStateAlert: IAlert = {
+  type: "",
+  message: "",
+};
+
 const ConsultFactScreen = () => {
   const [sorting, setSorting] = useState({ field: "", order: "" });
   const [facts, setFacts] = useState<Fact[]>([]);
@@ -32,34 +39,44 @@ const ConsultFactScreen = () => {
     end: "",
   });
   const ITEMS_PER_PAGE = 50;
+  const [resource] = useResource();
+  const [message, setMessage] = useState<IAlert>(initialStateAlert);
 
   const onSorting = (field: string, order: string) =>
     setSorting({ field, order });
 
   const handleChange = (e: InputChange) => {
+    setMessage(initialStateAlert);
     setConsult({ ...consult, [e.target.name]: e.target.value });
   };
 
   const goSearch = async () => {
-    setCurrentPage(1);
-    const { start, end } = consult;
-    const res = await getFactByRange(start, end);
-    const filter = res.data.map((fact: any) => {
-      return {
-        _id: fact._id,
-        cod_fact: fact.cod_fact,
-        createdAt: fact.createdAt,
-        client: fact.client.name + " " + fact.client.lastname,
-        user: fact?.user.name + " " + fact.user.lastname,
-        payment_type: fact.payment_type,
-        way_to_pay: fact.way_to_pay,
-        subtotal: fact.subtotal,
-        discount: fact.discount,
-        status: fact.status,
-        customer_payment: fact.customer_payment,
-      };
-    });
-    setFacts(filter);
+    if (resource.canRead) {
+      setCurrentPage(1);
+      const { start, end } = consult;
+      const res = await getFactByRange(start, end);
+      const filter = res.data.map((fact: any) => {
+        return {
+          _id: fact._id,
+          cod_fact: fact.cod_fact,
+          createdAt: fact.createdAt,
+          client: fact.client.name + " " + fact.client.lastname,
+          user: fact?.user.name + " " + fact.user.lastname,
+          payment_type: fact.payment_type,
+          way_to_pay: fact.way_to_pay,
+          subtotal: fact.subtotal,
+          discount: fact.discount,
+          status: fact.status,
+          customer_payment: fact.customer_payment,
+        };
+      });
+      setFacts(filter);
+    } else {
+      setMessage({
+        type: "danger",
+        message: `No tienes acceso a este recurso.`,
+      });
+    }
   };
 
   const factsFiltered = useMemo(() => {
@@ -100,11 +117,13 @@ const ConsultFactScreen = () => {
         });
     }
 
-    return computedFacts.slice(
-      (currentPage - 1) * ITEMS_PER_PAGE,
-      (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
-    );
-  }, [facts, sorting, currentPage]);
+    if (resource.canRead)
+      return computedFacts.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+      );
+    else return [];
+  }, [facts, sorting, currentPage, resource.canRead]);
 
   const openModalRE = useCallback((props: boolean, value?: any) => {
     setShow(true);
@@ -125,6 +144,9 @@ const ConsultFactScreen = () => {
       <FactForm show={show} closeModal={closeModal} fact={state} />
       <Card.Header as="h5">Consulta de ventas</Card.Header>
       <Card.Body>
+        {message.type && (
+          <Alert variant={message.type}>{message.message}</Alert>
+        )}
         <Row className="mb-3">
           <Form.Group md="3" as={Col} controlId="formGridStart">
             <Form.Label>Consultar desde:</Form.Label>
@@ -162,19 +184,21 @@ const ConsultFactScreen = () => {
             </span>
           </div>
         </div>
-        <Table striped bordered hover responsive="sm">
-          <TableHeader headers={headers} onSorting={onSorting} />
-          <tbody>
-            {factsFiltered.map((fact: any, i: number) => (
-              <FactListActives
-                key={fact._id}
-                item={i}
-                fact={fact}
-                openModalRE={openModalRE}
-              />
-            ))}
-          </tbody>
-        </Table>
+        {resource.canRead && (
+          <Table striped bordered hover responsive="sm">
+            <TableHeader headers={headers} onSorting={onSorting} />
+            <tbody>
+              {factsFiltered.map((fact: any, i: number) => (
+                <FactListActives
+                  key={fact._id}
+                  item={i}
+                  fact={fact}
+                  openModalRE={openModalRE}
+                />
+              ))}
+            </tbody>
+          </Table>
+        )}
       </Card.Body>
     </Card>
   );
