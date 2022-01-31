@@ -28,6 +28,7 @@ import { postCreateProduct } from "../../api/product/product";
 import PaginationComponent from "../../components/DatatableComponent/Pagination/Pagination";
 import Search from "../../components/DatatableComponent/Search/Search";
 import TableHeader from "../../components/DatatableComponent/Header/TableHeader";
+import { CSVLink } from "react-csv";
 
 const initialState: IAlert = {
   type: "",
@@ -49,6 +50,30 @@ const headers = [
   { name: "Precio", field: "price", sortable: true },
   { name: "Estado", field: "status", sortable: false },
   { name: "Eliminar", field: "delete", sortable: false },
+];
+
+const headersFormat = [
+  { label: "name", key: "name" },
+  { label: "cod_internal", key: "cod_internal" },
+  { label: "mark", key: "mark" },
+  { label: "model", key: "model" },
+  { label: "unit", key: "unit" },
+  { label: "stock", key: "stock" },
+  { label: "price", key: "price" },
+  { label: "area", key: "area" },
+];
+
+const dataFormat = [
+  {
+    name: "PRUEBA",
+    cod_internal: "CODAVETEST",
+    mark: "NINGUNA",
+    model: "NINGUNA",
+    unit: "UNIDAD",
+    stock: "10",
+    price: 12,
+    area: "SANTA ROSA",
+  },
 ];
 
 const ProductScreen = () => {
@@ -456,6 +481,29 @@ const ProductScreen = () => {
     setCurrentPage(1);
   };
 
+  //mejorar
+  let formatExportProducts: any[] = [];
+  headers.map((head, i) => {
+    if (i < headers.length - 1) {
+      const data = {
+        label: head.name,
+        key: head.field,
+      };
+      formatExportProducts.push(data);
+    }
+  });
+
+  const dataExportProducts = products.map((product: any, i: number) => {
+    return {
+      ...product,
+      item: i + 1,
+      area: product.area.name,
+      mark: product.mark.name,
+      model: product.model.name,
+      unit: product.unit.name,
+    };
+  });
+
   return (
     <>
       <Card>
@@ -489,6 +537,21 @@ const ProductScreen = () => {
                   </Button>
                 </div>
                 <div className={styles.contentButtons__excel}>
+                  <Form.Group className={styles.contentButtons__excel__input}>
+                    <CSVLink
+                      data={dataFormat}
+                      headers={headersFormat}
+                      filename="formato.csv"
+                      target="_blank"
+                      separator={";"}
+                    >
+                      <Form.Label
+                        className={styles.contentButtons__excel__download}
+                      >
+                        Descargar formato
+                      </Form.Label>
+                    </CSVLink>
+                  </Form.Group>
                   <Form.Group className={styles.contentButtons__excel__input}>
                     <Form.Label
                       htmlFor="file"
@@ -528,13 +591,63 @@ const ProductScreen = () => {
             </>
           ) : resource && resource.canCreate ? (
             <>
-              <Button
-                type="button"
-                variant="primary"
-                onClick={() => openModalRE(false)}
-              >
-                Agregar producto
-              </Button>{" "}
+              <div className={styles.contentButtons}>
+                <div className={styles.contentButtons__add}>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={() => openModalRE(false)}
+                  >
+                    Agregar producto
+                  </Button>
+                </div>
+
+                <div className={styles.contentButtons__excel}>
+                  <Form.Group className={styles.contentButtons__excel__input}>
+                    <CSVLink
+                      data={dataFormat}
+                      headers={headersFormat}
+                      filename="formato.csv"
+                      target="_blank"
+                      separator={";"}
+                    >
+                      <Form.Label
+                        className={styles.contentButtons__excel__download}
+                      >
+                        Descargar formato
+                      </Form.Label>
+                    </CSVLink>
+                  </Form.Group>
+                  <Form.Group className={styles.contentButtons__excel__input}>
+                    <Form.Label
+                      htmlFor="file"
+                      className={styles.contentButtons__excel__label}
+                    >
+                      Importar productos desde excel
+                    </Form.Label>
+
+                    <Form.Control
+                      type="file"
+                      onChange={importExcel}
+                      style={{ display: "none" }}
+                      id="file"
+                      title="aa"
+                      value={file}
+                    />
+                  </Form.Group>
+                  <Button
+                    type="button"
+                    variant="success"
+                    onClick={onSubmitXML}
+                    disabled={file ? false : true}
+                  >
+                    Cargar registros
+                  </Button>
+                </div>
+              </div>
+              <div className={styles.cantExcel}>
+                {registers.length} productos encontrados.
+              </div>
               <ProductForm
                 show={show}
                 closeModal={closeModal}
@@ -553,56 +666,75 @@ const ProductScreen = () => {
               />
             )
           )}
-          <div className="mb-3">
-            <Search onSearch={onSearch} />
-          </div>
-          <div
-            className="mb-3"
-            style={{ display: "flex", justifyContent: "space-between" }}
-          >
-            <PaginationComponent
-              total={totalItems}
-              itemsPerPage={ITEMS_PER_PAGE}
-              currentPage={currentPage}
-              onPageChange={onPageChange}
-            />
-            <div style={{ display: "flex", alignItems: "flex-end" }}>
-              <span style={{ marginLeft: 5 }}>
-                Hay un total de{" "}
-                {search ? productsFiltered.length : products.length} registros
-              </span>
-            </div>
-          </div>
+
           {resource && resource.canRead && (
-            <Table
-              striped
-              bordered
-              hover
-              responsive="sm"
-              className={styles.table}
-            >
-              <TableHeader headers={headers} onSorting={onSorting} />
-              <tbody>
-                {productsFiltered.map((pro, item: number) => (
-                  <ProductListActive
-                    item={item + 1}
-                    key={pro._id}
-                    product={pro}
-                    openModalRE={openModalRE}
-                    deleteProd={_deleteProduct}
-                  />
-                ))}
-              </tbody>
-              <tfoot>
-                {removes.map((remove) => (
-                  <ProductListRemoves
-                    key={remove._id}
-                    remove={remove}
-                    restorePro={_restoreProduct}
-                  />
-                ))}
-              </tfoot>
-            </Table>
+            <>
+              <div className={styles.contentSearch}>
+                <div className={styles.contentSearch__search}>
+                  <Search onSearch={onSearch} />
+                </div>
+                <div className={styles.contentSearch__options}>
+                  <CSVLink
+                    data={dataExportProducts}
+                    headers={formatExportProducts}
+                    filename="productos.csv"
+                    target="_blank"
+                    separator={";"}
+                  >
+                    <Button variant="secondary" type="button">
+                      Exportar productos a excel
+                    </Button>
+                  </CSVLink>
+                </div>
+              </div>
+              <div
+                className="mb-3"
+                style={{ display: "flex", justifyContent: "space-between" }}
+              >
+                <PaginationComponent
+                  total={totalItems}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  currentPage={currentPage}
+                  onPageChange={onPageChange}
+                />
+                <div style={{ display: "flex", alignItems: "flex-end" }}>
+                  <span style={{ marginLeft: 5 }}>
+                    Hay un total de{" "}
+                    {search ? productsFiltered.length : products.length}{" "}
+                    registros
+                  </span>
+                </div>
+              </div>
+              <Table
+                striped
+                bordered
+                hover
+                responsive="sm"
+                className={styles.table}
+              >
+                <TableHeader headers={headers} onSorting={onSorting} />
+                <tbody>
+                  {productsFiltered.map((pro, item: number) => (
+                    <ProductListActive
+                      item={item + 1}
+                      key={pro._id}
+                      product={pro}
+                      openModalRE={openModalRE}
+                      deleteProd={_deleteProduct}
+                    />
+                  ))}
+                </tbody>
+                <tfoot>
+                  {removes.map((remove) => (
+                    <ProductListRemoves
+                      key={remove._id}
+                      remove={remove}
+                      restorePro={_restoreProduct}
+                    />
+                  ))}
+                </tfoot>
+              </Table>
+            </>
           )}
         </Card.Body>
       </Card>

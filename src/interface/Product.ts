@@ -1,3 +1,4 @@
+import { Area } from "./Area";
 import { Mark } from "./Mark";
 import { Model } from "./Model";
 import { Unit } from "./Unit";
@@ -7,7 +8,7 @@ export interface Product {
   name: string;
   note?: string;
   mark: Mark | string;
-  area?: Mark | string;
+  area?: Area | string;
   model: Model | string;
   unit: Unit | string;
   stock: number;

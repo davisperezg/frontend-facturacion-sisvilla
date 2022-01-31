@@ -53,76 +53,81 @@ const LoginScreen = () => {
   };
 
   return (
-    <div className={styles.login}>
-      <div className={styles.login__center}>
-        {message && <Alert variant="danger">{message}</Alert>}
+    <>
+      <div className={styles.login}>
+        <h1 className={styles.title}>COMERCIAL SARAI</h1>
+        <div className={styles.login__center}>
+          {message && <Alert variant="danger">{message}</Alert>}
+          <Card>
+            <Card.Header as="h5">Acceso al sistema</Card.Header>
 
-        <Card>
-          <Card.Header as="h5">Acceso al sistema</Card.Header>
+            <Card.Body>
+              <Form onSubmit={handleSubmit(onSubmit)}>
+                <Row className="mb-3">
+                  <Form.Group as={Col} controlId="formGridUsername">
+                    <Form.Label>Usuario</Form.Label>
+                    <Form.Control
+                      {...register("username", {
+                        required: true,
+                        maxLength: 11,
+                      })}
+                      type="text"
+                      placeholder="Introduce tu usuario"
+                    />
+                    <Form.Text id="usernameHelpBlock" muted>
+                      {errors?.username?.type === "required" && (
+                        <label className="text-danger">
+                          Debe ingresar el usuario
+                        </label>
+                      )}
+                      {errors?.username?.type === "maxLength" && (
+                        <label className="text-danger">
+                          Debe completar solo el maximo de caracteres "11"
+                        </label>
+                      )}
+                    </Form.Text>
+                  </Form.Group>
+                </Row>
+                <Row className="mb-3">
+                  <Form.Group as={Col} controlId="formGridPassword">
+                    <Form.Label>Contraseña</Form.Label>
+                    <Form.Control
+                      {...register("password", {
+                        required: true,
+                        maxLength: 25,
+                      })}
+                      type="password"
+                      placeholder="Introduce tu contraseña"
+                    />
+                    <Form.Text id="passwordHelpBlock" muted>
+                      {errors.password?.type === "required" && (
+                        <label className="text-danger">
+                          Debe ingresar la contraseña
+                        </label>
+                      )}
 
-          <Card.Body>
-            <Form onSubmit={handleSubmit(onSubmit)}>
-              <Row className="mb-3">
-                <Form.Group as={Col} controlId="formGridUsername">
-                  <Form.Label>Usuario</Form.Label>
-                  <Form.Control
-                    {...register("username", {
-                      required: true,
-                      maxLength: 11,
-                    })}
-                    type="text"
-                    placeholder="Introduce tu usuario"
-                  />
-                  <Form.Text id="usernameHelpBlock" muted>
-                    {errors?.username?.type === "required" && (
-                      <label className="text-danger">
-                        Debe ingresar el usuario
-                      </label>
-                    )}
-                    {errors?.username?.type === "maxLength" && (
-                      <label className="text-danger">
-                        Debe completar solo el maximo de caracteres "11"
-                      </label>
-                    )}
-                  </Form.Text>
-                </Form.Group>
-              </Row>
-              <Row className="mb-3">
-                <Form.Group as={Col} controlId="formGridPassword">
-                  <Form.Label>Contraseña</Form.Label>
-                  <Form.Control
-                    {...register("password", { required: true, maxLength: 25 })}
-                    type="password"
-                    placeholder="Introduce tu contraseña"
-                  />
-                  <Form.Text id="passwordHelpBlock" muted>
-                    {errors.password?.type === "required" && (
-                      <label className="text-danger">
-                        Debe ingresar la contraseña
-                      </label>
-                    )}
-
-                    {errors.password?.type === "maxLength" && (
-                      <label className="text-danger">
-                        Debe completar solo el maximo de caracteres "11"
-                      </label>
-                    )}
-                  </Form.Text>
-                </Form.Group>
-              </Row>
-              <Button
-                type="submit"
-                variant="primary"
-                className="w-100"
-                disabled={disabled}
-              >
-                Ingresar
-              </Button>
-            </Form>
-          </Card.Body>
-        </Card>
+                      {errors.password?.type === "maxLength" && (
+                        <label className="text-danger">
+                          Debe completar solo el maximo de caracteres "11"
+                        </label>
+                      )}
+                    </Form.Text>
+                  </Form.Group>
+                </Row>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="w-100"
+                  disabled={disabled}
+                >
+                  Ingresar
+                </Button>
+              </Form>
+            </Card.Body>
+          </Card>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

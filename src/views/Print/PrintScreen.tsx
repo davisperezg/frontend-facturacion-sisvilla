@@ -65,6 +65,9 @@ const PrintScreen = () => {
           {fact.tipo_pago} - {fact.forma_pago}
         </p>
         <table>
+          <h1 className={styles.canceled}>
+            {fact.status === false && "Anulado"}
+          </h1>
           <thead>
             <tr>
               <th className={styles.cantidad}>CANT</th>

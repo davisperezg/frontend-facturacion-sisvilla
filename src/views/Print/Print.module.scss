@@ -79,6 +79,16 @@
         justify-content: flex-end;
       }
     }
+
+    .canceled {
+      position: absolute;
+      color: red;
+      opacity: 0.15;
+      text-align: center;
+      font-size: 50px;
+      font-weight: bold;
+      transform: rotate(-45deg);
+    }
   }
 }
 
