@@ -6,6 +6,7 @@ import { memo, useCallback, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../context/auth";
 import { useLocation } from "react-router-dom";
 import { getModuleByMenu } from "../../../../api/module/module";
+import { formatter } from "../../../../lib/helpers/functions/functions";
 
 const ProductListRemoves = ({
   remove,
@@ -45,7 +46,7 @@ const ProductListRemoves = ({
         <td>{String(model.name)}</td>
         <td>{String(unit.name)}</td>
         <td>{remove.stock}</td>
-        <td>S/ {remove.price}</td>
+        <td>S/ {formatter.format(remove.price)}</td>
         <td className={`${styles["table--center"]}`}>
           {remove.status === false && <Badge bg="danger">Eliminado</Badge>}
         </td>

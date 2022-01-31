@@ -1,5 +1,13 @@
-import { useCallback, useState, useEffect, useContext } from "react";
-import { Alert, Button, Card, Table } from "react-bootstrap";
+/* eslint-disable array-callback-return */
+import {
+  useCallback,
+  useState,
+  useEffect,
+  useContext,
+  useMemo,
+  useRef,
+} from "react";
+import { Alert, Button, Card, Table, Form } from "react-bootstrap";
 import { Product } from "../../interface/Product";
 import {
   deleteProduct,
@@ -15,22 +23,56 @@ import { AuthContext } from "../../context/auth";
 import { useLocation } from "react-router-dom";
 import { getModuleByMenu } from "../../api/module/module";
 import { IAlert } from "../../interface/IAlert";
+import XLSX from "xlsx";
+import { postCreateProduct } from "../../api/product/product";
+import PaginationComponent from "../../components/DatatableComponent/Pagination/Pagination";
+import Search from "../../components/DatatableComponent/Search/Search";
+import TableHeader from "../../components/DatatableComponent/Header/TableHeader";
 
 const initialState: IAlert = {
   type: "",
   message: "",
 };
 
+const EXTENSIONS = ["xlsx", "xls", "csv"];
+
+const headers = [
+  { name: "Item", field: "item", sortable: false },
+  { name: "Area / Sede", field: "area", sortable: true },
+  { name: "Cod. Barra / interno", field: "cod_internal", sortable: true },
+  { name: "Producto", field: "name", sortable: true },
+  { name: "Nota", field: "note", sortable: false },
+  { name: "Marca", field: "mark", sortable: true },
+  { name: "Modelo", field: "model", sortable: true },
+  { name: "Unidad de medida", field: "unit", sortable: true },
+  { name: "Stock", field: "stock", sortable: true },
+  { name: "Precio", field: "price", sortable: true },
+  { name: "Estado", field: "status", sortable: false },
+  { name: "Eliminar", field: "delete", sortable: false },
+];
+
 const ProductScreen = () => {
   const [show, setShow] = useState(false);
   const [state, setState] = useState<any>();
   const [products, setProducts] = useState<Product[]>([]);
+  const [registers, setRegisters] = useState<Product[]>([]);
   const [removes, setRemoves] = useState<Product[]>([]);
-  const { resources } = useContext(AuthContext);
+  const { resources, user } = useContext(AuthContext);
   const [resource, setResource] = useState<any>(null);
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
-  const [message, setMessage] = useState<IAlert>(initialState);
+  const [message, setMessage] = useState<IAlert | any>(initialState);
+  const [message2, setMessage2] = useState<IAlert | any>(initialState);
+  const [message3, setMessage3] = useState<IAlert | any>(initialState);
+  const [showAlert1, setShowAlert1] = useState(false);
+  const [showAlert2, setShowAlert2] = useState(false);
+  const [showAlert3, setShowAlert3] = useState(false);
+  const [file, setFile] = useState("");
+  const [totalItems, setTotalItems] = useState(0);
+  const ITEMS_PER_PAGE = 50;
+  const [sorting, setSorting] = useState({ field: "", order: "" });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
 
   const getMyModule = useCallback(async () => {
     const mymodule = await getModuleByMenu(getNameLocation);
@@ -118,23 +160,365 @@ const ProductScreen = () => {
     getMyModule();
   }, [listProducts, listProductDeleted, getMyModule, resource]);
 
+  const importExcel = (e: any) => {
+    setMessage(initialState);
+    setMessage2(initialState);
+    setMessage3(initialState);
+    const file = e.target.files[0];
+    setFile(e.target.value);
+    const reader = new FileReader();
+    reader.onload = (event: any) => {
+      //parse data
+
+      const bstr = event.target.result;
+      const workBook = XLSX.read(bstr, { type: "binary" });
+
+      //get first sheet
+      const workSheetName = workBook.SheetNames[0];
+      const workSheet = workBook.Sheets[workSheetName];
+      //convert to array
+      const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
+      // console.log(fileData)
+      const headers: any = fileData[0];
+      //setColDefs(heads)
+
+      //removing header
+      fileData.splice(0, 1);
+      setRegisters(convertToJson(headers, fileData));
+    };
+
+    if (file) {
+      if (getExention(file)) {
+        reader.readAsBinaryString(file);
+      } else {
+        alert("Invalid file input, Select Excel, CSV file");
+      }
+    } else {
+      setRegisters([]);
+    }
+  };
+
+  const getExention = (file: any) => {
+    const parts = file.name.split(".");
+    const extension = parts[parts.length - 1];
+    return EXTENSIONS.includes(extension); // return boolean
+  };
+
+  const convertToJson = (headers: any, data: any) => {
+    let rows: any = [];
+    data.forEach((row: any) => {
+      let rowData: any = {};
+      row.forEach((element: any, index: any) => {
+        rowData[headers[index]] = element;
+      });
+      rows.push(rowData);
+    });
+
+    rows = rows.map((format: any) => {
+      return {
+        ...format,
+        stock: Number(format.stock),
+        price: Number(format.price),
+      };
+    });
+
+    return rows;
+  };
+
+  const onSubmitXML = async () => {
+    setMessage(initialState);
+    setMessage2(initialState);
+    setMessage3(initialState);
+
+    let errors: Product[] = [];
+
+    //guarda los que no tienen errores de types
+    const filterTypes: any[] = registers
+      .map((product) =>
+        isNaN(product.price) || isNaN(product.stock)
+          ? errors.push(product)
+          : product
+      )
+      .filter((err) => typeof err === "object");
+
+    //muestra mensaje de los productos con errores
+    if (errors.length > 0) {
+      setShowAlert1(true);
+      setMessage({
+        type: "danger",
+        message: (
+          <>
+            <span>
+              Se han encontrado {errors.length} productos que no fueron
+              agregados porque el precio o stock no tienen un formato numerico,
+              el precio debe contener "." en lugar de "," y ser un valor
+              numerico por ejemplo: 1.50 y el stock debe ser un valor entero.
+            </span>
+            {
+              <ul>
+                {errors.map((err) => (
+                  <li key={err.cod_internal}>
+                    Producto{err.cod_internal}: {err.name} - precio: {err.price}{" "}
+                    - stock: {err.stock}
+                  </li>
+                ))}
+              </ul>
+            }
+          </>
+        ),
+      });
+    }
+
+    let productsEquals: any[] = [];
+    let productsAdds: any[] = [];
+
+    //de los productos filtrados correctamente se formatea con el cod del area
+    const getProductsByArea = String(user.area._id).slice(-3).toUpperCase();
+    const formatFiltersTypes = filterTypes.map((format) => {
+      return {
+        ...format, //{cod_internal: '679xxxxcc'}
+        cod_internal: getProductsByArea + format.cod_internal,
+      };
+    });
+
+    //busca los existentes de lo formateado con los productos ya registrados
+    products.filter((product) => {
+      formatFiltersTypes.map((format) => {
+        if (
+          String(format.cod_internal).toUpperCase() ===
+          String(product.cod_internal).toUpperCase()
+        ) {
+          productsEquals.push(format);
+        }
+      });
+    });
+
+    //busca los registros nuevos pero aun esta con el formato
+    //{cod_internal: '679xxxxcc'}
+    formatFiltersTypes.filter((product) => {
+      if (!productsEquals.includes(product)) {
+        productsAdds.push(product);
+      }
+    });
+
+    //quitando el formato {cod_internal: '679xxxxcc'} a {cod_internal: 'xxxxcc'}
+    const noCodeToAdd = productsAdds.map((add) => {
+      const getProductsByArea = String(add.cod_internal).slice(3).toUpperCase();
+      return {
+        ...add,
+        cod_internal: getProductsByArea,
+      };
+    });
+
+    if (productsEquals.length > 0) {
+      setShowAlert2(true);
+      setMessage2({
+        type: "warning",
+        message: (
+          <>
+            Se han encontrado {productsEquals.length} productos que ya se
+            encuentran registrados. Quieres{" "}
+            <strong>
+              ¿Volver a registrar de todas formas? (Esto lo actualizara el
+              producto con los mismos datos de tu excel).
+            </strong>{" "}
+            Si solo quieres actualizar una parte en especifico del producto. Por
+            favor seleccione el producto de la tabla directamente.{" "}
+            <Button
+              variant="secondary"
+              onClick={() => onSubmitXMLTwo(productsEquals)}
+            >
+              Actualizar de todas formas
+            </Button>{" "}
+            <Button variant="danger" onClick={cancelXML}>
+              Cancelar
+            </Button>
+          </>
+        ),
+      });
+    }
+
+    if (noCodeToAdd.length > 0) {
+      for (let i = 0; i < noCodeToAdd.length; i++) {
+        const product = noCodeToAdd[i];
+        await postCreateProduct(product);
+        setShowAlert3(true);
+        setMessage3({
+          type: "success",
+          message: `Se han agregado ${noCodeToAdd.length} productos con éxito.`,
+        });
+      }
+      listProducts();
+    }
+  };
+
+  const onSubmitXMLTwo = async (array: any[]) => {
+    for (let i = 0; i < array.length; i++) {
+      const product = {
+        ...array[i],
+        xmls: true,
+      };
+
+      await postCreateProduct(product);
+      setMessage2({
+        type: "success",
+        message: (
+          <>
+            <span>{array.length} productos actualizados con éxito.</span>
+            <ul>
+              {array.map((arr) => (
+                <li key={arr.cod_internal}>
+                  Producto{arr.cod_internal}: {arr.name}
+                </li>
+              ))}
+            </ul>
+          </>
+        ),
+      });
+    }
+
+    listProducts();
+  };
+
+  const cancelXML = () => {
+    setShowAlert2(false);
+    setMessage2(initialState);
+    setMessage(initialState);
+    setShowAlert1(false);
+    setRegisters([]);
+    setFile("");
+  };
+
+  const clearAlert3 = () => {
+    setMessage3(initialState);
+    setShowAlert3(false);
+  };
+
+  const clearAlert2 = () => {
+    setMessage2(initialState);
+    setShowAlert2(false);
+  };
+
+  const clearAlert1 = () => {
+    setMessage(initialState);
+    setShowAlert1(false);
+  };
+
+  const onSorting = (field: string, order: string) =>
+    setSorting({ field, order });
+
+  const onPageChange = (page: number) => setCurrentPage(page);
+
+  const productsFiltered = useMemo(() => {
+    let computedProducts = products! || [];
+
+    if (search) {
+      computedProducts = computedProducts.filter(
+        (product) =>
+          product.name.toLowerCase().includes(search.toLowerCase()) ||
+          product.cod_internal.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    setTotalItems(computedProducts.length);
+
+    //Sorting comments
+    if (sorting.field) {
+      const reversed = sorting.order === "asc" ? 1 : -1;
+      computedProducts = computedProducts.sort((a: any, b: any) => {
+        if (typeof a[sorting.field] === "object") {
+          return (
+            reversed *
+            a[sorting.field].name
+              .toString()
+              .localeCompare(b[sorting.field].name.toString())
+          );
+        } else {
+          return (
+            reversed *
+            a[sorting.field]
+              .toString()
+              .localeCompare(b[sorting.field].toString())
+          );
+        }
+      });
+    }
+
+    //Current Page slice
+    return computedProducts.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+    );
+  }, [products, currentPage, sorting, search]);
+
+  const onSearch = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1);
+  };
+
   return (
     <>
       <Card>
         <Card.Header as="h5">Lista de productos</Card.Header>
         <Card.Body>
-          {message.type && (
-            <Alert variant={message.type}>{message.message}</Alert>
+          {showAlert1 && message.type && (
+            <Alert onClose={clearAlert1} dismissible variant={message.type}>
+              {message.message}
+            </Alert>
+          )}
+          {showAlert2 && message2.type && (
+            <Alert onClose={clearAlert2} dismissible variant={message2.type}>
+              {message2.message}
+            </Alert>
+          )}
+          {showAlert3 && message3.type && (
+            <Alert onClose={clearAlert3} dismissible variant={message3.type}>
+              {message3.message}
+            </Alert>
           )}
           {resource && resource.canCreate && resource.canUpdate ? (
             <>
-              <Button
-                type="button"
-                variant="primary"
-                onClick={() => openModalRE(false)}
-              >
-                Agregar producto
-              </Button>{" "}
+              <div className={styles.contentButtons}>
+                <div className={styles.contentButtons__add}>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={() => openModalRE(false)}
+                  >
+                    Agregar producto
+                  </Button>
+                </div>
+                <div className={styles.contentButtons__excel}>
+                  <Form.Group className={styles.contentButtons__excel__input}>
+                    <Form.Label
+                      htmlFor="file"
+                      className={styles.contentButtons__excel__label}
+                    >
+                      Importar productos desde excel
+                    </Form.Label>
+
+                    <Form.Control
+                      type="file"
+                      onChange={importExcel}
+                      style={{ display: "none" }}
+                      id="file"
+                      title="aa"
+                      value={file}
+                    />
+                  </Form.Group>
+                  <Button
+                    type="button"
+                    variant="success"
+                    onClick={onSubmitXML}
+                    disabled={file ? false : true}
+                  >
+                    Cargar registros
+                  </Button>
+                </div>
+              </div>
+              <div className={styles.cantExcel}>
+                {registers.length} productos encontrados.
+              </div>
               <ProductForm
                 show={show}
                 closeModal={closeModal}
@@ -169,6 +553,26 @@ const ProductScreen = () => {
               />
             )
           )}
+          <div className="mb-3">
+            <Search onSearch={onSearch} />
+          </div>
+          <div
+            className="mb-3"
+            style={{ display: "flex", justifyContent: "space-between" }}
+          >
+            <PaginationComponent
+              total={totalItems}
+              itemsPerPage={ITEMS_PER_PAGE}
+              currentPage={currentPage}
+              onPageChange={onPageChange}
+            />
+            <div style={{ display: "flex", alignItems: "flex-end" }}>
+              <span style={{ marginLeft: 5 }}>
+                Hay un total de{" "}
+                {search ? productsFiltered.length : products.length} registros
+              </span>
+            </div>
+          </div>
           {resource && resource.canRead && (
             <Table
               striped
@@ -177,27 +581,11 @@ const ProductScreen = () => {
               responsive="sm"
               className={styles.table}
             >
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Area / Sede</th>
-                  <th>Cod interno</th>
-                  <th>Nombre</th>
-                  <th>Nota</th>
-                  <th>Marca</th>
-                  <th>Modelo</th>
-                  <th>Unidad de medida</th>
-                  <th>Stock</th>
-                  <th>Precio</th>
-                  <th className={`${styles["table--center"]}`}>Estado</th>
-                  {resource && resource.canDelete && (
-                    <th className={`${styles["table--center"]}`}>Eliminar</th>
-                  )}
-                </tr>
-              </thead>
+              <TableHeader headers={headers} onSorting={onSorting} />
               <tbody>
-                {products.map((pro) => (
+                {productsFiltered.map((pro, item: number) => (
                   <ProductListActive
+                    item={item + 1}
                     key={pro._id}
                     product={pro}
                     openModalRE={openModalRE}

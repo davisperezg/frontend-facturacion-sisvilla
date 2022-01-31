@@ -19,3 +19,32 @@
     color: #444;
   }
 }
+
+.contentButtons {
+  display: flex;
+
+  &__add {
+    width: 50%;
+  }
+
+  &__excel {
+    display: flex;
+    width: 50%;
+    justify-content: flex-end;
+
+    &__input {
+      margin-right: 10px;
+    }
+
+    &__label {
+      color: blue;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+}
+
+.cantExcel {
+  display: flex;
+  justify-content: flex-end;
+}

@@ -125,10 +125,7 @@ const FactForm = ({
   };
 
   const handleButtonFF = () => {
-    if (
-      form.customer_payment === 0 ||
-      form.customer_payment === form.subtotal
-    ) {
+    if (form.customer_payment <= 0 || form.customer_payment === form.subtotal) {
       setMessage({
         type: "info",
         message: `Si el cliente esta pagando con 0 soles o la misma cantidad del total a pagar, por favor cierre la ventana y cambie a la forma de pago a: "EFECTIVO COMPLETO"`,
@@ -622,6 +619,7 @@ const FactForm = ({
                 name="customer_payment"
                 value={form.customer_payment}
                 onChange={handleChange}
+                min="0"
               />
             </Col>
           </Form.Group>

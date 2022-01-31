@@ -30,7 +30,7 @@ const ConsultProductScreen = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [consult, setConsult] = useState({
-    filter: false,
+    filter: true,
   });
   const ITEMS_PER_PAGE = 50;
   const [resource] = useResource();
@@ -53,16 +53,9 @@ const ConsultProductScreen = () => {
     let computedProducts: any = products;
 
     if (consult.filter) {
-      if (resource.canRead) {
-        computedProducts = computedProducts.filter(
-          (product: any) => product.stock === 0
-        );
-      } else {
-        setMessage({
-          type: "danger",
-          message: `No tienes acceso a este recurso.`,
-        });
-      }
+      computedProducts = computedProducts.filter(
+        (product: any) => product.stock === 0
+      );
     }
 
     setTotalItems(computedProducts.length);
@@ -142,7 +135,7 @@ const ConsultProductScreen = () => {
           />
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             <span style={{ marginLeft: 5 }}>
-              Se encontraron un total de {productsFiltered.length} registros
+              Se encontraron un total de {products.length} registros
             </span>
           </div>
         </div>

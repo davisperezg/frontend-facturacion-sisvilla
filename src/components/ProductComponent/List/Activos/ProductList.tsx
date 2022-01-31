@@ -6,15 +6,18 @@ import { memo, useCallback, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../context/auth";
 import { useLocation } from "react-router-dom";
 import { getModuleByMenu } from "../../../../api/module/module";
+import { formatter } from "../../../../lib/helpers/functions/functions";
 
 const ProductListActive = ({
   product,
   deleteProd,
   openModalRE,
+  item,
 }: {
   product: Product;
   deleteProd: (id: string) => void;
   openModalRE: (props: boolean, value?: any) => void;
+  item?: number;
 }) => {
   const { mark, model, unit, area }: any = product;
 
@@ -43,7 +46,7 @@ const ProductListActive = ({
             className={styles.table__td}
             onClick={() => openModalRE(true, product)}
           >
-            {product._id}
+            {item}
           </td>
           <td
             className={styles.table__td}
@@ -97,7 +100,7 @@ const ProductListActive = ({
             className={styles.table__td}
             onClick={() => openModalRE(true, product)}
           >
-            S/ {product.price}
+            S/ {formatter.format(product.price)}
           </td>
           <td
             className={`${styles.table__td} ${styles["table--center"]}`}
@@ -116,7 +119,7 @@ const ProductListActive = ({
         </tr>
       ) : (
         <tr>
-          <td>{product._id}</td>
+          <td>{item}</td>
           <td>{String(area.name)}</td>
           <td>{product.cod_internal}</td>
           <td>{product.name}</td>
@@ -125,7 +128,7 @@ const ProductListActive = ({
           <td>{String(model.name)}</td>
           <td>{String(unit.name)}</td>
           <td>{product.stock}</td>
-          <td>S/ {product.price}</td>
+          <td>S/ {formatter.format(product.price)}</td>
           <td className={`${styles.table__td} ${styles["table--center"]}`}>
             {product.status && <Badge bg="success">Activo</Badge>}
           </td>
