@@ -65,7 +65,7 @@ const FactForm = ({
   listFactDeleted?: () => void;
 }) => {
   const initialStateFact = {
-    cod_fact: 0,
+    cod_fact: "",
     client: "",
     payment_type: "CONTADO",
     way_to_pay: "EFECTIVO COMPLETO",
@@ -93,7 +93,7 @@ const FactForm = ({
   const [totalItems, setTotalItems] = useState(0);
   const [sorting, setSorting] = useState({ field: "", order: "" });
   const [currentPage, setCurrentPage] = useState(1);
-  const [numberFact, setNumberFact] = useState(0);
+  const [numberFact, setNumberFact] = useState("");
   const [selectCliente, setSelectClient] = useState<any>({
     label: "",
     value: "",
@@ -544,8 +544,9 @@ const FactForm = ({
   const openModalClient = () => setShowModalClient(true);
 
   const getFactById = useCallback(async () => {
+    const noCode = String(fact?.cod_fact).slice(3).toUpperCase();
     setForm({
-      cod_fact: fact?.cod_fact || 0,
+      cod_fact: fact?.cod_fact || "",
       client: String(fact?.client) || "",
       payment_type: fact?.payment_type || "",
       way_to_pay: fact?.way_to_pay || "",
@@ -553,8 +554,9 @@ const FactForm = ({
       discount: fact?.discount || 0,
       customer_payment: fact?.customer_payment || 0,
     });
-    setNumberFact(fact?.cod_fact || 0);
+    setNumberFact(noCode);
     const res = await getDetailsFacts(String(fact?._id));
+
     const filter = res.data.map((detail: any) => {
       return {
         fact: detail.fact.cod_fact,

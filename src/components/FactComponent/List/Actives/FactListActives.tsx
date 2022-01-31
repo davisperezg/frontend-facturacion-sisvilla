@@ -39,6 +39,8 @@ const FactListActives = ({
     getMyModule();
   }, [getMyModule]);
 
+  const noCode = String(fact.cod_fact).slice(3).toUpperCase();
+
   return (
     <>
       {resource && resource.canUpdate ? (
@@ -53,7 +55,7 @@ const FactListActives = ({
             className={styles.table__td}
             onClick={() => openModalRE(true, fact)}
           >
-            000{fact.cod_fact}
+            000{noCode}
           </td>
           <td
             className={styles.table__td}
@@ -112,7 +114,7 @@ const FactListActives = ({
       ) : (
         <tr>
           <td>{item + 1}</td>
-          <td>000{fact.cod_fact}</td>
+          <td>000{noCode}</td>
           <td>{formatDate(new Date(String(fact.createdAt)))}</td>
           <td>{fact.client}</td>
           <td>{fact.user}</td>

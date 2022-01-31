@@ -3,7 +3,7 @@ import { User } from "./User";
 
 export interface Fact {
   _id?: string;
-  cod_fact: number;
+  cod_fact: string;
   user?: User | string;
   client: Client | string | any;
   payment_type: string;

@@ -9,6 +9,7 @@ import PaginationComponent from "../../../components/DatatableComponent/Paginati
 import FactForm from "../../../components/FactComponent/Form/FactForm";
 import useResource from "../../../hooks/resource/resourceHook";
 import { IAlert } from "../../../interface/IAlert";
+import { formatter } from "../../../lib/helpers/functions/functions";
 
 const headers = [
   { name: "#", field: "item", sortable: false },
@@ -64,7 +65,7 @@ const ConsultFactScreen = () => {
           user: fact?.user.name + " " + fact.user.lastname,
           payment_type: fact.payment_type,
           way_to_pay: fact.way_to_pay,
-          subtotal: fact.subtotal,
+          subtotal: fact.subtotal - fact.discount,
           discount: fact.discount,
           status: fact.status,
           customer_payment: fact.customer_payment,
@@ -139,6 +140,15 @@ const ConsultFactScreen = () => {
     setState({});
   }, []);
 
+  const calSumTotal = () => {
+    return factsFiltered.reduce(
+      (previousValue: any, currentValue: any) =>
+        previousValue + currentValue.subtotal,
+
+      0
+    );
+  };
+
   return (
     <Card>
       <FactForm show={show} closeModal={closeModal} fact={state} />
@@ -166,6 +176,11 @@ const ConsultFactScreen = () => {
             >
               Consultar
             </Button>
+          </Form.Group>
+          <Form.Group md="4" as={Col} controlId="formTotalVend">
+            <Form.Label>
+              Total vendido S/{formatter.format(calSumTotal())}
+            </Form.Label>
           </Form.Group>
         </Row>
         <div

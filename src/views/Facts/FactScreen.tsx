@@ -104,7 +104,7 @@ const FactScreen = () => {
         user: fact?.user.name + " " + fact.user.lastname,
         payment_type: fact.payment_type,
         way_to_pay: fact.way_to_pay,
-        subtotal: fact.subtotal,
+        subtotal: fact.subtotal - fact.discount,
         discount: fact.discount,
         status: fact.status,
         customer_payment: fact.customer_payment,
@@ -196,34 +196,27 @@ const FactScreen = () => {
     //Sorting comments
     if (sorting.field) {
       const reversed = sorting.order === "asc" ? 1 : -1;
-      computedFacts = computedFacts
-        .map((format: any) => {
-          return {
-            ...format,
-            subtotal: format.subtotal - format.discount,
-          };
-        })
-        .sort((a: any, b: any) => {
-          if (typeof a[sorting.field] === "object") {
+      computedFacts = computedFacts.sort((a: any, b: any) => {
+        if (typeof a[sorting.field] === "object") {
+          return (
+            reversed *
+            a[sorting.field].name
+              .toString()
+              .localeCompare(b[sorting.field].name.toString())
+          );
+        } else {
+          if (typeof a[sorting.field] === "number") {
+            return reversed * (a[sorting.field] - b[sorting.field]);
+          } else {
             return (
               reversed *
-              a[sorting.field].name
+              a[sorting.field]
                 .toString()
-                .localeCompare(b[sorting.field].name.toString())
+                .localeCompare(b[sorting.field].toString())
             );
-          } else {
-            if (typeof a[sorting.field] === "number") {
-              return reversed * (a[sorting.field] - b[sorting.field]);
-            } else {
-              return (
-                reversed *
-                a[sorting.field]
-                  .toString()
-                  .localeCompare(b[sorting.field].toString())
-              );
-            }
           }
-        });
+        }
+      });
     }
     //Current Page slice
     // computedFacts.slice(
