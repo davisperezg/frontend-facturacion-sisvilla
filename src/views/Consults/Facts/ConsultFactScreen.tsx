@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Alert, Button, Card, Table, Form, Row, Col } from "react-bootstrap";
 import TableHeader from "../../../components/DatatableComponent/Header/TableHeader";
 import { Fact } from "../../../interface/Fact";
@@ -10,6 +10,10 @@ import FactForm from "../../../components/FactComponent/Form/FactForm";
 import useResource from "../../../hooks/resource/resourceHook";
 import { IAlert } from "../../../interface/IAlert";
 import { formatter } from "../../../lib/helpers/functions/functions";
+import { getAreas } from "../../../api/area/area";
+import { Area } from "../../../interface/Area";
+import ItemCheck from "./ItemCheck";
+import { AuthContext } from "../../../context/auth";
 
 const headers = [
   { name: "#", field: "item", sortable: false },
@@ -31,6 +35,7 @@ const initialStateAlert: IAlert = {
 const ConsultFactScreen = () => {
   const [sorting, setSorting] = useState({ field: "", order: "" });
   const [facts, setFacts] = useState<Fact[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [show, setShow] = useState(false);
   const [state, setState] = useState<any>();
@@ -42,6 +47,7 @@ const ConsultFactScreen = () => {
   const ITEMS_PER_PAGE = 50;
   const [resource] = useResource();
   const [message, setMessage] = useState<IAlert>(initialStateAlert);
+  const { user } = useContext(AuthContext);
 
   const onSorting = (field: string, order: string) =>
     setSorting({ field, order });
@@ -49,6 +55,18 @@ const ConsultFactScreen = () => {
   const handleChange = (e: InputChange) => {
     setMessage(initialStateAlert);
     setConsult({ ...consult, [e.target.name]: e.target.value });
+  };
+
+  const listAreas = async () => {
+    const res = await getAreas();
+    const filter = res.data.map((area: any) => {
+      return {
+        _id: area._id,
+        name: area.name,
+        checked: area.name === user.area.name ? true : false,
+      };
+    });
+    setAreas(filter);
   };
 
   const goSearch = async () => {
@@ -62,7 +80,8 @@ const ConsultFactScreen = () => {
           cod_fact: fact.cod_fact,
           createdAt: fact.createdAt,
           client: fact.client.name + " " + fact.client.lastname,
-          user: fact?.user.name + " " + fact.user.lastname,
+          user: fact.user.name + " " + fact.user.lastname,
+          area: fact.user.area,
           payment_type: fact.payment_type,
           way_to_pay: fact.way_to_pay,
           subtotal: fact.subtotal - fact.discount,
@@ -82,6 +101,18 @@ const ConsultFactScreen = () => {
 
   const factsFiltered = useMemo(() => {
     let computedFacts: any = facts;
+
+    if (areas.length > 0) {
+      let filter: any[] = [];
+      computedFacts.filter((fact: any) => {
+        areas.map((area: any) => {
+          if (fact.area === area._id && area.checked === true) {
+            filter.push(fact);
+          }
+        });
+      });
+      computedFacts = filter.length > 0 ? filter : [];
+    }
 
     setTotalItems(computedFacts.length);
 
@@ -124,7 +155,7 @@ const ConsultFactScreen = () => {
         (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
       );
     else return [];
-  }, [facts, sorting, currentPage, resource.canRead]);
+  }, [facts, sorting, currentPage, resource.canRead, areas]);
 
   const openModalRE = useCallback((props: boolean, value?: any) => {
     setShow(true);
@@ -148,6 +179,10 @@ const ConsultFactScreen = () => {
       0
     );
   };
+
+  useEffect(() => {
+    listAreas();
+  }, []);
 
   return (
     <Card>
@@ -195,10 +230,30 @@ const ConsultFactScreen = () => {
           />
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             <span style={{ marginLeft: 5 }}>
-              Se encontraron un total de {facts.length} registros
+              Se encontraron un total de {factsFiltered.length} registros
             </span>
           </div>
         </div>
+        <Row className="mb-3">
+          {areas.map((area: any) => {
+            return (
+              <Form.Group
+                key={area._id}
+                md="4"
+                as={Col}
+                controlId={`formBasicCheckbox${area.name}`}
+              >
+                <ItemCheck
+                  area={area}
+                  areas={areas}
+                  setAreas={setAreas}
+                  facts={facts}
+                />
+              </Form.Group>
+            );
+          })}
+        </Row>
+
         {resource.canRead && (
           <Table striped bordered hover responsive="sm">
             <TableHeader headers={headers} onSorting={onSorting} />
