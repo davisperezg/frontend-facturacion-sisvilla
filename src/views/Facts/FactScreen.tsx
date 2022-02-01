@@ -52,7 +52,7 @@ const FactScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [idFact, setIdFact] = useState({
     id: "",
-    cod: 0,
+    cod: "",
   });
   const [message, setMessage] = useState<IAlert>(initialState);
   const { resources } = useContext(AuthContext);
@@ -155,14 +155,14 @@ const FactScreen = () => {
     setShowModal(false);
     setIdFact({
       id: "",
-      cod: 0,
+      cod: "",
     });
     setTimeout(() => {
       setMessage(initialState);
     }, 2500);
   };
 
-  const openModalConfirm = (id: string, cod: number) => {
+  const openModalConfirm = (id: string, cod: string) => {
     setShowModal(true);
     setIdFact({
       id: id,
@@ -235,7 +235,7 @@ const FactScreen = () => {
         </Modal.Header>
         <Modal.Body>
           ¿ Estas seguro que deseas anular la venta{" "}
-          <strong>000{idFact.cod}</strong> ?
+          <strong>000{String(idFact.cod).slice(3)}</strong> ?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={closeModalConfirm}>

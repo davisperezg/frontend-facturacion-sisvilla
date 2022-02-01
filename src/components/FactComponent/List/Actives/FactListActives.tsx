@@ -21,7 +21,7 @@ const FactListActives = ({
   fact: Fact | any;
   item: number;
   openModalRE: (props: boolean, value?: any) => void;
-  deleteFact?: (id: string, cod: number) => void;
+  deleteFact?: (id: string, cod: string) => void;
   noDelete?: boolean;
 }) => {
   const { resources } = useContext(AuthContext);
@@ -111,7 +111,7 @@ const FactListActives = ({
                   className={styles.table__iconClose}
                   onClick={() =>
                     deleteFact &&
-                    deleteFact(String(fact._id), Number(fact.cod_fact))
+                    deleteFact(String(fact._id), String(fact.cod_fact))
                   }
                 />
               </td>
@@ -141,7 +141,7 @@ const FactListActives = ({
                   className={styles.table__iconClose}
                   onClick={() =>
                     deleteFact &&
-                    deleteFact(String(fact._id), Number(fact.cod_fact))
+                    deleteFact(String(fact._id), String(fact.cod_fact))
                   }
                 />
               </td>
