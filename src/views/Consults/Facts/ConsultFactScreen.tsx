@@ -14,6 +14,7 @@ import { getAreas } from "../../../api/area/area";
 import { Area } from "../../../interface/Area";
 import ItemCheck from "./ItemCheck";
 import { AuthContext } from "../../../context/auth";
+import { CSVLink } from "react-csv";
 
 const headers = [
   { name: "#", field: "item", sortable: false },
@@ -184,6 +185,21 @@ const ConsultFactScreen = () => {
     listAreas();
   }, []);
 
+  const headerXML = headers.map((head) => {
+    return {
+      label: head.name,
+      key: head.field,
+    };
+  });
+
+  const dataXML = factsFiltered.map((fact: any, i: number) => {
+    console.log(fact);
+    return {
+      ...fact,
+      item: i + 1,
+    };
+  });
+
   return (
     <Card>
       <FactForm show={show} closeModal={closeModal} fact={state} />
@@ -255,19 +271,45 @@ const ConsultFactScreen = () => {
         </Row>
 
         {resource.canRead && (
-          <Table striped bordered hover responsive="sm">
-            <TableHeader headers={headers} onSorting={onSorting} />
-            <tbody>
-              {factsFiltered.map((fact: any, i: number) => (
-                <FactListActives
-                  key={fact._id}
-                  item={i}
-                  fact={fact}
-                  openModalRE={openModalRE}
-                />
-              ))}
-            </tbody>
-          </Table>
+          <>
+            <Form.Group
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+              //className={styles.contentButtons__excel__input}
+            >
+              <CSVLink
+                data={dataXML}
+                headers={headerXML}
+                filename="ventas.csv"
+                target="_blank"
+                separator={";"}
+              >
+                <Form.Label
+                  className="btn btn-success"
+                  style={{ cursor: "pointer" }}
+                >
+                  Exportar a excel
+                </Form.Label>
+              </CSVLink>
+            </Form.Group>
+
+            <Table striped bordered hover responsive="sm">
+              <TableHeader headers={headers} onSorting={onSorting} />
+              <tbody>
+                {factsFiltered.map((fact: any, i: number) => (
+                  <FactListActives
+                    key={fact._id}
+                    item={i}
+                    fact={fact}
+                    openModalRE={openModalRE}
+                    noDelete={true}
+                  />
+                ))}
+              </tbody>
+            </Table>
+          </>
         )}
       </Card.Body>
     </Card>

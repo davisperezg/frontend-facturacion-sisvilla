@@ -16,11 +16,13 @@ const FactListActives = ({
   item,
   deleteFact,
   openModalRE,
+  noDelete,
 }: {
   fact: Fact | any;
   item: number;
   openModalRE: (props: boolean, value?: any) => void;
   deleteFact?: (id: string, cod: number) => void;
+  noDelete?: boolean;
 }) => {
   const { resources } = useContext(AuthContext);
   const location = useLocation();
@@ -99,16 +101,21 @@ const FactListActives = ({
           >
             {fact.status && <Badge bg="success">Pagada</Badge>}
           </td>
-          {resource && resource.canDelete && (
-            <td className={`${styles["table--center"]}`}>
-              <IoMdClose
-                className={styles.table__iconClose}
-                onClick={() =>
-                  deleteFact &&
-                  deleteFact(String(fact._id), Number(fact.cod_fact))
-                }
-              />
-            </td>
+          {noDelete ? (
+            <></>
+          ) : (
+            resource &&
+            resource.canDelete && (
+              <td className={`${styles["table--center"]}`}>
+                <IoMdClose
+                  className={styles.table__iconClose}
+                  onClick={() =>
+                    deleteFact &&
+                    deleteFact(String(fact._id), Number(fact.cod_fact))
+                  }
+                />
+              </td>
+            )
           )}
         </tr>
       ) : (
@@ -124,16 +131,21 @@ const FactListActives = ({
           <td className={`${styles["table--center"]}`}>
             {fact.status && <Badge bg="success">Pagada</Badge>}
           </td>
-          {resource && resource.canDelete && (
-            <td className={`${styles["table--center"]}`}>
-              <IoMdClose
-                className={styles.table__iconClose}
-                onClick={() =>
-                  deleteFact &&
-                  deleteFact(String(fact._id), Number(fact.cod_fact))
-                }
-              />
-            </td>
+          {noDelete ? (
+            <></>
+          ) : (
+            resource &&
+            resource.canDelete && (
+              <td className={`${styles["table--center"]}`}>
+                <IoMdClose
+                  className={styles.table__iconClose}
+                  onClick={() =>
+                    deleteFact &&
+                    deleteFact(String(fact._id), Number(fact.cod_fact))
+                  }
+                />
+              </td>
+            )
           )}
         </tr>
       )}

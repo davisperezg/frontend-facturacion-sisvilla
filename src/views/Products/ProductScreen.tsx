@@ -571,7 +571,7 @@ const ProductScreen = () => {
                   </Form.Group>
                   <Button
                     type="button"
-                    variant="success"
+                    variant="dark"
                     onClick={onSubmitXML}
                     disabled={file ? false : true}
                   >
@@ -637,7 +637,7 @@ const ProductScreen = () => {
                   </Form.Group>
                   <Button
                     type="button"
-                    variant="success"
+                    variant="dark"
                     onClick={onSubmitXML}
                     disabled={file ? false : true}
                   >
@@ -681,7 +681,7 @@ const ProductScreen = () => {
                     target="_blank"
                     separator={";"}
                   >
-                    <Button variant="secondary" type="button">
+                    <Button variant="success  " type="button">
                       Exportar productos a excel
                     </Button>
                   </CSVLink>

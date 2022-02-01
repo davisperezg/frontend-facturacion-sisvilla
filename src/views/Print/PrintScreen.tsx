@@ -49,7 +49,7 @@ const PrintScreen = () => {
         <p className={styles.ticket__centrado}>
           TICKET DE VENTA
           <br />
-          {fact.area} - 000{fact.cod_fact}
+          {fact.area} - 000{String(fact.cod_fact).slice(3)}
           <br />
           {formatDate(fact_fecha)}
         </p>
@@ -170,9 +170,15 @@ const PrintScreen = () => {
                     <div className={styles.iconAndSoles}>
                       <div>S/</div>
                       <div className={styles.iconAndSoles__soles}>
-                        {formatter.format(
-                          fact.total - fact.descuento - fact.pago_cliente
-                        )}
+                        {fact.total - fact.descuento - fact.pago_cliente < 0
+                          ? String(
+                              formatter.format(
+                                fact.total - fact.descuento - fact.pago_cliente
+                              )
+                            ).slice(1)
+                          : formatter.format(
+                              fact.total - fact.descuento - fact.pago_cliente
+                            )}
                       </div>
                     </div>
                   </td>

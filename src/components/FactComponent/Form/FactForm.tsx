@@ -620,7 +620,17 @@ const FactForm = ({
                 type="number"
                 name="customer_payment"
                 value={form.customer_payment}
-                onChange={handleChange}
+                onChange={(e) => {
+                  if (Number(e.target.value) < 0) {
+                    alert("El monto a pagar no puede ser negativo");
+                  } else {
+                    setForm({
+                      ...form,
+                      customer_payment: Number(e.target.value),
+                    });
+                  }
+                }}
+                step="0.01"
                 min="0"
               />
             </Col>
@@ -638,9 +648,16 @@ const FactForm = ({
                 type="number"
                 value={
                   form.customer_payment
-                    ? `${formatter.format(
-                        Number(form.subtotal) - Number(form.customer_payment)
-                      )}`
+                    ? Number(form.subtotal) - Number(form.customer_payment) < 0
+                      ? String(
+                          formatter.format(
+                            Number(form.subtotal) -
+                              Number(form.customer_payment)
+                          )
+                        ).slice(1)
+                      : `${formatter.format(
+                          Number(form.subtotal) - Number(form.customer_payment)
+                        )}`
                     : formatter.format(0)
                 }
                 disabled
@@ -915,9 +932,21 @@ const FactForm = ({
                         value={form.discount}
                         type="number"
                         disabled={fact?._id ? true : false}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          if (Number(e.target.value) > calSumSub()) {
+                            return;
+                          } else if (Number(e.target.value) < 0) {
+                            alert("El descuento no puede ser negativo");
+                          } else {
+                            setForm({
+                              ...form,
+                              discount: Number(e.target.value),
+                            });
+                          }
+                        }}
                         step="0.01"
                         min="0"
+                        max={calSumSub()}
                       />
                     </td>
                   </tr>
@@ -948,7 +977,7 @@ const FactForm = ({
                         <td>
                           <strong>Pagó con</strong>
                         </td>
-                        <td>{`S/ -${formatter.format(
+                        <td>{`S/ ${formatter.format(
                           form.customer_payment
                         )}`}</td>
                       </tr>
@@ -962,9 +991,17 @@ const FactForm = ({
                         <td>
                           <strong>Vuelto</strong>
                         </td>
-                        <td>{`S/ ${formatter.format(
-                          form.subtotal - form.discount - form.customer_payment
-                        )}`}</td>
+                        <td>{`S/ ${
+                          form.subtotal - form.customer_payment < 0
+                            ? String(
+                                formatter.format(
+                                  form.subtotal - form.customer_payment
+                                )
+                              ).slice(1)
+                            : formatter.format(
+                                form.subtotal - form.customer_payment
+                              )
+                        }`}</td>
                       </tr>
                     </>
                   )}

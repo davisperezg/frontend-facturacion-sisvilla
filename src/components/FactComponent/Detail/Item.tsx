@@ -1,13 +1,9 @@
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import { Form } from "react-bootstrap";
 import { IoMdClose } from "react-icons/io";
 import { DetailsFact } from "../../../interface/DetailsFact";
 import { formatter } from "../../../lib/helpers/functions/functions";
 import styles from "../Form/FactForm.module.scss";
-
-type InputChange = ChangeEvent<
-  HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
->;
 
 const DetailItem = ({
   listed,
@@ -91,6 +87,8 @@ const DetailItem = ({
               onChange={(e) => {
                 if (Number(e.target.value) > product.stock) {
                   return;
+                } else if (Number(e.target.value) <= 0) {
+                  alert("La cantidad no puede ser 0 o negativo");
                 } else {
                   const element = list.map((res: any) => {
                     return {
@@ -138,17 +136,27 @@ const DetailItem = ({
               step="0.01"
               min="0"
               onChange={(e) => {
-                const element = list.map((res: any) => {
-                  return {
-                    ...res,
-                    discount:
-                      res.product === product.product
-                        ? Number(e.target.value)
-                        : res.discount,
-                  };
-                });
-                getProductByItem(element);
-                setProduct({ ...product, discount: Number(e.target.value) });
+                const total =
+                  Number(product.price) * Number(product.quantity) -
+                  Number(e.target.value);
+
+                if (Number(e.target.value) > total && total < 0.0) {
+                  return;
+                } else if (Number(e.target.value) < 0) {
+                  alert("El descuento no puede ser negativo");
+                } else {
+                  const element = list.map((res: any) => {
+                    return {
+                      ...res,
+                      discount:
+                        res.product === product.product
+                          ? Number(e.target.value)
+                          : res.discount,
+                    };
+                  });
+                  getProductByItem(element);
+                  setProduct({ ...product, discount: Number(e.target.value) });
+                }
               }}
             />
           </td>
