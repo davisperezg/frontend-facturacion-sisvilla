@@ -27,7 +27,7 @@ const RoleScreen = () => {
   const [show, setShow] = useState(false);
   //const [counter, setCounter] = useState(0);
   const [state, setState] = useState<any>();
-  const { resources } = useContext(AuthContext);
+  const { resources, user } = useContext(AuthContext);
   const [resource, setResource] = useState<any>(null);
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
@@ -198,14 +198,25 @@ const RoleScreen = () => {
                 </tr>
               </thead>
               <tbody>
-                {roles.map((role) => (
-                  <RoleList
-                    key={role._id}
-                    role={role}
-                    openModalRE={openModalRE}
-                    deleteRol={deleteRol}
-                  />
-                ))}
+                {user.role.name === "SUPER ADMINISTRADOR"
+                  ? roles.map((role) => (
+                      <RoleList
+                        key={role._id}
+                        role={role}
+                        openModalRE={openModalRE}
+                        deleteRol={deleteRol}
+                      />
+                    ))
+                  : roles
+                      .filter((flts) => flts.name !== "SUPER ADMINISTRADOR")
+                      .map((role) => (
+                        <RoleList
+                          key={role._id}
+                          role={role}
+                          openModalRE={openModalRE}
+                          deleteRol={deleteRol}
+                        />
+                      ))}
               </tbody>
               <tfoot>
                 {removes.map((remove) => (

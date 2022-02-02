@@ -29,3 +29,9 @@ export const restoreUser = async (id: string) => {
 export const updateUser = async (id: string, user: User) => {
   return await axios.put(`${API}/api/v1/users/${id}`, user);
 };
+
+export const changePassword = async (id: string, newPassword: string) => {
+  return await axios.put(`${API}/api/v1/users/change-password/${id}`, {
+    newPassword,
+  });
+};

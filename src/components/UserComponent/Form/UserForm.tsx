@@ -55,7 +55,7 @@ const UserForm = ({
   const [disabled, setDisabled] = useState<boolean>(false);
   const [roles, setRoles] = useState<Rol[]>([]);
   const [errors, setErrors] = useState<any>({});
-  const { resources } = useContext(AuthContext);
+  const { resources, user: userContext } = useContext(AuthContext);
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
   const [resource, setResource] = useState<any>(null);
@@ -294,11 +294,19 @@ const UserForm = ({
                 isInvalid={!!errors?.role}
               >
                 <option value="">[Seleccione el rol]</option>
-                {roles.map((role) => (
-                  <option key={role._id} value={role.name}>
-                    {role.name}
-                  </option>
-                ))}
+                {userContext.role.name === "SUPER ADMINISTRADOR"
+                  ? roles.map((role) => (
+                      <option key={role._id} value={role.name}>
+                        {role.name}
+                      </option>
+                    ))
+                  : roles
+                      .filter((flts) => flts.name !== "SUPER ADMINISTRADOR")
+                      .map((role) => (
+                        <option key={role._id} value={role.name}>
+                          {role.name}
+                        </option>
+                      ))}
               </Form.Select>
               <Form.Control.Feedback type="invalid">
                 {errors?.role}

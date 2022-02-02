@@ -1,8 +1,18 @@
-import { Alert, Button, Card, Table } from "react-bootstrap";
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Form,
+  Modal,
+  Row,
+  Table,
+} from "react-bootstrap";
 import { User } from "../../interface/User";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { FormEvent, useCallback, useContext, useEffect, useState } from "react";
 import styles from "./User.module.scss";
 import {
+  changePassword,
   deleteUser,
   getUsers,
   getUsersDeleted,
@@ -15,6 +25,7 @@ import { AuthContext } from "../../context/auth";
 import { useLocation } from "react-router-dom";
 import { IAlert } from "../../interface/IAlert";
 import { getModuleByMenu } from "../../api/module/module";
+import { InputChange } from "../../lib/types/types";
 
 const initialState: IAlert = {
   type: "",
@@ -26,11 +37,19 @@ const UserScreen = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [removes, setRemoves] = useState<User[]>([]);
   const [state, setState] = useState<any>();
-  const { resources } = useContext(AuthContext);
+  const { resources, user } = useContext(AuthContext);
   const [resource, setResource] = useState<any>(null);
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
   const [message, setMessage] = useState<IAlert>(initialState);
+  const [message2, setMessage2] = useState<IAlert>(initialState);
+  const [showModal, setShowModal] = useState(false);
+  const [errors, setErrors] = useState<any>({});
+  const [changePassowrd, setChangePassword] = useState({
+    id: "",
+    newPassword: "",
+  });
+  const [disabled, setDisabled] = useState(false);
 
   const getMyModule = useCallback(async () => {
     const mymodule = await getModuleByMenu(getNameLocation);
@@ -113,8 +132,101 @@ const UserScreen = () => {
     getMyModule();
   }, [listUsers, listUsersDeleted, getMyModule, resource]);
 
+  const openModalPassword = (id: string) => {
+    setChangePassword({ ...changePassowrd, id });
+    setShowModal(true);
+  };
+
+  const closeModalPassword = () => {
+    setChangePassword({
+      id: "",
+      newPassword: "",
+    });
+    setMessage2(initialState);
+    setShowModal(false);
+    setErrors({});
+  };
+
+  const onChangeAccount = (e: InputChange) => {
+    setMessage2(initialState);
+    if (errors[e.target.name])
+      setErrors({
+        ...errors,
+        [e.target.name]: null,
+      });
+    setChangePassword({ ...changePassowrd, [e.target.name]: e.target.value });
+  };
+
+  const findFormErrors = () => {
+    const { newPassword } = changePassowrd;
+    const newErrors: any = {};
+    if (!newPassword || newPassword === "")
+      newErrors.newPassword = "Por favor ingrese una contraseña.";
+
+    return newErrors;
+  };
+
+  const onSubmitChangePassword = async (e: FormEvent) => {
+    e.preventDefault();
+    const newErrors = findFormErrors();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+    } else {
+      setDisabled(true);
+      const { id, newPassword } = changePassowrd;
+      await changePassword(id, newPassword);
+      setMessage2({
+        type: "success",
+        message: "Se ha cambiado la contraseña correctamente.",
+      });
+      setChangePassword({
+        ...changePassowrd,
+        newPassword: "",
+      });
+      setDisabled(false);
+    }
+  };
+
   return (
     <>
+      <Modal show={showModal} onHide={closeModalPassword} centered>
+        <Form onSubmit={onSubmitChangePassword}>
+          <Modal.Header closeButton>
+            <Modal.Title>Cambiar contraseña</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {message2.type && (
+              <Alert variant={message2.type}>{message2.message}</Alert>
+            )}
+            <Row className="mb-3">
+              <Form.Group as={Col} controlId="formGridPassword">
+                <Form.Label>
+                  Nueva contraseña <strong className="text-danger">*</strong>
+                </Form.Label>
+                <Form.Control
+                  name="newPassword"
+                  onChange={onChangeAccount}
+                  value={changePassowrd.newPassword}
+                  type="password"
+                  placeholder="Introduce contraseña"
+                  isInvalid={!!errors?.newPassword}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors?.newPassword}
+                </Form.Control.Feedback>
+              </Form.Group>
+            </Row>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={closeModalPassword}>
+              Cerrar
+            </Button>
+            <Button disabled={disabled} type="submit" variant="success">
+              Cambiar
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
       <Card>
         <Card.Header as="h5">Lista de Usuarios</Card.Header>
         <Card.Body>
@@ -191,17 +303,33 @@ const UserScreen = () => {
                   {resource && resource.canDelete && (
                     <th className={`${styles["table--center"]}`}>Eliminar</th>
                   )}
+                  <th className={`${styles["table--center"]}`}>Contraseña</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
-                  <UserListActives
-                    key={user._id}
-                    user={user}
-                    deleteUsu={deleteUsu}
-                    openModalRE={openModalRE}
-                  />
-                ))}
+                {user.role.name === "SUPER ADMINISTRADOR"
+                  ? users.map((user) => (
+                      <UserListActives
+                        key={user._id}
+                        user={user}
+                        deleteUsu={deleteUsu}
+                        openModalRE={openModalRE}
+                        openModalPassword={openModalPassword}
+                      />
+                    ))
+                  : users
+                      .filter(
+                        (flts) => flts.role.name !== "SUPER ADMINISTRADOR"
+                      )
+                      .map((user) => (
+                        <UserListActives
+                          key={user._id}
+                          user={user}
+                          deleteUsu={deleteUsu}
+                          openModalRE={openModalRE}
+                          openModalPassword={openModalPassword}
+                        />
+                      ))}
               </tbody>
               <tfoot>
                 {removes.map((remove) => (

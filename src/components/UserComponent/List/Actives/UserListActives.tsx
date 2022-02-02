@@ -6,15 +6,18 @@ import styles from "./UserList.module.scss";
 import { AuthContext } from "../../../../context/auth";
 import { useLocation } from "react-router-dom";
 import { getModuleByMenu } from "../../../../api/module/module";
+import { FaKey } from "react-icons/fa";
 
 const UserListActives = ({
   user,
   deleteUsu,
   openModalRE,
+  openModalPassword,
 }: {
   user: User;
   deleteUsu: (id: string) => void;
   openModalRE: (props: boolean, value?: any) => void;
+  openModalPassword: (id: string) => void;
 }) => {
   const { resources } = useContext(AuthContext);
   const location = useLocation();
@@ -105,6 +108,12 @@ const UserListActives = ({
               />
             </td>
           )}
+          <td className={`${styles["table--center"]}`}>
+            <FaKey
+              className={styles.table__iconPassword}
+              onClick={() => openModalPassword(String(user._id))}
+            />
+          </td>
         </tr>
       ) : (
         <tr>
@@ -130,6 +139,12 @@ const UserListActives = ({
               />
             </td>
           )}
+          <td className={`${styles["table--center"]}`}>
+            <FaKey
+              className={styles.table__iconPassword}
+              onClick={() => openModalPassword(String(user._id))}
+            />
+          </td>
         </tr>
       )}
     </>

@@ -31,7 +31,7 @@ const OptionsScreen = () => {
   const [resources, setResources] = useState<any[]>([]);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [alert, setAlert] = useState<IAlert>(initialStateAlert);
-  const { resources: resourcesAux } = useContext(AuthContext);
+  const { resources: resourcesAux, user } = useContext(AuthContext);
   const [resource, setResource] = useState<any>(null);
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
@@ -47,15 +47,26 @@ const OptionsScreen = () => {
   const listRoles = useCallback(async () => {
     const res = await getRoles();
     const { data } = res;
-
-    const filter = data.map((rol: any) => {
-      return {
-        label: rol.name,
-        value: rol.name,
-      };
-    });
-    setRoles(filter);
-  }, []);
+    if (user.role.name === "SUPER ADMINISTRADOR") {
+      const filter = data.map((rol: any) => {
+        return {
+          label: rol.name,
+          value: rol.name,
+        };
+      });
+      setRoles(filter);
+    } else {
+      const filter = data
+        .filter((flts: any) => flts.name !== "SUPER ADMINISTRADOR")
+        .map((rol: any) => {
+          return {
+            label: rol.name,
+            value: rol.name,
+          };
+        });
+      setRoles(filter);
+    }
+  }, [user.role.name]);
 
   const clearAlert = useCallback(() => setAlert(initialStateAlert), []);
 
