@@ -14,6 +14,7 @@ import { Client } from "../../../interface/Client";
 import { AuthContext } from "../../../context/auth";
 import { useLocation } from "react-router-dom";
 import { getModuleByMenu } from "../../../api/module/module";
+import { getServiceData } from "../../../api/identify";
 
 type InputChange = ChangeEvent<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -211,48 +212,21 @@ const ClientForm = ({
           {message.type && (
             <Alert variant={message.type}>{message.message}</Alert>
           )}
-
-          <Row className="mb-3">
-            <Form.Group as={Col} controlId="formGridName">
-              <Form.Label>
-                Nombre <strong className="text-danger">*</strong>
-              </Form.Label>
-              <Form.Control
-                name="name"
-                onChange={handleChange}
-                value={form?.name}
-                type="text"
-                placeholder="Introduce nombre"
-                isInvalid={!!errors?.name}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors?.name}
-              </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group as={Col} controlId="formGridLastname">
-              <Form.Label>
-                Apellidos <strong className="text-danger">*</strong>
-              </Form.Label>
-              <Form.Control
-                name="lastname"
-                onChange={handleChange}
-                value={form?.lastname}
-                type="text"
-                placeholder="Introduce apellido(s)"
-                isInvalid={!!errors?.lastname}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors?.lastname}
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Row>
           <Form.Group className="mb-3" as={Col} controlId="formGridTip">
             <Form.Label>
               Tipo de documento <strong className="text-danger">*</strong>
             </Form.Label>
             <Form.Select
               name="tipDocument"
-              onChange={handleChange}
+              onChange={(e) => {
+                setForm({
+                  ...form,
+                  tipDocument: e.target.value,
+                  nroDocument: "",
+                  name: "",
+                  lastname: "",
+                });
+              }}
               value={form?.tipDocument}
               isInvalid={!!errors?.tipDocument}
             >
@@ -271,7 +245,49 @@ const ClientForm = ({
             </Form.Label>
             <Form.Control
               name="nroDocument"
-              onChange={handleChange}
+              maxLength={form.tipDocument === "DNI" ? 8 : 11}
+              minLength={form.tipDocument === "DNI" ? 8 : 11}
+              onKeyUp={async (e: any) => {
+                if (
+                  form.tipDocument === "DNI" &&
+                  Number(e.target.value.length) === 8
+                ) {
+                  const res = await getServiceData(
+                    String(form.tipDocument).toLowerCase(),
+                    e.target.value
+                  );
+                  const { nombres, apellidoPaterno, apellidoMaterno } =
+                    res.data;
+                  setForm({
+                    ...form,
+                    name: nombres,
+                    lastname: apellidoPaterno + " " + apellidoMaterno,
+                  });
+                }
+                if (
+                  form.tipDocument === "RUC" &&
+                  Number(e.target.value.length) === 11
+                ) {
+                  const res = await getServiceData(
+                    String(form.tipDocument).toLowerCase(),
+                    e.target.value
+                  );
+                  const { nombre, estado } = res.data;
+                  setForm({
+                    ...form,
+                    name: nombre,
+                    lastname: estado,
+                  });
+                }
+              }}
+              onChange={(e) => {
+                setForm({
+                  ...form,
+                  nroDocument: e.target.value,
+                  name: "",
+                  lastname: "",
+                });
+              }}
               value={form?.nroDocument}
               type="text"
               placeholder="Introduce Nro. de documento"
@@ -281,6 +297,51 @@ const ClientForm = ({
               {errors?.nroDocument}
             </Form.Control.Feedback>
           </Form.Group>
+          <Row className="mb-3">
+            <Form.Group as={Col} controlId="formGridName">
+              <Form.Label>
+                {form.tipDocument === "RUC" ? "Razón social" : "Nombres"}{" "}
+                <strong className="text-danger">*</strong>
+              </Form.Label>
+              <Form.Control
+                name="name"
+                onChange={handleChange}
+                value={form?.name}
+                type="text"
+                placeholder={
+                  form.tipDocument === "RUC"
+                    ? "Introduce razón social"
+                    : "Introduce nombre(s)"
+                }
+                isInvalid={!!errors?.name}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors?.name}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group as={Col} controlId="formGridLastname">
+              <Form.Label>
+                {form.tipDocument === "RUC" ? "Razón social" : "Apellidos"}{" "}
+                <strong className="text-danger">*</strong>
+              </Form.Label>
+              <Form.Control
+                name="lastname"
+                onChange={handleChange}
+                value={form?.lastname}
+                type="text"
+                placeholder={
+                  form.tipDocument === "RUC"
+                    ? "Introduce estado de ruc"
+                    : "Introduce apellido(s)"
+                }
+                isInvalid={!!errors?.lastname}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors?.lastname}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Row>
+
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridEmail">
               <Form.Label>Correo</Form.Label>
