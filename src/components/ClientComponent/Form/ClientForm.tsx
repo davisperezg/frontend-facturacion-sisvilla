@@ -252,32 +252,44 @@ const ClientForm = ({
                   form.tipDocument === "DNI" &&
                   Number(e.target.value.length) === 8
                 ) {
-                  const res = await getServiceData(
-                    String(form.tipDocument).toLowerCase(),
-                    e.target.value
-                  );
-                  const { nombres, apellidoPaterno, apellidoMaterno } =
-                    res.data;
-                  setForm({
-                    ...form,
-                    name: nombres,
-                    lastname: apellidoPaterno + " " + apellidoMaterno,
-                  });
+                  try {
+                    const res = await getServiceData(
+                      String(form.tipDocument).toLowerCase(),
+                      e.target.value
+                    );
+                    const { nombres, apellidoPaterno, apellidoMaterno } =
+                      res.data;
+                    setForm({
+                      ...form,
+                      name: nombres,
+                      lastname: apellidoPaterno + " " + apellidoMaterno,
+                    });
+                  } catch (e) {
+                    alert(
+                      "Ha ocurrido un error. Verifique el Nro de documento o borre el nro de documento y vuelva a ingresarlo, si el error persiste ingrese el nombre/razon o apellido/estado del cliente manualmente. Gracias."
+                    );
+                  }
                 }
                 if (
                   form.tipDocument === "RUC" &&
                   Number(e.target.value.length) === 11
                 ) {
-                  const res = await getServiceData(
-                    String(form.tipDocument).toLowerCase(),
-                    e.target.value
-                  );
-                  const { nombre, estado } = res.data;
-                  setForm({
-                    ...form,
-                    name: nombre,
-                    lastname: estado,
-                  });
+                  try {
+                    const res = await getServiceData(
+                      String(form.tipDocument).toLowerCase(),
+                      e.target.value
+                    );
+                    const { nombre, estado } = res.data;
+                    setForm({
+                      ...form,
+                      name: nombre,
+                      lastname: estado,
+                    });
+                  } catch (e) {
+                    alert(
+                      "Ha ocurrido un error. Borre el nro de documento y vuelva a ingresarlo, si el error persiste ingrese el nombre/razon o apellido/estado del usuario manualmente. Gracias"
+                    );
+                  }
                 }
               }}
               onChange={(e) => {

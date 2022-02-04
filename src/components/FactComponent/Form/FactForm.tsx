@@ -36,6 +36,9 @@ import {
 import ClientForm from "../../ClientComponent/Form/ClientForm";
 import { useLocation } from "react-router-dom";
 import { getModuleByMenu } from "../../../api/module/module";
+import { useReactToPrint } from "react-to-print";
+import { getFactById } from "../../../api/fact/fact";
+import { getDetailsByIdFact } from "../../../api/detail-fact/detail";
 
 const animatedComponents = makeAnimated();
 
@@ -101,10 +104,13 @@ const FactForm = ({
   const { user, resources } = useContext(AuthContext);
   const [showMoney, setShowMoney] = useState(false);
   const [showModalClient, setShowModalClient] = useState(false);
-
+  const componentRef = useRef(null);
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
   const [resource, setResource] = useState<any>(null);
+
+  const [ticket, setTicket] = useState<any>({});
+  const [details, setDetails] = useState<any[]>([]);
 
   const getMyModule = useCallback(async () => {
     const mymodule = await getModuleByMenu(getNameLocation);
@@ -289,10 +295,7 @@ const FactForm = ({
       setErrors(newErrors);
     } else {
       if (fact?._id && resource && resource.canUpdate) {
-        window.open(
-          `/comprobantes/ventas/venta-generada/${fact?._id}`,
-          "_blank"
-        );
+        getTicket(fact?._id);
       } else {
         setDisabled(true);
         if (list.length <= 0) {
@@ -327,6 +330,27 @@ const FactForm = ({
     }
   };
 
+  // const handleAfterPrint = useCallback(() => {
+  //   console.log("`onAfterPrint` called");
+  // }, []);
+
+  // const handleBeforePrint = useCallback(async () => {
+  //   console.log("`onBeforePrint` called");
+  // }, []);
+
+  // const handleOnBeforeGetContent = useCallback(() => {
+  //   console.log("`onBeforePrint` called");
+  // }, []);
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+    documentTitle: "Comprobante de venta",
+    // onBeforePrint: handleBeforePrint,
+    // onAfterPrint: handleAfterPrint,
+    // onBeforeGetContent: handleOnBeforeGetContent,
+    removeAfterPrint: true,
+  });
+
   const saveFactAndDetail = async () => {
     if (resource && resource.canCreate) {
       try {
@@ -335,6 +359,7 @@ const FactForm = ({
           cod_fact: numberFact,
           subtotal: calSumSub(),
         });
+
         for (let i = 0; i < list.length; i++) {
           const addProduct = {
             fact: numberFact,
@@ -344,6 +369,7 @@ const FactForm = ({
             discount: list[i].discount,
           };
           const res = await postCreateDetailsFact(addProduct);
+
           if (res.data.details === true) {
             //tomandolo como si hubiera un error
             setMessage({
@@ -356,11 +382,15 @@ const FactForm = ({
             return;
           }
         }
+
         getFac();
         setMessage({
           type: "success",
           message: `La venta ha sido registrado existosamente.`,
         });
+        setTimeout(() => {
+          setMessage(initialStateAlert);
+        }, 2000);
         //setForm({ ...initialStateFact, client: selectCliente.value });
         setList([]);
         const getClientNO: any = clients.find(
@@ -374,10 +404,7 @@ const FactForm = ({
         setDisabled(false);
         listProducts!();
         listFacts!();
-        window.open(
-          `/comprobantes/ventas/venta-generada/${dataFact.data.fact._id}`,
-          "_blank"
-        );
+        getTicket(dataFact.data.fact._id);
       } catch (e) {
         setDisabled(false);
         const error: any = e as Error;
@@ -543,7 +570,7 @@ const FactForm = ({
 
   const openModalClient = () => setShowModalClient(true);
 
-  const getFactById = useCallback(async () => {
+  const getFactByIdEdit = useCallback(async () => {
     const noCode = String(fact?.cod_fact).slice(3).toUpperCase();
     setForm({
       cod_fact: fact?.cod_fact || "",
@@ -581,24 +608,241 @@ const FactForm = ({
     fact?.customer_payment,
   ]);
 
+  const getTicket = async (id: string) => {
+    const resFact = await getFactById(id);
+    setTicket(resFact.data);
+    const resDetails = await getDetailsByIdFact(id);
+    setDetails(resDetails.data);
+    handlePrint();
+  };
+
+  const Ticket = () => (
+    <div className={styles.content} ref={componentRef}>
+      <div className={styles.ticket}>
+        <img
+          className={styles.ticket__img}
+          src="https://logodownload.org/wp-content/uploads/2016/03/ticket-logo.png"
+          alt="Logotipo"
+        />
+        <p className={styles.ticket__centrado}>
+          TICKET DE VENTA
+          <br />
+          {ticket.area} - 000{String(ticket.cod_fact).slice(3)}
+          <br />
+          {formatDate(new Date(ticket.fecha_creada))}
+        </p>
+        <div>
+          <strong>CLIENTE: </strong>
+          {ticket.cliente}
+        </div>
+        <div>
+          <strong>VENDEDOR: </strong>
+          {ticket.vendedor}
+        </div>
+        <p className={styles.ticket__centrado}>
+          {ticket.tipo_pago} - {ticket.forma_pago}
+        </p>
+        <table>
+          <h1 className={styles.canceled}>
+            {ticket.status === false && "Anulado"}
+          </h1>
+          <thead>
+            <tr>
+              <th className={styles.cantidad}>CANT</th>
+              <th className={styles.producto}>PROD.</th>
+              <th className={styles.descuento}>DESC.</th>
+              <th className={styles.precio}>S/</th>
+            </tr>
+          </thead>
+          <tbody>
+            {details.map((dtls, i) => {
+              return (
+                <tr key={i}>
+                  <td className={styles.cantidad}>{dtls.cantidad}</td>
+                  <td className={styles.producto}>{dtls.producto}</td>
+                  <td className={styles.descuento}>
+                    {formatter.format(dtls.descuento)}
+                  </td>
+                  <td className={styles.precio}>
+                    {/* dtls.precio - dtls.descuento DESCUENTO APLICADO */}
+                    {/* dtls.precio DESCUENTO NO APLICADO */}
+                    {formatter.format(dtls.precio)}
+                  </td>
+                </tr>
+              );
+            })}
+            <tr>
+              <td></td>
+              <td>
+                <strong>SUB TOTAL</strong>
+              </td>
+              <td></td>
+              <td>
+                <div className={styles.iconAndSoles}>
+                  <div>S/</div>
+                  <div className={styles.iconAndSoles__soles}>
+                    {formatter.format(ticket.total)}
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            {ticket.forma_pago === "EFECTIVO CON VUELTO" ? (
+              <>
+                <tr className={styles.ticket__tr}>
+                  <td></td>
+                  <td>
+                    <strong>DESCUENTO</strong>
+                  </td>
+                  <td></td>
+                  <td className={styles.ticket__soles}>
+                    <div className={styles.iconAndSoles}>
+                      <div>S/</div>
+                      <div className={styles.iconAndSoles__soles}>
+                        {!ticket.descuento || ticket.descuento === 0
+                          ? formatter.format(0)
+                          : formatter.format(ticket.descuento)}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr className={styles.ticket__tr}>
+                  <td></td>
+                  <td>
+                    <strong>TOTAL</strong>
+                  </td>
+                  <td></td>
+                  <td className={styles.ticket__soles}>
+                    <div className={styles.iconAndSoles}>
+                      <div>S/</div>
+                      <div className={styles.iconAndSoles__soles}>
+                        {!ticket.descuento || ticket.descuento === 0
+                          ? formatter.format(ticket.total)
+                          : formatter.format(ticket.total - ticket.descuento)}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr className={styles.ticket__tr}>
+                  <td></td>
+                  <td>
+                    <strong>PAGO CON</strong>
+                  </td>
+                  <td></td>
+                  <td className={styles.ticket__soles}>
+                    <div className={styles.iconAndSoles}>
+                      <div>S/</div>
+                      <div className={styles.iconAndSoles__soles}>
+                        {formatter.format(ticket.pago_cliente)}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr className={styles.ticket__tr}>
+                  <td></td>
+                  <td>
+                    <strong>VUELTO</strong>
+                  </td>
+                  <td></td>
+                  <td className={styles.ticket__soles}>
+                    <div className={styles.iconAndSoles}>
+                      <div>S/</div>
+                      <div className={styles.iconAndSoles__soles}>
+                        {ticket.total - ticket.descuento - ticket.pago_cliente <
+                        0
+                          ? String(
+                              formatter.format(
+                                ticket.total -
+                                  ticket.descuento -
+                                  ticket.pago_cliente
+                              )
+                            ).slice(1)
+                          : formatter.format(
+                              ticket.total -
+                                ticket.descuento -
+                                ticket.pago_cliente
+                            )}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </>
+            ) : (
+              <>
+                <tr className={styles.ticket__tr}>
+                  <td></td>
+                  <td>
+                    <strong>DESCUENTO</strong>
+                  </td>
+                  <td></td>
+                  <td className={styles.ticket__soles}>
+                    <div className={styles.iconAndSoles}>
+                      <div>S/</div>
+                      <div className={styles.iconAndSoles__soles}>
+                        {!ticket.descuento || ticket.descuento === 0
+                          ? formatter.format(0)
+                          : formatter.format(ticket.descuento)}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr className={styles.ticket__tr}>
+                  <td></td>
+                  <td>
+                    <strong>TOTAL</strong>
+                  </td>
+                  <td></td>
+                  <td className={styles.ticket__soles}>
+                    <div className={styles.iconAndSoles}>
+                      <div>S/</div>
+                      <div className={styles.iconAndSoles__soles}>
+                        {!ticket.descuento || ticket.descuento === 0
+                          ? formatter.format(ticket.total)
+                          : formatter.format(ticket.total - ticket.descuento)}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </>
+            )}
+          </tbody>
+        </table>
+        <p className={styles.ticket__centrado}>
+          ¡GRACIAS POR SU COMPRA!
+          <br />
+          vuelva pronto :)
+        </p>
+      </div>
+    </div>
+  );
+
   useEffect(() => {
     if (fact?._id) {
-      getFactById();
+      getFactByIdEdit();
       return;
     }
     getMyModule();
     getFac();
     listClients();
-  }, [getFactById, getFactById, fact?._id, getMyModule]);
+  }, [getFactByIdEdit, fact?._id, getMyModule]);
 
   return (
     <div onKeyDown={onKeyDownDiv}>
+      <div style={{ display: "none" }}>
+        <Ticket />
+      </div>
+
       <Modal show={showMoney} onHide={handleCloseModalMoney} centered>
         <Modal.Header closeButton style={{ background: "yellow" }}>
           <Modal.Title>EFECTIVO CON VUELTO</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form.Group as={Row} className="mb-3" controlId="formHorizontalTotal">
+          <Form.Group
+            as={Row}
+            className="mb-3"
+            controlId="formHorizontalTotal"
+            id="formHorizontalTotal"
+          >
             <Form.Label column sm={6}>
               Total a pagar (S/)
             </Form.Label>
