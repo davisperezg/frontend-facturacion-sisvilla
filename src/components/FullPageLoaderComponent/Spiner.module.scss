@@ -1,0 +1,19 @@
+.fp_container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: #f8f8f8ad;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.fp_container .fp_loader {
+  top: 30%;
+  left: 48%;
+  z-index: 1000;
+  position: absolute;
+  pointer-events: none;
+}

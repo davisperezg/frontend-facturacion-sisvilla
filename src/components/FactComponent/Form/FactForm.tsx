@@ -39,6 +39,7 @@ import { getModuleByMenu } from "../../../api/module/module";
 import { useReactToPrint } from "react-to-print";
 import { getFactById } from "../../../api/fact/fact";
 import { getDetailsByIdFact } from "../../../api/detail-fact/detail";
+import useFullPageLoader from "../../../hooks/FullPageLoader/useFullPageLoader";
 
 const animatedComponents = makeAnimated();
 
@@ -111,6 +112,7 @@ const FactForm = ({
 
   const [ticket, setTicket] = useState<any>({});
   const [details, setDetails] = useState<any[]>([]);
+  const [loader, showLoader, hideLoader]: any = useFullPageLoader();
 
   const getMyModule = useCallback(async () => {
     const mymodule = await getModuleByMenu(getNameLocation);
@@ -295,6 +297,7 @@ const FactForm = ({
       setErrors(newErrors);
     } else {
       if (fact?._id && resource && resource.canUpdate) {
+        showLoader();
         getTicket(fact?._id);
       } else {
         setDisabled(true);
@@ -331,27 +334,28 @@ const FactForm = ({
   };
 
   // const handleAfterPrint = useCallback(() => {
-  //   console.log("`onAfterPrint` called");
-  // }, []);
+  //   hideLoader();
+  // }, [hideLoader]);
 
-  // const handleBeforePrint = useCallback(async () => {
-  //   console.log("`onBeforePrint` called");
-  // }, []);
+  const handleBeforePrint = useCallback(async () => {
+    hideLoader();
+  }, [hideLoader]);
 
   // const handleOnBeforeGetContent = useCallback(() => {
   //   console.log("`onBeforePrint` called");
-  // }, []);
+  // }, [showLoader]);
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle: "Comprobante de venta",
-    // onBeforePrint: handleBeforePrint,
-    // onAfterPrint: handleAfterPrint,
-    // onBeforeGetContent: handleOnBeforeGetContent,
+    onBeforePrint: handleBeforePrint,
+    //onAfterPrint: handleAfterPrint,
+    //onBeforeGetContent: handleOnBeforeGetContent,
     removeAfterPrint: true,
   });
 
   const saveFactAndDetail = async () => {
+    showLoader();
     if (resource && resource.canCreate) {
       try {
         const dataFact = await postCreateFact({
@@ -821,6 +825,7 @@ const FactForm = ({
       getFactByIdEdit();
       return;
     }
+
     getMyModule();
     getFac();
     listClients();
@@ -1347,6 +1352,7 @@ const FactForm = ({
                 </div>
               )}
             </div>
+            {loader}
           </Modal.Body>
           <Modal.Footer>
             <Button type="button" variant="secondary" onClick={closeAndClear}>

@@ -20,6 +20,7 @@ import TableHeader from "../../components/DatatableComponent/Header/TableHeader"
 import { AuthContext } from "../../context/auth";
 import { useLocation } from "react-router-dom";
 import { getModuleByMenu } from "../../api/module/module";
+import PaginationComponent from "../../components/DatatableComponent/Pagination/Pagination";
 
 const initialState: IAlert = {
   type: "",
@@ -64,9 +65,9 @@ const FactScreen = () => {
   const [sorting, setSorting] = useState({ field: "", order: "" });
   const [search, setSearch] = useState<string | any>("");
   const searchInput = useRef<HTMLInputElement | null>(null);
-  // const [totalItems, setTotalItems] = useState(0);
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const ITEMS_PER_PAGE = 5;
+  const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 50;
 
   const getMyModule = useCallback(async () => {
     const mymodule = await getModuleByMenu(getNameLocation);
@@ -86,6 +87,8 @@ const FactScreen = () => {
       setState(value);
     }
   }, []);
+
+  const onPageChange = (page: number) => setCurrentPage(page);
 
   const closeModal = useCallback(() => {
     setShow(false);
@@ -191,7 +194,8 @@ const FactScreen = () => {
           .includes(search.toLowerCase());
       });
     }
-    //setTotalItems(computedFacts.length);
+
+    setTotalItems(computedFacts.length);
 
     //Sorting comments
     if (sorting.field) {
@@ -218,14 +222,13 @@ const FactScreen = () => {
         }
       });
     }
-    //Current Page slice
-    // computedFacts.slice(
-    //   (currentPage - 1) * ITEMS_PER_PAGE,
-    //   (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
-    // );
 
-    return computedFacts;
-  }, [facts, search, sorting]);
+    //Current Page slice
+    return computedFacts.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+    );
+  }, [facts, search, sorting, currentPage]);
 
   return (
     <>
@@ -312,7 +315,7 @@ const FactScreen = () => {
           {resource && resource.canRead && (
             <>
               <Form.Control
-                className="mt-3"
+                className="mt-3 mb-3"
                 type="text"
                 autoFocus
                 placeholder="Busca por código de venta"
@@ -320,6 +323,24 @@ const FactScreen = () => {
                 ref={searchInput}
                 onChange={handleSearch}
               />
+
+              <div
+                className="mb-3"
+                style={{ display: "flex", justifyContent: "space-between" }}
+              >
+                <PaginationComponent
+                  total={totalItems}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  currentPage={currentPage}
+                  onPageChange={onPageChange}
+                />
+                <div style={{ display: "flex", alignItems: "flex-end" }}>
+                  <span style={{ marginLeft: 5 }}>
+                    Hay un total de{" "}
+                    {search ? factsFiltered.length : facts.length} registros
+                  </span>
+                </div>
+              </div>
 
               <Table
                 striped
