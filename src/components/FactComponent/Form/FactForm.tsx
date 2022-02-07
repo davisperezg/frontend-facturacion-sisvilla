@@ -165,6 +165,29 @@ const FactForm = ({
   const handleSearch = () => {
     setSearch(searchInput.current?.value);
     setCurrentPage(1);
+
+    const findOneProduct: any = productsFiltered.find(
+      (one) => String(one.cod_internal).slice(3) === searchInput.current?.value
+    );
+
+    if (findOneProduct) {
+      const item = {
+        fact: numberFact,
+        cod_internal: findOneProduct.cod_internal,
+        product: String(findOneProduct._id),
+        quantity: 1,
+        price: findOneProduct.price,
+        discount: 0,
+        name: findOneProduct.name,
+        unit: findOneProduct.unit.name,
+        stock: findOneProduct.stock,
+      };
+
+      if (productsFiltered.length === 1) {
+        setSearch("");
+        setList([...list, item]);
+      }
+    }
   };
 
   const getFac = async () => {
@@ -333,9 +356,10 @@ const FactForm = ({
     }
   };
 
-  // const handleAfterPrint = useCallback(() => {
-  //   hideLoader();
-  // }, [hideLoader]);
+  const handleAfterPrint = useCallback(() => {
+    setTicket({});
+    setDetails([]);
+  }, []);
 
   const handleBeforePrint = useCallback(async () => {
     hideLoader();
@@ -349,7 +373,7 @@ const FactForm = ({
     content: () => componentRef.current,
     documentTitle: "Comprobante de venta",
     onBeforePrint: handleBeforePrint,
-    //onAfterPrint: handleAfterPrint,
+    onAfterPrint: handleAfterPrint,
     //onBeforeGetContent: handleOnBeforeGetContent,
     removeAfterPrint: true,
   });
@@ -623,11 +647,12 @@ const FactForm = ({
   const Ticket = () => (
     <div className={styles.content} ref={componentRef}>
       <div className={styles.ticket}>
-        <img
+        {/* <img
           className={styles.ticket__img}
           src="https://logodownload.org/wp-content/uploads/2016/03/ticket-logo.png"
           alt="Logotipo"
-        />
+        /> */}
+        <h1 className={styles.ticket__centrado}>COMERCIAL SARAI</h1>
         <p className={styles.ticket__centrado}>
           TICKET DE VENTA
           <br />
@@ -635,182 +660,186 @@ const FactForm = ({
           <br />
           {formatDate(new Date(ticket.fecha_creada))}
         </p>
-        <div>
+        <div className={styles.ticket__centrado_noMargin}>
           <strong>CLIENTE: </strong>
           {ticket.cliente}
         </div>
-        <div>
+        <div className={styles.ticket__centrado_noMargin}>
           <strong>VENDEDOR: </strong>
           {ticket.vendedor}
         </div>
         <p className={styles.ticket__centrado}>
           {ticket.tipo_pago} - {ticket.forma_pago}
         </p>
-        <table>
-          <h1 className={styles.canceled}>
-            {ticket.status === false && "Anulado"}
-          </h1>
-          <thead>
-            <tr>
-              <th className={styles.cantidad}>CANT</th>
-              <th className={styles.producto}>PROD.</th>
-              <th className={styles.descuento}>DESC.</th>
-              <th className={styles.precio}>S/</th>
-            </tr>
-          </thead>
-          <tbody>
-            {details.map((dtls, i) => {
-              return (
-                <tr key={i}>
-                  <td className={styles.cantidad}>{dtls.cantidad}</td>
-                  <td className={styles.producto}>{dtls.producto}</td>
-                  <td className={styles.descuento}>
-                    {formatter.format(dtls.descuento)}
-                  </td>
-                  <td className={styles.precio}>
-                    {/* dtls.precio - dtls.descuento DESCUENTO APLICADO */}
-                    {/* dtls.precio DESCUENTO NO APLICADO */}
-                    {formatter.format(dtls.precio)}
-                  </td>
-                </tr>
-              );
-            })}
-            <tr>
-              <td></td>
-              <td>
-                <strong>SUB TOTAL</strong>
-              </td>
-              <td></td>
-              <td>
-                <div className={styles.iconAndSoles}>
-                  <div>S/</div>
-                  <div className={styles.iconAndSoles__soles}>
-                    {formatter.format(ticket.total)}
+        <div className={styles.ticket__centrado_Table}>
+          <table>
+            <h1 className={styles.canceled}>
+              {ticket.status === false && "Anulado"}
+            </h1>
+            <thead>
+              <tr>
+                <th className={styles.cantidad}>CANT</th>
+                <th className={styles.producto}>PROD.</th>
+                <th className={styles.descuento}>DESC.</th>
+                <th className={styles.precio}>S/</th>
+              </tr>
+            </thead>
+            <tbody>
+              {details.map((dtls, i) => {
+                return (
+                  <tr key={i}>
+                    <td className={styles.cantidad}>{dtls.cantidad}</td>
+                    <td className={styles.producto}>{dtls.producto}</td>
+                    <td className={styles.descuento}>
+                      {formatter.format(dtls.descuento)}
+                    </td>
+                    <td className={styles.precio}>
+                      {/* dtls.precio - dtls.descuento DESCUENTO APLICADO */}
+                      {/* dtls.precio DESCUENTO NO APLICADO */}
+                      {formatter.format(dtls.precio)}
+                    </td>
+                  </tr>
+                );
+              })}
+              <tr>
+                <td></td>
+                <td>
+                  <strong>SUB TOTAL</strong>
+                </td>
+                <td></td>
+                <td>
+                  <div className={styles.iconAndSoles}>
+                    <div>S/</div>
+                    <div className={styles.iconAndSoles__soles}>
+                      {formatter.format(ticket.total)}
+                    </div>
                   </div>
-                </div>
-              </td>
-            </tr>
+                </td>
+              </tr>
 
-            {ticket.forma_pago === "EFECTIVO CON VUELTO" ? (
-              <>
-                <tr className={styles.ticket__tr}>
-                  <td></td>
-                  <td>
-                    <strong>DESCUENTO</strong>
-                  </td>
-                  <td></td>
-                  <td className={styles.ticket__soles}>
-                    <div className={styles.iconAndSoles}>
-                      <div>S/</div>
-                      <div className={styles.iconAndSoles__soles}>
-                        {!ticket.descuento || ticket.descuento === 0
-                          ? formatter.format(0)
-                          : formatter.format(ticket.descuento)}
+              {ticket.forma_pago === "EFECTIVO CON VUELTO" ? (
+                <>
+                  <tr className={styles.ticket__tr}>
+                    <td></td>
+                    <td>
+                      <strong>DESCUENTO</strong>
+                    </td>
+                    <td></td>
+                    <td className={styles.ticket__soles}>
+                      <div className={styles.iconAndSoles}>
+                        <div>S/</div>
+                        <div className={styles.iconAndSoles__soles}>
+                          {!ticket.descuento || ticket.descuento === 0
+                            ? formatter.format(0)
+                            : formatter.format(ticket.descuento)}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr className={styles.ticket__tr}>
-                  <td></td>
-                  <td>
-                    <strong>TOTAL</strong>
-                  </td>
-                  <td></td>
-                  <td className={styles.ticket__soles}>
-                    <div className={styles.iconAndSoles}>
-                      <div>S/</div>
-                      <div className={styles.iconAndSoles__soles}>
-                        {!ticket.descuento || ticket.descuento === 0
-                          ? formatter.format(ticket.total)
-                          : formatter.format(ticket.total - ticket.descuento)}
+                    </td>
+                  </tr>
+                  <tr className={styles.ticket__tr}>
+                    <td></td>
+                    <td>
+                      <strong>TOTAL</strong>
+                    </td>
+                    <td></td>
+                    <td className={styles.ticket__soles}>
+                      <div className={styles.iconAndSoles}>
+                        <div>S/</div>
+                        <div className={styles.iconAndSoles__soles}>
+                          {!ticket.descuento || ticket.descuento === 0
+                            ? formatter.format(ticket.total)
+                            : formatter.format(ticket.total - ticket.descuento)}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr className={styles.ticket__tr}>
-                  <td></td>
-                  <td>
-                    <strong>PAGO CON</strong>
-                  </td>
-                  <td></td>
-                  <td className={styles.ticket__soles}>
-                    <div className={styles.iconAndSoles}>
-                      <div>S/</div>
-                      <div className={styles.iconAndSoles__soles}>
-                        {formatter.format(ticket.pago_cliente)}
+                    </td>
+                  </tr>
+                  <tr className={styles.ticket__tr}>
+                    <td></td>
+                    <td>
+                      <strong>PAGO CON</strong>
+                    </td>
+                    <td></td>
+                    <td className={styles.ticket__soles}>
+                      <div className={styles.iconAndSoles}>
+                        <div>S/</div>
+                        <div className={styles.iconAndSoles__soles}>
+                          {formatter.format(ticket.pago_cliente)}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr className={styles.ticket__tr}>
-                  <td></td>
-                  <td>
-                    <strong>VUELTO</strong>
-                  </td>
-                  <td></td>
-                  <td className={styles.ticket__soles}>
-                    <div className={styles.iconAndSoles}>
-                      <div>S/</div>
-                      <div className={styles.iconAndSoles__soles}>
-                        {ticket.total - ticket.descuento - ticket.pago_cliente <
-                        0
-                          ? String(
-                              formatter.format(
+                    </td>
+                  </tr>
+                  <tr className={styles.ticket__tr}>
+                    <td></td>
+                    <td>
+                      <strong>VUELTO</strong>
+                    </td>
+                    <td></td>
+                    <td className={styles.ticket__soles}>
+                      <div className={styles.iconAndSoles}>
+                        <div>S/</div>
+                        <div className={styles.iconAndSoles__soles}>
+                          {ticket.total -
+                            ticket.descuento -
+                            ticket.pago_cliente <
+                          0
+                            ? String(
+                                formatter.format(
+                                  ticket.total -
+                                    ticket.descuento -
+                                    ticket.pago_cliente
+                                )
+                              ).slice(1)
+                            : formatter.format(
                                 ticket.total -
                                   ticket.descuento -
                                   ticket.pago_cliente
-                              )
-                            ).slice(1)
-                          : formatter.format(
-                              ticket.total -
-                                ticket.descuento -
-                                ticket.pago_cliente
-                            )}
+                              )}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                </tr>
-              </>
-            ) : (
-              <>
-                <tr className={styles.ticket__tr}>
-                  <td></td>
-                  <td>
-                    <strong>DESCUENTO</strong>
-                  </td>
-                  <td></td>
-                  <td className={styles.ticket__soles}>
-                    <div className={styles.iconAndSoles}>
-                      <div>S/</div>
-                      <div className={styles.iconAndSoles__soles}>
-                        {!ticket.descuento || ticket.descuento === 0
-                          ? formatter.format(0)
-                          : formatter.format(ticket.descuento)}
+                    </td>
+                  </tr>
+                </>
+              ) : (
+                <>
+                  <tr className={styles.ticket__tr}>
+                    <td></td>
+                    <td>
+                      <strong>DESCUENTO</strong>
+                    </td>
+                    <td></td>
+                    <td className={styles.ticket__soles}>
+                      <div className={styles.iconAndSoles}>
+                        <div>S/</div>
+                        <div className={styles.iconAndSoles__soles}>
+                          {!ticket.descuento || ticket.descuento === 0
+                            ? formatter.format(0)
+                            : formatter.format(ticket.descuento)}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr className={styles.ticket__tr}>
-                  <td></td>
-                  <td>
-                    <strong>TOTAL</strong>
-                  </td>
-                  <td></td>
-                  <td className={styles.ticket__soles}>
-                    <div className={styles.iconAndSoles}>
-                      <div>S/</div>
-                      <div className={styles.iconAndSoles__soles}>
-                        {!ticket.descuento || ticket.descuento === 0
-                          ? formatter.format(ticket.total)
-                          : formatter.format(ticket.total - ticket.descuento)}
+                    </td>
+                  </tr>
+                  <tr className={styles.ticket__tr}>
+                    <td></td>
+                    <td>
+                      <strong>TOTAL</strong>
+                    </td>
+                    <td></td>
+                    <td className={styles.ticket__soles}>
+                      <div className={styles.iconAndSoles}>
+                        <div>S/</div>
+                        <div className={styles.iconAndSoles__soles}>
+                          {!ticket.descuento || ticket.descuento === 0
+                            ? formatter.format(ticket.total)
+                            : formatter.format(ticket.total - ticket.descuento)}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                </tr>
-              </>
-            )}
-          </tbody>
-        </table>
+                    </td>
+                  </tr>
+                </>
+              )}
+            </tbody>
+          </table>
+        </div>
         <p className={styles.ticket__centrado}>
           ¡GRACIAS POR SU COMPRA!
           <br />
