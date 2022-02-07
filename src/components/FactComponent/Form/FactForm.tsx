@@ -183,9 +183,17 @@ const FactForm = ({
         stock: findOneProduct.stock,
       };
 
-      if (productsFiltered.length === 1) {
+      const isFound = list.find(
+        (product: any) => product.product === item.product
+      );
+
+      if (!isFound) {
+        if (productsFiltered.length === 1) {
+          setSearch("");
+          setList([...list, item]);
+        }
+      } else {
         setSearch("");
-        setList([...list, item]);
       }
     }
   };
