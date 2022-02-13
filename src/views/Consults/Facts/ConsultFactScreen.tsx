@@ -193,7 +193,6 @@ const ConsultFactScreen = () => {
   });
 
   const dataXML = factsFiltered.map((fact: any, i: number) => {
-    console.log(fact);
     return {
       ...fact,
       item: i + 1,
@@ -202,7 +201,12 @@ const ConsultFactScreen = () => {
 
   return (
     <Card>
-      <FactForm show={show} closeModal={closeModal} fact={state} />
+      <FactForm
+        show={show}
+        byConsult={true}
+        closeModal={closeModal}
+        fact={state}
+      />
       <Card.Header as="h5">Consulta de ventas</Card.Header>
       <Card.Body>
         {message.type && (

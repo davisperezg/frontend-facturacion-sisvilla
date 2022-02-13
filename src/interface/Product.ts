@@ -14,4 +14,5 @@ export interface Product {
   stock: number;
   price: number;
   status?: boolean;
+  price_c: number;
 }

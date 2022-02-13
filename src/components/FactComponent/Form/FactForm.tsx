@@ -8,8 +8,18 @@ import {
   KeyboardEvent,
   useContext,
   useCallback,
+  FormEvent,
 } from "react";
-import { Alert, Button, Col, Form, Modal, Row, Table } from "react-bootstrap";
+import {
+  Alert,
+  Button,
+  Col,
+  Container,
+  Form,
+  Modal,
+  Row,
+  Table,
+} from "react-bootstrap";
 import { postCreateFact } from "../../../api/fact/fact";
 import { IAlert } from "../../../interface/IAlert";
 import { Fact } from "../../../interface/Fact";
@@ -40,6 +50,7 @@ import { useReactToPrint } from "react-to-print";
 import { getFactById } from "../../../api/fact/fact";
 import { getDetailsByIdFact } from "../../../api/detail-fact/detail";
 import useFullPageLoader from "../../../hooks/FullPageLoader/useFullPageLoader";
+import DetailView from "../Detail/ItemView";
 
 const animatedComponents = makeAnimated();
 
@@ -52,6 +63,7 @@ type KeyChange = KeyboardEvent<HTMLTableRowElement>;
 let selected: any = [];
 
 const FactForm = ({
+  tab,
   show,
   fact,
   closeModal,
@@ -59,7 +71,9 @@ const FactForm = ({
   listProducts,
   products,
   listFactDeleted,
+  byConsult,
 }: {
+  tab?: string;
   show: boolean;
   closeModal: () => void;
   fact?: Fact;
@@ -67,6 +81,7 @@ const FactForm = ({
   listProducts?: () => void;
   products?: Product[];
   listFactDeleted?: () => void;
+  byConsult?: boolean;
 }) => {
   const initialStateFact = {
     cod_fact: "",
@@ -288,9 +303,7 @@ const FactForm = ({
     setMessage(initialStateAlert);
     setErrors({});
     setSearch("");
-    setShowProducts(false);
     setList([]);
-    selected = [];
     setDisabled(false);
   };
 
@@ -320,7 +333,8 @@ const FactForm = ({
     });
   };
 
-  const onSubmit = async () => {
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
     const newErrors = findFormErrors();
     setMessage(initialStateAlert);
 
@@ -458,13 +472,17 @@ const FactForm = ({
   };
 
   const onKeyDownDiv = (e: any) => {
-    if (!showProducts) {
-      if (e.key === "Enter") {
-        setShowProducts(true);
-        setSearch("");
-        setCurrentPage(1);
-      }
+    if (e.key === "Enter") {
+      console.log("ee");
     }
+
+    // if (!showProducts) {
+    //   if (e.key === "Enter") {
+    //     setShowProducts(true);
+    //     setSearch("");
+    //     setCurrentPage(1);
+    //   }
+    // }
   };
 
   const handleKeyDownInput = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -509,33 +527,21 @@ const FactForm = ({
         unit: pro.unit.name,
         stock: pro.stock,
       };
-      if (selected.length > 0) {
-        const isFound = selected.find(
-          (product: any) => product.product === item.product
+
+      if (item.stock === 0) {
+        alert(
+          "Este producto no se puede agregar porque no tiene stock disponible."
         );
-        if (!isFound) {
-          selected.push(item);
-        }
-      } else {
-        if (list.length > 0) {
-          const isFound = list.find(
-            (product: any) => product.product === item.product
-          );
-          if (!isFound) {
-            setList([...list, item]);
-          }
-          return;
-        } else {
-          selected.push(item);
-        }
+        return;
       }
-      const allSelected = selected.map((product: Product) => product);
-      setList(allSelected);
-    }
-    if (e.key === "Escape") {
-      setShowProducts(false);
-      searchProducts.current!.focus();
-      selected = [];
+
+      const isFound = list.find(
+        (product: any) => product.product === item.product
+      );
+
+      if (!isFound) {
+        setList([...list, item]);
+      }
     }
 
     if (e.key === "F2") {
@@ -558,28 +564,20 @@ const FactForm = ({
       stock: pro.stock,
     };
 
-    if (selected.length > 0) {
-      const isFound = selected.find(
-        (product: any) => product.product === item.product
+    if (item.stock === 0) {
+      alert(
+        "Este producto no se puede agregar porque no tiene stock disponible."
       );
-      if (!isFound) {
-        selected.push(item);
-      }
-    } else {
-      if (list.length > 0) {
-        const isFound = list.find(
-          (product: any) => product.product === item.product
-        );
-        if (!isFound) {
-          setList([...list, item]);
-        }
-        return;
-      } else {
-        selected.push(item);
-      }
+      return;
     }
-    const allSelected = selected.map((product: Product) => product);
-    setList(allSelected);
+
+    const isFound = list.find(
+      (product: any) => product.product === item.product
+    );
+
+    if (!isFound) {
+      setList([...list, item]);
+    }
   };
 
   const deleteItem = (id: string) => {
@@ -863,129 +861,27 @@ const FactForm = ({
       return;
     }
 
+    if (tab === "create") {
+      searchInput.current!.focus();
+    }
+
     getMyModule();
     getFac();
     listClients();
-  }, [getFactByIdEdit, fact?._id, getMyModule]);
+  }, [tab, getFactByIdEdit, fact?._id, getMyModule]);
 
   return (
-    <div onKeyDown={onKeyDownDiv}>
+    <>
       <div style={{ display: "none" }}>
         <Ticket />
       </div>
+      {fact?._id ? (
+        <Modal show={show} onHide={closeAndClear} top="true" size="xl">
+          <Modal.Header closeButton>
+            <Modal.Title>{form?._id && "Ver Venta"}</Modal.Title>
+          </Modal.Header>
 
-      <Modal show={showMoney} onHide={handleCloseModalMoney} centered>
-        <Modal.Header closeButton style={{ background: "yellow" }}>
-          <Modal.Title>EFECTIVO CON VUELTO</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Group
-            as={Row}
-            className="mb-3"
-            controlId="formHorizontalTotal"
-            id="formHorizontalTotal"
-          >
-            <Form.Label column sm={6}>
-              Total a pagar (S/)
-            </Form.Label>
-            <Col sm={6}>
-              <Form.Control
-                name="subtotal"
-                type="number"
-                defaultValue={`${formatter.format(form.subtotal)}`}
-                disabled
-              />
-            </Col>
-          </Form.Group>
-          <Form.Group as={Row} className="mb-3" controlId="formHorizontalPaga">
-            <Form.Label column sm={6}>
-              Paga con (S/)
-            </Form.Label>
-            <Col sm={6}>
-              <Form.Control
-                type="number"
-                name="customer_payment"
-                value={form.customer_payment}
-                onChange={(e) => {
-                  if (Number(e.target.value) < 0) {
-                    alert("El monto a pagar no puede ser negativo");
-                  } else {
-                    setForm({
-                      ...form,
-                      customer_payment: Number(e.target.value),
-                    });
-                  }
-                }}
-                step="0.01"
-                min="0"
-              />
-            </Col>
-          </Form.Group>
-          <Form.Group
-            as={Row}
-            className="mb-3"
-            controlId="formHorizontalVuelto"
-          >
-            <Form.Label column sm={6}>
-              Vuelto (S/)
-            </Form.Label>
-            <Col sm={6}>
-              <Form.Control
-                type="number"
-                value={
-                  form.customer_payment
-                    ? Number(form.subtotal) - Number(form.customer_payment) < 0
-                      ? String(
-                          formatter.format(
-                            Number(form.subtotal) -
-                              Number(form.customer_payment)
-                          )
-                        ).slice(1)
-                      : `${formatter.format(
-                          Number(form.subtotal) - Number(form.customer_payment)
-                        )}`
-                    : formatter.format(0)
-                }
-                disabled
-                min="0"
-              />
-            </Col>
-          </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModalMoney}>
-            Cerrar
-          </Button>
-          <Button variant="success" onClick={handleButtonFF}>
-            Finalizar venta
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <ClientForm
-        show={showModalClient}
-        closeModal={closeModalClient}
-        listClients={listClients}
-      />
-
-      <Modal
-        show={show}
-        onHide={closeAndClear}
-        backdrop="static"
-        keyboard={false}
-        top="true"
-        size="xl"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>{form?._id ? "Ver Venta" : "Nueva Venta"}</Modal.Title>
-        </Modal.Header>
-
-        <Form onSubmit={onSubmit} ref={contentDiv}>
           <Modal.Body>
-            {message.type && (
-              <Alert variant={message.type}>{message.message}</Alert>
-            )}
-
             <div
               style={{
                 width: "100%",
@@ -994,7 +890,11 @@ const FactForm = ({
               }}
             >
               <div
-                style={{ width: "100%", display: "flex", flexDirection: "row" }}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "row",
+                }}
               >
                 <div style={{ width: "70%" }}>
                   <Row className="mb-3">
@@ -1003,9 +903,8 @@ const FactForm = ({
                       <Form.Control
                         name="fech"
                         value={
-                          fact?._id
-                            ? formatDate(new Date(String(fact?.createdAt)))
-                            : getDate()
+                          fact?._id &&
+                          formatDate(new Date(String(fact?.createdAt)))
                         }
                         type="text"
                         disabled
@@ -1015,24 +914,9 @@ const FactForm = ({
                       <Form.Label>Tipo de pago</Form.Label>
                       <Form.Select
                         name="payment_type"
-                        onChange={(e) => {
-                          if (e.target.value === "CREDITO") {
-                            setForm({
-                              ...form,
-                              payment_type: e.target.value,
-                              way_to_pay: "POR PAGAR",
-                            });
-                          } else {
-                            setForm({
-                              ...form,
-                              payment_type: e.target.value,
-                              way_to_pay: "EFECTIVO COMPLETO",
-                            });
-                          }
-                        }}
                         value={form?.payment_type}
                         isInvalid={!!errors?.payment_type}
-                        disabled={fact?._id ? true : false}
+                        disabled={true}
                       >
                         <option value="CONTADO">CONTADO</option>
                         <option value="CREDITO">CREDITO</option>
@@ -1041,55 +925,22 @@ const FactForm = ({
                   </Row>
                   <Row className="mb-3">
                     <Form.Group md="7" as={Col} controlId="formGridFech">
-                      <Form.Label>
-                        Cliente{" "}
-                        {!fact?._id && (
-                          <strong
-                            style={{ cursor: "pointer" }}
-                            className="text-primary"
-                            onClick={openModalClient}
-                          >
-                            Registrar cliente
-                          </strong>
-                        )}
-                      </Form.Label>
+                      <Form.Label>Cliente</Form.Label>
                       <Select
-                        isDisabled={fact?._id ? true : false}
-                        closeMenuOnSelect={true}
-                        components={animatedComponents}
-                        value={
-                          form.client === ""
-                            ? []
-                            : {
-                                label: fact?._id
-                                  ? String(fact?.client)
-                                  : selectCliente.label,
-                                value: fact?._id
-                                  ? String(fact.client)
-                                  : selectCliente.value,
-                              }
-                        }
-                        onChange={(values: any) => {
-                          setMessage(initialStateAlert);
-                          const { label, value } = values;
-                          setSelectClient({ label, value });
-                          setForm({ ...form, client: value });
+                        isDisabled={true}
+                        value={{
+                          label: String(fact?.client),
+                          value: String(fact?.client),
                         }}
-                        options={clients}
                       />
                     </Form.Group>
                     <Form.Group md="4" as={Col} controlId="formGridType">
                       <Form.Label>Forma de pago</Form.Label>
                       <Form.Select
                         name="way_to_pay"
-                        onChange={handleChange}
                         value={form?.way_to_pay}
                         isInvalid={!!errors?.way_to_pay}
-                        disabled={
-                          fact?._id || form?.payment_type === "CREDITO"
-                            ? true
-                            : false
-                        }
+                        disabled={true}
                       >
                         {form?.payment_type === "CREDITO" && (
                           <option value="POR PAGAR">POR PAGAR</option>
@@ -1127,7 +978,6 @@ const FactForm = ({
                   </div>
                 </div>
               </div>
-              <div></div>
               <Table striped bordered hover responsive="sm" className="mt-3">
                 <thead>
                   <tr>
@@ -1138,54 +988,20 @@ const FactForm = ({
                     {!fact?._id && <th>Stock</th>}
                     <th>Cantidad</th>
                     <th>Precio</th>
-                    <th>Descuento</th>
+                    <th>Descuento X Prod.</th>
                     <th>Total</th>
                     {!fact?._id && <th className="text-center">Eliminar</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {fact?._id
-                    ? list.map((listed, i: number) => (
-                        <DetailItem
-                          key={listed.product}
-                          listed={listed}
-                          item={i}
-                          list={list}
-                          view={true}
-                        />
-                      ))
-                    : list.map((listed, i: number) => (
-                        <DetailItem
-                          key={listed.product}
-                          listed={listed}
-                          item={i}
-                          list={list}
-                          deleteItem={deleteItem}
-                          numberFact={numberFact}
-                          getProductByItem={getProductByItem}
-                        />
-                      ))}
-                  {!fact?._id && (
-                    <tr>
-                      <td>
-                        <button
-                          className="btn btn-success"
-                          type="button"
-                          onClick={() => {
-                            setMessage(initialStateAlert);
-                            setShowProducts(!showProducts);
-                          }}
-                          style={{
-                            width: 40,
-                            height: 40,
-                          }}
-                          ref={searchProducts}
-                        >
-                          <strong>+</strong>
-                        </button>
-                      </td>
-                    </tr>
-                  )}
+                  {fact?._id &&
+                    list.map((listed, i: number) => (
+                      <DetailView
+                        key={listed.product}
+                        listed={listed}
+                        item={i}
+                      />
+                    ))}
                 </tbody>
                 <tfoot>
                   <tr>
@@ -1199,7 +1015,7 @@ const FactForm = ({
                     <td>
                       <strong>SubTotal</strong>
                     </td>
-                    <td>{`S/ ${formatter.format(calSumSub())}`}</td>
+                    <td>{`S/${formatter.format(calSumSub())}`}</td>
                   </tr>
                   <tr>
                     <td></td>
@@ -1210,31 +1026,9 @@ const FactForm = ({
                     <td></td>
                     {!fact?._id && <td></td>}
                     <td>
-                      <strong>Descuento</strong>
+                      <strong>Descuento General</strong>
                     </td>
-                    <td>
-                      <Form.Control
-                        name="discount"
-                        value={form.discount}
-                        type="number"
-                        disabled={fact?._id ? true : false}
-                        onChange={(e) => {
-                          if (Number(e.target.value) > calSumSub()) {
-                            return;
-                          } else if (Number(e.target.value) < 0) {
-                            alert("El descuento no puede ser negativo");
-                          } else {
-                            setForm({
-                              ...form,
-                              discount: Number(e.target.value),
-                            });
-                          }
-                        }}
-                        step="0.01"
-                        min="0"
-                        max={calSumSub()}
-                      />
-                    </td>
+                    <td>{`S/${formatter.format(form.discount)}`}</td>
                   </tr>
                   <tr>
                     <td></td>
@@ -1247,7 +1041,7 @@ const FactForm = ({
                     <td>
                       <strong>Total</strong>
                     </td>
-                    <td>{`S/ ${formatter.format(
+                    <td>{`S/${formatter.format(
                       calSumSub() - form.discount
                     )}`}</td>
                   </tr>
@@ -1263,7 +1057,7 @@ const FactForm = ({
                         <td>
                           <strong>Pagó con</strong>
                         </td>
-                        <td>{`S/ ${formatter.format(
+                        <td>{`S/${formatter.format(
                           form.customer_payment
                         )}`}</td>
                       </tr>
@@ -1277,7 +1071,7 @@ const FactForm = ({
                         <td>
                           <strong>Vuelto</strong>
                         </td>
-                        <td>{`S/ ${
+                        <td>{`S/${
                           form.subtotal - form.customer_payment < 0
                             ? String(
                                 formatter.format(
@@ -1293,101 +1087,6 @@ const FactForm = ({
                   )}
                 </tfoot>
               </Table>
-              {showProducts && (
-                <div
-                  style={{
-                    boxShadow:
-                      "0 16px 32px rgb(55 71 79 / 8%), 0 8px 24px rgb(55 71 79 / 10%)",
-                    background: "#fff",
-                    position: "absolute",
-                    width: "900px",
-                    top: "270px",
-                    left: "110px",
-                    height: "auto",
-                    display: "flex",
-                    flexDirection: "column",
-                    padding: 10,
-                  }}
-                >
-                  <input
-                    type="text"
-                    autoFocus
-                    className="p-1"
-                    placeholder="Introduce Cod. de barra / interno o nombre del producto"
-                    value={search}
-                    ref={searchInput}
-                    onChange={handleSearch}
-                    onKeyDown={handleKeyDownInput}
-                  />
-                  <Table
-                    striped
-                    bordered
-                    hover
-                    responsive="sm"
-                    className="mt-3"
-                  >
-                    <TableHeader headers={headers} onSorting={onSorting} />
-                    <tbody>
-                      {productsFiltered.map((pro: any) => {
-                        return (
-                          <tr
-                            tabIndex={0}
-                            key={pro._id}
-                            onKeyDown={(e) => handleKeyDownTr(e, pro)}
-                            className={styles.tr}
-                          >
-                            <td>{pro.cod_internal}</td>
-                            <td>{pro.name}</td>
-                            <td>{pro.mark.name}</td>
-                            <td>{pro.model.name}</td>
-                            <td>{pro.unit.name}</td>
-                            <td>{pro.stock}</td>
-                            <td>S/ {pro.price}</td>
-                            <td className="text-center">
-                              <BsFillCartFill
-                                type="button"
-                                onClick={() => handleClickList(pro)}
-                                className="text-success font-weight-bold"
-                                style={{ cursor: "pointer" }}
-                              />
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </Table>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <div style={{ display: "flex" }}>
-                      <Button
-                        onKeyDown={handleKeyDownButton}
-                        variant="danger"
-                        onClick={() => {
-                          setShowProducts(false);
-                          selected = [];
-                        }}
-                      >
-                        Cerrar
-                      </Button>
-                    </div>
-                    <div style={{ display: "flex" }}>
-                      <PaginationComponent
-                        total={totalItems}
-                        itemsPerPage={ITEMS_PER_PAGE}
-                        currentPage={currentPage}
-                        onPageChange={onPageChange}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
             {loader}
           </Modal.Body>
@@ -1402,12 +1101,517 @@ const FactForm = ({
               disabled={disabled}
               onClick={onSubmit}
             >
-              {fact?._id ? "Imprimir" : "Registrar"}
+              Imprimir
             </Button>
           </Modal.Footer>
-        </Form>
-      </Modal>
-    </div>
+        </Modal>
+      ) : (
+        byConsult === false && (
+          <Form onSubmit={onSubmit}>
+            {message.type && (
+              <Alert variant={message.type}>{message.message}</Alert>
+            )}
+
+            <Modal show={showMoney} onHide={handleCloseModalMoney} centered>
+              <Modal.Header closeButton style={{ background: "yellow" }}>
+                <Modal.Title>EFECTIVO CON VUELTO</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formHorizontalTotal"
+                  id="formHorizontalTotal"
+                >
+                  <Form.Label column sm={6}>
+                    Total a pagar (S/)
+                  </Form.Label>
+                  <Col sm={6}>
+                    <Form.Control
+                      name="subtotal"
+                      type="number"
+                      defaultValue={`${formatter.format(form.subtotal)}`}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formHorizontalPaga"
+                >
+                  <Form.Label column sm={6}>
+                    Paga con (S/)
+                  </Form.Label>
+                  <Col sm={6}>
+                    <Form.Control
+                      type="number"
+                      name="customer_payment"
+                      value={form.customer_payment}
+                      onChange={(e) => {
+                        if (Number(e.target.value) < 0) {
+                          alert("El monto a pagar no puede ser negativo");
+                        } else {
+                          setForm({
+                            ...form,
+                            customer_payment: Number(e.target.value),
+                          });
+                        }
+                      }}
+                      step="0.01"
+                      min="0"
+                    />
+                  </Col>
+                </Form.Group>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formHorizontalVuelto"
+                >
+                  <Form.Label column sm={6}>
+                    Vuelto (S/)
+                  </Form.Label>
+                  <Col sm={6}>
+                    <Form.Control
+                      type="number"
+                      value={
+                        form.customer_payment
+                          ? Number(form.subtotal) -
+                              Number(form.customer_payment) <
+                            0
+                            ? String(
+                                formatter.format(
+                                  Number(form.subtotal) -
+                                    Number(form.customer_payment)
+                                )
+                              ).slice(1)
+                            : `${formatter.format(
+                                Number(form.subtotal) -
+                                  Number(form.customer_payment)
+                              )}`
+                          : formatter.format(0)
+                      }
+                      disabled
+                      min="0"
+                    />
+                  </Col>
+                </Form.Group>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleCloseModalMoney}>
+                  Cerrar
+                </Button>
+                <Button variant="success" onClick={handleButtonFF}>
+                  Finalizar venta
+                </Button>
+              </Modal.Footer>
+            </Modal>
+
+            <ClientForm
+              show={showModalClient}
+              closeModal={closeModalClient}
+              listClients={listClients}
+            />
+
+            <div style={{ width: "100%", display: "flex" }}>
+              <div style={{ width: "65%" }}>
+                <Row>
+                  <Col xs={12} md={8}>
+                    <Row>
+                      <Form.Group md="3" as={Col} controlId="formGridFech">
+                        <Form.Label>Fecha</Form.Label>
+                        <Form.Control
+                          name="fech"
+                          value={
+                            fact?._id
+                              ? formatDate(new Date(String(fact?.createdAt)))
+                              : getDate()
+                          }
+                          type="text"
+                          disabled
+                        />
+                      </Form.Group>
+                      <Form.Group md="8" as={Col} controlId="formGridType">
+                        <Form.Label>Tipo de pago</Form.Label>
+                        <Form.Select
+                          name="payment_type"
+                          onChange={(e) => {
+                            if (e.target.value === "CREDITO") {
+                              setForm({
+                                ...form,
+                                payment_type: e.target.value,
+                                way_to_pay: "POR PAGAR",
+                              });
+                            } else {
+                              setForm({
+                                ...form,
+                                payment_type: e.target.value,
+                                way_to_pay: "EFECTIVO COMPLETO",
+                              });
+                            }
+                          }}
+                          value={form?.payment_type}
+                          isInvalid={!!errors?.payment_type}
+                          disabled={fact?._id ? true : false}
+                        >
+                          <option value="CONTADO">CONTADO</option>
+                          <option value="CREDITO">CREDITO</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Row>
+                  </Col>
+                  <Col xs={6} md={4}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        textAlign: "center",
+                        flexDirection: "column",
+                        marginRight: 20,
+                        border: "1px solid #000",
+                      }}
+                    >
+                      <h3>RUC: 10443373824</h3>
+                      <h3>
+                        <strong>GUIA DE VENTA</strong>
+                      </h3>
+                      <h3>N° 000{numberFact}</h3>
+                    </div>
+                  </Col>
+                </Row>
+
+                <Row className="mb-3">
+                  <Col xs={6} md={4}>
+                    <Form.Group md="12" as={Col} controlId="formGridFech">
+                      <Form.Label>
+                        Cliente{" "}
+                        {!fact?._id && (
+                          <strong
+                            style={{ cursor: "pointer" }}
+                            className="text-primary"
+                            onClick={openModalClient}
+                          >
+                            Registrar cliente
+                          </strong>
+                        )}
+                      </Form.Label>
+                      <Select
+                        isDisabled={fact?._id ? true : false}
+                        closeMenuOnSelect={true}
+                        components={animatedComponents}
+                        value={
+                          form.client === ""
+                            ? []
+                            : {
+                                label: selectCliente.label,
+                                value: selectCliente.value,
+                              }
+                        }
+                        onChange={(values: any) => {
+                          setMessage(initialStateAlert);
+                          const { label, value } = values;
+                          setSelectClient({ label, value });
+                          setForm({ ...form, client: value });
+                        }}
+                        options={clients}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col xs={6} md={4}>
+                    <Form.Group md="12" as={Col} controlId="formGridType">
+                      <Form.Label>Forma de pago</Form.Label>
+                      <Form.Select
+                        name="way_to_pay"
+                        onChange={handleChange}
+                        value={form?.way_to_pay}
+                        isInvalid={!!errors?.way_to_pay}
+                        disabled={
+                          fact?._id || form?.payment_type === "CREDITO"
+                            ? true
+                            : false
+                        }
+                      >
+                        {form?.payment_type === "CREDITO" && (
+                          <option value="POR PAGAR">POR PAGAR</option>
+                        )}
+                        <option value="EFECTIVO COMPLETO">
+                          EFECTIVO COMPLETO
+                        </option>
+                        <option value="EFECTIVO CON VUELTO">
+                          EFECTIVO CON VUELTO
+                        </option>
+                        <option value="YAPE">YAPE</option>
+                        <option value="PLIN">PLIN</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col xs={12} md={12}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-end",
+                        marginRight: 20,
+                      }}
+                    >
+                      <Form.Control
+                        type="text"
+                        autoFocus
+                        style={{ width: "400px" }}
+                        className="p-1 mb-3"
+                        placeholder="Introduce Cod. de barra / interno o nombre del producto"
+                        value={search}
+                        ref={searchInput}
+                        onChange={handleSearch}
+                        onKeyDown={handleKeyDownInput}
+                      />
+                    </div>
+                    <div style={{ marginRight: 20 }}>
+                      <Table
+                        striped
+                        bordered
+                        hover
+                        responsive="sm"
+                        className="mt-3"
+                      >
+                        <TableHeader headers={headers} onSorting={onSorting} />
+                        <tbody>
+                          {productsFiltered.map((pro: any) => {
+                            return (
+                              <tr
+                                tabIndex={0}
+                                key={pro._id}
+                                onKeyDown={(e) => handleKeyDownTr(e, pro)}
+                                className={styles.tr}
+                              >
+                                <td>{pro.cod_internal}</td>
+                                <td>{pro.name}</td>
+                                <td>{pro.mark.name}</td>
+                                <td>{pro.model.name}</td>
+                                <td>{pro.unit.name}</td>
+                                <td className="text-center">
+                                  {pro.stock === 0 ? (
+                                    <strong style={{ color: "red" }}>
+                                      {pro.stock}
+                                    </strong>
+                                  ) : (
+                                    <strong style={{ color: "green" }}>
+                                      {pro.stock}
+                                    </strong>
+                                  )}
+                                </td>
+                                <td>S/{formatter.format(pro.price)}</td>
+                                <td className="text-center">
+                                  <BsFillCartFill
+                                    type="button"
+                                    onClick={() => handleClickList(pro)}
+                                    className="text-success font-weight-bold"
+                                    style={{ cursor: "pointer" }}
+                                  />
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </Table>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          justifyContent: "flex-end",
+                        }}
+                      >
+                        <PaginationComponent
+                          total={totalItems}
+                          itemsPerPage={ITEMS_PER_PAGE}
+                          currentPage={currentPage}
+                          onPageChange={onPageChange}
+                        />
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+              <div
+                style={{
+                  width: "35%",
+                  border: "1px solid #444",
+                  display: "flex",
+                  flexDirection: "column",
+                  position: "relative",
+                  height: "600px",
+                }}
+              >
+                <div
+                  style={{
+                    height: "calc(100% - 150px)",
+                    overflowX: "auto",
+                    overflowY: "auto",
+                  }}
+                >
+                  {list.map((listed, i: number) => (
+                    <DetailItem
+                      key={listed.product}
+                      listed={listed}
+                      item={i}
+                      list={list}
+                      deleteItem={deleteItem}
+                      numberFact={numberFact}
+                      getProductByItem={getProductByItem}
+                    />
+                  ))}
+                </div>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "100%",
+                    bottom: 0,
+                    height: 150,
+                    display: "flex",
+                    flexDirection: "column",
+                    background: "#F5F8FB",
+                    boxShadow:
+                      "0 16px 32px rgb(55 71 79 / 8%), 0 8px 24px rgb(55 71 79 / 10%)",
+                    borderTop: "10px solid #F1C023",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "60%",
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 200,
+                        display: "flex",
+                        flexDirection: "column",
+                        paddingRight: 10,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          flexDirection: "row",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            width: "50%",
+                          }}
+                        >
+                          <strong>SubTotal:</strong>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            width: "50%",
+                            flexDirection: "row",
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          <strong>S/{formatter.format(calSumSub())}</strong>
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          flexDirection: "row",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            width: "50%",
+                          }}
+                        >
+                          <strong>Descuento:</strong>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            width: "50%",
+                            flexDirection: "row",
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          <Form.Control
+                            style={{ width: 100 }}
+                            name="discount"
+                            value={form.discount}
+                            type="number"
+                            disabled={fact?._id ? true : false}
+                            onChange={(e) => {
+                              if (Number(e.target.value) > calSumSub()) {
+                                return;
+                              } else if (Number(e.target.value) < 0) {
+                                alert("El descuento no puede ser negativo");
+                              } else {
+                                setForm({
+                                  ...form,
+                                  discount: Number(e.target.value),
+                                });
+                              }
+                            }}
+                            step="0.01"
+                            min="0"
+                            max={calSumSub()}
+                          />
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          flexDirection: "row",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            width: "50%",
+                          }}
+                        >
+                          <strong>Total:</strong>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            width: "50%",
+                            flexDirection: "row",
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          S/{formatter.format(calSumSub() - form.discount)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ height: "40%", padding: "5px" }}>
+                    <Button
+                      className="btn btn-success w-100 h-100"
+                      disabled={disabled}
+                      type="submit"
+                    >
+                      Realizar Venta
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Form>
+        )
+      )}
+    </>
   );
 };
 

@@ -47,6 +47,7 @@ const ProductForm = ({
     unit: "",
     stock: 0,
     price: 0,
+    price_c: 0,
     cod_internal: "",
     note: "",
   };
@@ -243,6 +244,7 @@ const ProductForm = ({
         unit: product?.unit,
         stock: product?.stock,
         price: product?.price,
+        price_c: product?.price_c,
       });
     }
   }, [
@@ -255,6 +257,7 @@ const ProductForm = ({
     product?.unit,
     product?.stock,
     product?.price,
+    product?.price_c,
   ]);
 
   useEffect(() => {
@@ -453,7 +456,7 @@ const ProductForm = ({
               </Form.Control.Feedback>
             </Form.Group>
             <Form.Group as={Col} controlId="formGridStock">
-              <Form.Label>Precio</Form.Label>
+              <Form.Label>Precio Venta</Form.Label>
               <Form.Control
                 name="price"
                 type="number"
@@ -461,10 +464,25 @@ const ProductForm = ({
                 onChange={handleChange}
                 value={form?.price}
                 isInvalid={!!errors?.price}
-                placeholder="Introduce un precio"
+                placeholder="Introduce un precio venta"
               />
               <Form.Control.Feedback type="invalid">
                 {errors?.price}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group as={Col} controlId="formGridStock">
+              <Form.Label>Precio Costo</Form.Label>
+              <Form.Control
+                name="price_c"
+                type="number"
+                step="0.01"
+                onChange={handleChange}
+                value={form?.price_c}
+                isInvalid={!!errors?.price_c}
+                placeholder="Introduce un precio costo"
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors?.price_c}
               </Form.Control.Feedback>
             </Form.Group>
           </Row>

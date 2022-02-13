@@ -1,4 +1,13 @@
-import { Alert, Button, Card, Modal, Table, Form } from "react-bootstrap";
+import {
+  Alert,
+  Button,
+  Card,
+  Modal,
+  Table,
+  Form,
+  Tabs,
+  Tab,
+} from "react-bootstrap";
 import {
   useCallback,
   useState,
@@ -67,6 +76,8 @@ const FactScreen = () => {
   const searchInput = useRef<HTMLInputElement | null>(null);
   const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [key, setKey] = useState<string | null>("list");
+
   const ITEMS_PER_PAGE = 50;
 
   const getMyModule = useCallback(async () => {
@@ -176,8 +187,8 @@ const FactScreen = () => {
   const listProducts = async () => {
     const res = await getProducts();
     const { data } = res;
-    const filterJustMayor0 = data.filter((product: any) => product.stock > 0);
-    setProducts(filterJustMayor0);
+    //const filterJustMayor0 = data.filter((product: any) => product.stock > 0);
+    setProducts(data);
   };
 
   const onSorting = (field: string, order: string) =>
@@ -256,123 +267,102 @@ const FactScreen = () => {
           {message.type && (
             <Alert variant={message.type}>{message.message}</Alert>
           )}
-
-          {resource && resource.canCreate && resource.canUpdate ? (
-            <>
-              <Button
-                type="button"
-                variant="primary"
-                autoFocus
-                onClick={() => openModalRE(false)}
-              >
-                Agregar nueva venta
-              </Button>
-              <FactForm
-                show={show}
-                closeModal={closeModal}
-                listFacts={listFacts}
-                listProducts={listProducts}
-                listFactDeleted={listFactDeleted}
-                products={products}
-                fact={state}
-              />
-            </>
-          ) : resource && resource.canCreate ? (
-            <>
-              <Button
-                type="button"
-                variant="primary"
-                autoFocus
-                onClick={() => openModalRE(false)}
-              >
-                Agregar nueva venta
-              </Button>
-              <FactForm
-                show={show}
-                closeModal={closeModal}
-                listFacts={listFacts}
-                listProducts={listProducts}
-                listFactDeleted={listFactDeleted}
-                products={products}
-                fact={state}
-              />
-            </>
-          ) : (
-            resource &&
-            resource.canUpdate && (
-              <FactForm
-                show={show}
-                closeModal={closeModal}
-                listFacts={listFacts}
-                listProducts={listProducts}
-                listFactDeleted={listFactDeleted}
-                products={products}
-                fact={state}
-              />
-            )
-          )}
-
-          {resource && resource.canRead && (
-            <>
-              <Form.Control
-                className="mt-3 mb-3"
-                type="text"
-                autoFocus
-                placeholder="Busca por código de venta"
-                value={search}
-                ref={searchInput}
-                onChange={handleSearch}
-              />
-
-              <div
-                className="mb-3"
-                style={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <PaginationComponent
-                  total={totalItems}
-                  itemsPerPage={ITEMS_PER_PAGE}
-                  currentPage={currentPage}
-                  onPageChange={onPageChange}
+          <Tabs
+            activeKey={key as string}
+            onSelect={(k) => setKey(k)}
+            id="uncontrolled-tab-example"
+            className="mb-3"
+          >
+            {resource && resource.canRead && (
+              <Tab eventKey="list" title="Todas la ventas">
+                <Form.Control
+                  className="mt-3 mb-3"
+                  type="text"
+                  autoFocus
+                  placeholder="Busca por código de venta"
+                  value={search}
+                  ref={searchInput}
+                  onChange={handleSearch}
                 />
-                <div style={{ display: "flex", alignItems: "flex-end" }}>
-                  <span style={{ marginLeft: 5 }}>
-                    Hay un total de{" "}
-                    {search ? factsFiltered.length : facts.length} registros
-                  </span>
-                </div>
-              </div>
 
-              <Table
-                striped
-                bordered
-                hover
-                responsive="sm"
-                className={styles.table}
-              >
-                <TableHeader headers={headers} onSorting={onSorting} />
-                <tbody>
-                  {factsFiltered.map((fact: any, i: number) => (
-                    <FactListActives
-                      key={fact._id}
-                      item={i}
-                      fact={fact}
-                      openModalRE={openModalRE}
-                      deleteFact={openModalConfirm}
-                    />
-                  ))}
-                </tbody>
-                <tfoot>
-                  {removes.map((remove, i: number) => (
-                    <FactListRemoves
-                      item={i}
-                      key={remove._id}
-                      remove={remove}
-                    />
-                  ))}
-                </tfoot>
-              </Table>
-            </>
-          )}
+                <div
+                  className="mb-3"
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <PaginationComponent
+                    total={totalItems}
+                    itemsPerPage={ITEMS_PER_PAGE}
+                    currentPage={currentPage}
+                    onPageChange={onPageChange}
+                  />
+                  <div style={{ display: "flex", alignItems: "flex-end" }}>
+                    <span style={{ marginLeft: 5 }}>
+                      Hay un total de{" "}
+                      {search ? factsFiltered.length : facts.length} registros
+                    </span>
+                  </div>
+                </div>
+
+                <Table
+                  striped
+                  bordered
+                  hover
+                  responsive="sm"
+                  className={styles.table}
+                >
+                  <TableHeader headers={headers} onSorting={onSorting} />
+                  <tbody>
+                    {factsFiltered.map((fact: any, i: number) => (
+                      <FactListActives
+                        key={fact._id}
+                        item={i}
+                        fact={fact}
+                        openModalRE={openModalRE}
+                        deleteFact={openModalConfirm}
+                      />
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    {removes.map((remove, i: number) => (
+                      <FactListRemoves
+                        item={i}
+                        key={remove._id}
+                        remove={remove}
+                      />
+                    ))}
+                  </tfoot>
+                </Table>
+              </Tab>
+            )}
+
+            {resource && resource.canCreate && (
+              <Tab eventKey="create" title="Nueva venta">
+                <FactForm
+                  tab={key as string}
+                  show={true}
+                  byConsult={false}
+                  closeModal={closeModal}
+                  listFacts={listFacts}
+                  listProducts={listProducts}
+                  listFactDeleted={listFactDeleted}
+                  products={products}
+                  fact={state}
+                />
+              </Tab>
+            )}
+          </Tabs>
+          {/* <FactForm
+                  show={show}
+                  closeModal={closeModal}
+                  listFacts={listFacts}
+                  listProducts={listProducts}
+                  listFactDeleted={listFactDeleted}
+                  products={products}
+                  fact={state}
+                /> */}
+          {/* {resource && resource.canRead && (
+            
+          )} */}
         </Card.Body>
       </Card>
     </>
