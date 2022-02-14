@@ -21,7 +21,7 @@ const ProductListActive = ({
 }) => {
   const { mark, model, unit, area }: any = product;
 
-  const { resources } = useContext(AuthContext);
+  const { resources, user } = useContext(AuthContext);
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
   const [resource, setResource] = useState<any>(null);
@@ -94,7 +94,11 @@ const ProductListActive = ({
             className={styles.table__td}
             onClick={() => openModalRE(true, product)}
           >
-            {product.stock}
+            {product.stock <= 10 ? (
+              <strong style={{ color: "red" }}>{product.stock}</strong>
+            ) : (
+              <strong style={{ color: "green" }}>{product.stock}</strong>
+            )}
           </td>
           <td
             className={styles.table__td}
@@ -102,6 +106,18 @@ const ProductListActive = ({
           >
             S/ {formatter.format(product.price)}
           </td>
+          {user.role.name === "SUPER ADMINISTRADOR" && (
+            <td
+              className={styles.table__td}
+              onClick={() => openModalRE(true, product)}
+            >
+              S/{" "}
+              {product.price_c === undefined
+                ? "No registrado"
+                : formatter.format(product.price_c)}
+            </td>
+          )}
+
           <td
             className={`${styles.table__td} ${styles["table--center"]}`}
             onClick={() => openModalRE(true, product)}
@@ -127,8 +143,23 @@ const ProductListActive = ({
           <td>{String(mark.name)}</td>
           <td>{String(model.name)}</td>
           <td>{String(unit.name)}</td>
-          <td>{product.stock}</td>
+          <td>
+            {product.stock <= 10 ? (
+              <strong style={{ color: "red" }}>{product.stock}</strong>
+            ) : (
+              <strong style={{ color: "green" }}>{product.stock}</strong>
+            )}
+          </td>
           <td>S/ {formatter.format(product.price)}</td>
+          {user.role.name === "SUPER ADMINISTRADOR" && (
+            <td>
+              S/{" "}
+              {product.price_c === undefined
+                ? "No registrado"
+                : formatter.format(product.price_c)}
+            </td>
+          )}
+
           <td className={`${styles.table__td} ${styles["table--center"]}`}>
             {product.status && <Badge bg="success">Activo</Badge>}
           </td>

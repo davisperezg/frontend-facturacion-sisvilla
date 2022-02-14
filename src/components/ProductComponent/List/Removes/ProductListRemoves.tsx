@@ -9,15 +9,17 @@ import { getModuleByMenu } from "../../../../api/module/module";
 import { formatter } from "../../../../lib/helpers/functions/functions";
 
 const ProductListRemoves = ({
+  item,
   remove,
   restorePro,
 }: {
+  item: number;
   remove: Product;
   restorePro: (id: string) => void;
 }) => {
   const { mark, model, unit, area }: any = remove;
 
-  const { resources } = useContext(AuthContext);
+  const { resources, user } = useContext(AuthContext);
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
   const [resource, setResource] = useState<any>(null);
@@ -37,7 +39,7 @@ const ProductListRemoves = ({
   return (
     <>
       <tr>
-        <td>{remove._id}</td>
+        <td>{item}</td>
         <td>{String(area.name)}</td>
         <td>{remove.cod_internal}</td>
         <td>{remove.name}</td>
@@ -47,6 +49,15 @@ const ProductListRemoves = ({
         <td>{String(unit.name)}</td>
         <td>{remove.stock}</td>
         <td>S/ {formatter.format(remove.price)}</td>
+        {user.role.name === "SUPER ADMINISTRADOR" && (
+          <td>
+            S/{" "}
+            {remove.price_c === undefined
+              ? "No registrado"
+              : formatter.format(remove.price_c)}
+          </td>
+        )}
+
         <td className={`${styles["table--center"]}`}>
           {remove.status === false && <Badge bg="danger">Eliminado</Badge>}
         </td>

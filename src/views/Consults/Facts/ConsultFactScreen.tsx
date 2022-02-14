@@ -15,6 +15,10 @@ import { Area } from "../../../interface/Area";
 import ItemCheck from "./ItemCheck";
 import { AuthContext } from "../../../context/auth";
 import { CSVLink } from "react-csv";
+import {
+  getDetailsByIdFact,
+  getDetailsFacts,
+} from "../../../api/detail-fact/detail";
 
 const headers = [
   { name: "#", field: "item", sortable: false },
@@ -49,6 +53,9 @@ const ConsultFactScreen = () => {
   const [resource] = useResource();
   const [message, setMessage] = useState<IAlert>(initialStateAlert);
   const { user } = useContext(AuthContext);
+  const [priceC, setPriceC] = useState(0);
+  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onSorting = (field: string, order: string) =>
     setSorting({ field, order });
@@ -71,6 +78,8 @@ const ConsultFactScreen = () => {
   };
 
   const goSearch = async () => {
+    setLoading(false);
+    setNote("Calculando ganancias...");
     if (resource.canRead) {
       setCurrentPage(1);
       const { start, end } = consult;
@@ -91,6 +100,38 @@ const ConsultFactScreen = () => {
           customer_payment: fact.customer_payment,
         };
       });
+
+      const allPriceC = filter.map(async (flts: any) => {
+        const details = await getDetailsFacts(flts._id);
+        return details.data.reduce(
+          (previousValue: any, currentValue: any) =>
+            currentValue.product.price_c === undefined
+              ? previousValue + 0 * currentValue.quantity
+              : previousValue +
+                currentValue.product.price_c * currentValue.quantity,
+
+          0
+        );
+      });
+
+      Promise.all(allPriceC)
+        .then((values) => {
+          const allPrice = values.reduce(
+            (previousValue: any, currentValue: any) =>
+              previousValue + currentValue,
+
+            0
+          );
+          setPriceC(allPrice);
+        })
+        .catch((reason) => {
+          console.log(reason);
+        })
+        .finally(() => {
+          setLoading(true);
+          setNote("");
+        });
+
       setFacts(filter);
     } else {
       setMessage({
@@ -232,11 +273,37 @@ const ConsultFactScreen = () => {
               Consultar
             </Button>
           </Form.Group>
-          <Form.Group md="4" as={Col} controlId="formTotalVend">
-            <Form.Label>
-              Total vendido S/{formatter.format(calSumTotal())}
-            </Form.Label>
-          </Form.Group>
+        </Row>
+        <Row>
+          <Col>
+            <Form.Group md="4" as={Col} controlId="formTotalC">
+              <Form.Label>
+                Total de precio venta S/{formatter.format(calSumTotal())}
+              </Form.Label>
+            </Form.Group>
+
+            <Form.Group md="4" as={Col} controlId="formTotalV">
+              <Form.Label>
+                Inversión a precio costo S/{formatter.format(priceC)}
+              </Form.Label>
+            </Form.Group>
+
+            {loading ? (
+              <Form.Group md="4" as={Col} controlId="formTotalC">
+                <Form.Label
+                  style={
+                    calSumTotal() - priceC <= 0
+                      ? { color: "red" }
+                      : { color: "green" }
+                  }
+                >
+                  Ganancia es de S/{formatter.format(calSumTotal() - priceC)}
+                </Form.Label>
+              </Form.Group>
+            ) : (
+              note
+            )}
+          </Col>
         </Row>
         <div
           className="mb-3"

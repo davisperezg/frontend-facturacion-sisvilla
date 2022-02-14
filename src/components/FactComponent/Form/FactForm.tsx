@@ -173,7 +173,8 @@ const FactForm = ({
     { name: "Categoria", field: "model", sortable: true },
     { name: "Unidad", field: "unit", sortable: true },
     { name: "Stock", field: "stock", sortable: true },
-    { name: "Precio", field: "price", sortable: true },
+    { name: "Precio Venta", field: "price", sortable: true },
+    { name: "Precio Costo", field: "price_c", sortable: true },
     { name: "Añadir", field: "actiones", sortable: false },
   ];
 
@@ -619,12 +620,14 @@ const FactForm = ({
     const res = await getDetailsFacts(String(fact?._id));
 
     const filter = res.data.map((detail: any) => {
+      console.log(res.data);
       return {
         fact: detail.fact.cod_fact,
         cod_internal: detail.product.cod_internal,
         product: detail.product._id,
         quantity: detail.quantity,
         price: detail.price,
+        price_c: detail.product.price_c,
         discount: detail.discount,
         name: detail.product.name,
         unit: detail.product.unit.name,
@@ -870,6 +873,14 @@ const FactForm = ({
     listClients();
   }, [tab, getFactByIdEdit, fact?._id, getMyModule]);
 
+  const calSumPriceC = () => {
+    return list.reduce(
+      (previousValue: any, currentValue: any) =>
+        previousValue + currentValue.price_c * currentValue.quantity,
+      0
+    );
+  };
+
   return (
     <>
       <div style={{ display: "none" }}>
@@ -987,7 +998,10 @@ const FactForm = ({
                     <th>U. Medida</th>
                     {!fact?._id && <th>Stock</th>}
                     <th>Cantidad</th>
-                    <th>Precio</th>
+                    <th>Precio Venta</th>
+                    {user.role.name === "SUPER ADMINISTRADOR" && (
+                      <th>Precio Costo</th>
+                    )}
                     <th>Descuento X Prod.</th>
                     <th>Total</th>
                     {!fact?._id && <th className="text-center">Eliminar</th>}
@@ -1087,6 +1101,21 @@ const FactForm = ({
                   )}
                 </tfoot>
               </Table>
+              {user.role.name === "SUPER ADMINISTRADOR" && (
+                <strong>
+                  RESUMEN DE VENTA: ITV({`S/${formatter.format(calSumSub())}`})
+                  - ITC({`S/${formatter.format(calSumPriceC())}`}) ={" "}
+                  <strong
+                    style={
+                      calSumSub() - calSumPriceC() <= 0
+                        ? { color: "red" }
+                        : { color: "green" }
+                    }
+                  >{`S/${formatter.format(
+                    calSumSub() - calSumPriceC()
+                  )}`}</strong>
+                </strong>
+              )}
             </div>
             {loader}
           </Modal.Body>
@@ -1094,7 +1123,6 @@ const FactForm = ({
             <Button type="button" variant="secondary" onClick={closeAndClear}>
               Cerrar
             </Button>
-
             <Button
               type="button"
               variant="primary"
@@ -1377,7 +1405,16 @@ const FactForm = ({
                         responsive="sm"
                         className="mt-3"
                       >
-                        <TableHeader headers={headers} onSorting={onSorting} />
+                        <TableHeader
+                          headers={
+                            user.role.name === "SUPER ADMINISTRADOR"
+                              ? headers
+                              : headers.filter(
+                                  (head) => head.field !== "price_c"
+                                )
+                          }
+                          onSorting={onSorting}
+                        />
                         <tbody>
                           {productsFiltered.map((pro: any) => {
                             return (
@@ -1404,6 +1441,14 @@ const FactForm = ({
                                   )}
                                 </td>
                                 <td>S/{formatter.format(pro.price)}</td>
+                                {user.role.name === "SUPER ADMINISTRADOR" && (
+                                  <td>
+                                    S/
+                                    {pro.price_c === undefined
+                                      ? "No Registrado"
+                                      : formatter.format(pro.price_c)}
+                                  </td>
+                                )}
                                 <td className="text-center">
                                   <BsFillCartFill
                                     type="button"

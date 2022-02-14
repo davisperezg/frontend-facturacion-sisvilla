@@ -47,7 +47,8 @@ const headers = [
   { name: "Modelo", field: "model", sortable: true },
   { name: "Unidad de medida", field: "unit", sortable: true },
   { name: "Stock", field: "stock", sortable: true },
-  { name: "Precio", field: "price", sortable: true },
+  { name: "Precio Venta", field: "price", sortable: true },
+  { name: "Precio Costo", field: "price_c", sortable: true },
   { name: "Estado", field: "status", sortable: false },
   { name: "Eliminar", field: "delete", sortable: false },
 ];
@@ -60,6 +61,7 @@ const headersFormat = [
   { label: "unit", key: "unit" },
   { label: "stock", key: "stock" },
   { label: "price", key: "price" },
+  { label: "price_c", key: "price_c" },
   { label: "area", key: "area" },
 ];
 
@@ -72,6 +74,7 @@ const dataFormat = [
     unit: "UNIDAD",
     stock: "10",
     price: 12,
+    price_c: 10,
     area: "SANTA ROSA",
   },
 ];
@@ -501,6 +504,7 @@ const ProductScreen = () => {
       mark: product.mark.name,
       model: product.model.name,
       unit: product.unit.name,
+      price_c: product.price_c === undefined ? 0 : product.price_c,
     };
   });
 
@@ -712,7 +716,14 @@ const ProductScreen = () => {
                 responsive="sm"
                 className={styles.table}
               >
-                <TableHeader headers={headers} onSorting={onSorting} />
+                <TableHeader
+                  headers={
+                    user.role.name === "SUPER ADMINISTRADOR"
+                      ? headers
+                      : headers.filter((head) => head.field !== "price_c")
+                  }
+                  onSorting={onSorting}
+                />
                 <tbody>
                   {productsFiltered.map((pro, item: number) => (
                     <ProductListActive
@@ -725,8 +736,9 @@ const ProductScreen = () => {
                   ))}
                 </tbody>
                 <tfoot>
-                  {removes.map((remove) => (
+                  {removes.map((remove, item: number) => (
                     <ProductListRemoves
+                      item={item + 1}
                       key={remove._id}
                       remove={remove}
                       restorePro={_restoreProduct}

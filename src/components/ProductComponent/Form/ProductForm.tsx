@@ -470,21 +470,23 @@ const ProductForm = ({
                 {errors?.price}
               </Form.Control.Feedback>
             </Form.Group>
-            <Form.Group as={Col} controlId="formGridStock">
-              <Form.Label>Precio Costo</Form.Label>
-              <Form.Control
-                name="price_c"
-                type="number"
-                step="0.01"
-                onChange={handleChange}
-                value={form?.price_c}
-                isInvalid={!!errors?.price_c}
-                placeholder="Introduce un precio costo"
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors?.price_c}
-              </Form.Control.Feedback>
-            </Form.Group>
+            {user.role.name === "SUPER ADMINISTRADOR" && (
+              <Form.Group as={Col} controlId="formGridStock">
+                <Form.Label>Precio Costo</Form.Label>
+                <Form.Control
+                  name="price_c"
+                  type="number"
+                  step="0.01"
+                  onChange={handleChange}
+                  value={form?.price_c}
+                  isInvalid={!!errors?.price_c}
+                  placeholder="Introduce un precio costo"
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors?.price_c}
+                </Form.Control.Feedback>
+              </Form.Group>
+            )}
           </Row>
         </Modal.Body>
         <Modal.Footer>
