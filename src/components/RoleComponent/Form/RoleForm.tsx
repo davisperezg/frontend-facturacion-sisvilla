@@ -50,7 +50,7 @@ const RolForm = ({
   const [disabled, setDisabled] = useState<boolean>(false);
   const [modules, setModules] = useState<Module[]>([]);
   const [errors, setErrors] = useState<any>({});
-  const { resources } = useContext(AuthContext);
+  const { resources, user } = useContext(AuthContext);
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
   const [resource, setResource] = useState<any>(null);
@@ -200,36 +200,41 @@ const RolForm = ({
             <Alert variant={message.type}>{message.message}</Alert>
           )}
 
-          <Row className="mb-3">
-            <Form.Group as={Col} controlId="formGridName">
-              <Form.Label>
-                Nombre <strong className="text-danger">*</strong>
-              </Form.Label>
-              <Form.Control
-                name="name"
-                onChange={handleChange}
-                value={form?.name}
-                type="text"
-                isInvalid={!!errors.name}
-                placeholder="Introduce nombre"
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.name}
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Row>
-          <Row className="mb-3">
-            <Form.Group as={Col} controlId="formGridDes">
-              <Form.Label>Descripción</Form.Label>
-              <Form.Control
-                name="description"
-                onChange={handleChange}
-                value={form?.description}
-                type="text"
-                placeholder="Introduce descripción (opcional)"
-              />
-            </Form.Group>
-          </Row>
+          {(user.role.name === "SUPER ADMINISTRADOR" &&
+            form?.name === "SUPER ADMINISTRADOR") || (
+            <>
+              <Row className="mb-3">
+                <Form.Group as={Col} controlId="formGridName">
+                  <Form.Label>
+                    Nombre <strong className="text-danger">*</strong>
+                  </Form.Label>
+                  <Form.Control
+                    name="name"
+                    onChange={handleChange}
+                    value={form?.name}
+                    type="text"
+                    isInvalid={!!errors.name}
+                    placeholder="Introduce nombre"
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.name}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Row>
+              <Row className="mb-3">
+                <Form.Group as={Col} controlId="formGridDes">
+                  <Form.Label>Descripción</Form.Label>
+                  <Form.Control
+                    name="description"
+                    onChange={handleChange}
+                    value={form?.description}
+                    type="text"
+                    placeholder="Introduce descripción (opcional)"
+                  />
+                </Form.Group>
+              </Row>
+            </>
+          )}
           <Form.Group as={Col} controlId="formGridMenu">
             <Form.Label>Modulos disponibles</Form.Label>
             <Select

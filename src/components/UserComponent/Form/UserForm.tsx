@@ -283,37 +283,40 @@ const UserForm = ({
                 </Form.Control.Feedback>
               </Form.Group>
             </Row>
-            <Row className="mb-3">
-              <Form.Group as={Col} controlId="formGridRole">
-                <Form.Label>
-                  Rol <strong className="text-danger">*</strong>
-                </Form.Label>
-                <Form.Select
-                  name="role"
-                  onChange={handleChange}
-                  value={form?.role}
-                  isInvalid={!!errors?.role}
-                >
-                  <option value="">[Seleccione el rol]</option>
-                  {userContext.role.name === "SUPER ADMINISTRADOR"
-                    ? roles.map((role) => (
-                        <option key={role._id} value={role.name}>
-                          {role.name}
-                        </option>
-                      ))
-                    : roles
-                        .filter((flts) => flts.name !== "SUPER ADMINISTRADOR")
-                        .map((role) => (
+            {(form?.role === "SUPER ADMINISTRADOR" &&
+              userContext.username === form?.username) || (
+              <Row className="mb-3">
+                <Form.Group as={Col} controlId="formGridRole">
+                  <Form.Label>
+                    Rol <strong className="text-danger">*</strong>
+                  </Form.Label>
+                  <Form.Select
+                    name="role"
+                    onChange={handleChange}
+                    value={form?.role}
+                    isInvalid={!!errors?.role}
+                  >
+                    <option value="">[Seleccione el rol]</option>
+                    {userContext.role.name === "SUPER ADMINISTRADOR"
+                      ? roles.map((role) => (
                           <option key={role._id} value={role.name}>
                             {role.name}
                           </option>
-                        ))}
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">
-                  {errors?.role}
-                </Form.Control.Feedback>
-              </Form.Group>
-            </Row>
+                        ))
+                      : roles
+                          .filter((flts) => flts.name !== "SUPER ADMINISTRADOR")
+                          .map((role) => (
+                            <option key={role._id} value={role.name}>
+                              {role.name}
+                            </option>
+                          ))}
+                  </Form.Select>
+                  <Form.Control.Feedback type="invalid">
+                    {errors?.role}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Row>
+            )}
             <Row className="mb-3">
               <Form.Group as={Col} controlId="formGridTip">
                 <Form.Label>
