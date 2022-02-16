@@ -27,7 +27,7 @@ const Header = () => {
       <div className={styles.item}>
         <div className={styles.item__left}>
           <h1>
-            TU <strong>EMPRESA.</strong>
+            Comercial <strong>SARAI</strong>
           </h1>
         </div>
       </div>

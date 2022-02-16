@@ -32,7 +32,7 @@ const LayoutScreen = () => {
       <Aside />
       <div
         style={{
-          marginLeft: 350,
+          marginLeft: 240,
           position: "absolute",
           left: 50,
           marginTop: 10,

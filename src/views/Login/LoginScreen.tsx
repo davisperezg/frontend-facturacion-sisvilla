@@ -55,7 +55,7 @@ const LoginScreen = () => {
   return (
     <>
       <div className={styles.login}>
-        <h1 className={styles.title}>DEMO</h1>
+        <h1 className={styles.title}>COMERCIAL SARAI</h1>
         <div className={styles.login__center}>
           {message && <Alert variant="danger">{message}</Alert>}
           <Card>
