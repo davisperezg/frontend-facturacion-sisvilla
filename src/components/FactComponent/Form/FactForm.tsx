@@ -51,6 +51,7 @@ import { getFactById } from "../../../api/fact/fact";
 import { getDetailsByIdFact } from "../../../api/detail-fact/detail";
 import useFullPageLoader from "../../../hooks/FullPageLoader/useFullPageLoader";
 import DetailView from "../Detail/ItemView";
+import { format } from "path/posix";
 
 const animatedComponents = makeAnimated();
 
@@ -182,9 +183,18 @@ const FactForm = ({
     setSearch(searchInput.current?.value);
     setCurrentPage(1);
 
-    const findOneProduct: any = productsFiltered.find(
-      (one) => String(one.cod_internal).slice(3) === searchInput.current?.value
-    );
+    const findOneProduct: any = productsFiltered
+      .map((format) => {
+        return {
+          ...format,
+          cod_internal: String(format.cod_internal).slice(3),
+        };
+      })
+      .find(
+        (one) =>
+          one.cod_internal.toUpperCase() ===
+          searchInput.current?.value.toUpperCase()
+      );
 
     if (findOneProduct) {
       const item = {
@@ -1391,7 +1401,7 @@ const FactForm = ({
                         style={{ width: "400px" }}
                         className="p-1 mb-3"
                         placeholder="Introduce Cod. de barra / interno o nombre del producto"
-                        value={search}
+                        value={search.toUpperCase()}
                         ref={searchInput}
                         onChange={handleSearch}
                         onKeyDown={handleKeyDownInput}
@@ -1424,7 +1434,7 @@ const FactForm = ({
                                 onKeyDown={(e) => handleKeyDownTr(e, pro)}
                                 className={styles.tr}
                               >
-                                <td>{pro.cod_internal}</td>
+                                <td>{String(pro.cod_internal).slice(3)}</td>
                                 <td>{pro.name}</td>
                                 <td>{pro.mark.name}</td>
                                 <td>{pro.model.name}</td>

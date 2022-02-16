@@ -58,7 +58,7 @@ const ProductListActive = ({
             className={styles.table__td}
             onClick={() => openModalRE(true, product)}
           >
-            {product.cod_internal}
+            {String(product.cod_internal).slice(3)}
           </td>
           <td
             className={styles.table__td}
@@ -137,7 +137,7 @@ const ProductListActive = ({
         <tr>
           <td>{item}</td>
           <td>{String(area.name)}</td>
-          <td>{product.cod_internal}</td>
+          <td>{String(product.cod_internal).slice(3)}</td>
           <td>{product.name}</td>
           <td>{product.note}</td>
           <td>{String(mark.name)}</td>
