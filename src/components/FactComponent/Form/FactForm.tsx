@@ -182,7 +182,7 @@ const FactForm = ({
   const handleSearch = () => {
     setSearch(searchInput.current?.value);
     setCurrentPage(1);
-
+    showLoader();
     const findOneProduct: any = productsFiltered
       .map((format) => {
         return {
@@ -192,8 +192,8 @@ const FactForm = ({
       })
       .find(
         (one) =>
-          one.cod_internal.toUpperCase() ===
-          searchInput.current?.value.toUpperCase()
+          one.cod_internal.toUpperCase().trim() ===
+          searchInput.current?.value.toUpperCase().trim()
       );
 
     if (findOneProduct) {
@@ -209,19 +209,28 @@ const FactForm = ({
         stock: findOneProduct.stock,
       };
 
+      if (findOneProduct.stock === 0) {
+        alert(
+          "Este producto no se puede agregar porque no tiene stock disponible."
+        );
+        hideLoader();
+        return;
+      }
+
       const isFound = list.find(
         (product: any) => product.product === item.product
       );
 
       if (!isFound) {
-        if (productsFiltered.length === 1) {
-          setSearch("");
-          setList([...list, item]);
-        }
+        // if (productsFiltered.length === 1) {
+        setSearch("");
+        setList([...list, item]);
+        //}
       } else {
         setSearch("");
       }
     }
+    hideLoader();
   };
 
   const getFac = async () => {
@@ -630,7 +639,6 @@ const FactForm = ({
     const res = await getDetailsFacts(String(fact?._id));
 
     const filter = res.data.map((detail: any) => {
-      console.log(res.data);
       return {
         fact: detail.fact.cod_fact,
         cod_internal: detail.product.cod_internal,
@@ -1659,6 +1667,7 @@ const FactForm = ({
                     >
                       Realizar Venta
                     </Button>
+                    {loader}
                   </div>
                 </div>
               </div>
