@@ -8,10 +8,12 @@ import { AuthContext } from "../../../../context/auth";
 import { getModuleByMenu } from "../../../../api/module/module";
 
 const ModelListActives = ({
+  item,
   model,
   deleteModel,
   openModalRE,
 }: {
+  item: number;
   model: Model;
   deleteModel: (id: string) => void;
   openModalRE: (props: boolean, value?: any) => void;
@@ -41,7 +43,7 @@ const ModelListActives = ({
             className={styles.table__td}
             onClick={() => openModalRE(true, model)}
           >
-            {model._id}
+            {item}
           </td>
           <td
             className={styles.table__td}
@@ -66,7 +68,7 @@ const ModelListActives = ({
         </tr>
       ) : (
         <tr>
-          <td>{model._id}</td>
+          <td>{item}</td>
           <td>{model.name}</td>
           <td
             className={`${styles.table__td} ${styles["table--center"]}`}

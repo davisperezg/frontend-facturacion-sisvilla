@@ -187,7 +187,7 @@ const DetailItem = ({
               value={product.price}
               type="number"
               step="0.01"
-              min="1"
+              min="0.00"
               disabled={view ? true : false}
               onChange={(e) => {
                 const element = list.map((res: any) => {

@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useContext } from "react";
+import { useCallback, useState, useEffect, useContext, useMemo } from "react";
 import { Alert, Button, Card, Table } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 import {
@@ -8,6 +8,8 @@ import {
   restoreMark,
 } from "../../api/mark/mark";
 import { getModuleByMenu } from "../../api/module/module";
+import PaginationComponent from "../../components/DatatableComponent/Pagination/Pagination";
+import Search from "../../components/DatatableComponent/Search/Search";
 import MarkForm from "../../components/MarkComponent/Form/MarkForm";
 import MarkListActives from "../../components/MarkComponent/List/Actives/MarkListActives";
 import MarkListRemoves from "../../components/MarkComponent/List/Removes/MarkListRemoves";
@@ -31,6 +33,10 @@ const MarkScreen = () => {
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
   const [message, setMessage] = useState<IAlert>(initialState);
+  const [totalItems, setTotalItems] = useState(0);
+  const ITEMS_PER_PAGE = 50;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
 
   const getMyModule = useCallback(async () => {
     const mymodule = await getModuleByMenu(getNameLocation);
@@ -113,6 +119,31 @@ const MarkScreen = () => {
     getMyModule();
   }, [listMarks, listMarkDeleted, getMyModule, resource]);
 
+  const marksFiltered = useMemo(() => {
+    let computedMarks = marks! || [];
+
+    if (search) {
+      computedMarks = computedMarks.filter((mark) =>
+        mark.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    setTotalItems(computedMarks.length);
+
+    //Current Page slice
+    return computedMarks.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+    );
+  }, [marks, currentPage, search]);
+
+  const onSearch = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1);
+  };
+
+  const onPageChange = (page: number) => setCurrentPage(page);
+
   return (
     <>
       <Card>
@@ -166,43 +197,68 @@ const MarkScreen = () => {
           )}
 
           {resource && resource.canRead && (
-            <Table
-              striped
-              bordered
-              hover
-              responsive="sm"
-              className={styles.table}
-            >
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Nombre</th>
-                  <th className={`${styles["table--center"]}`}>Estado</th>
-                  {resource && resource.canDelete && (
-                    <th className={`${styles["table--center"]}`}>Eliminar</th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {marks.map((mark) => (
-                  <MarkListActives
-                    key={mark._id}
-                    mark={mark}
-                    openModalRE={openModalRE}
-                    deleteMark={_deleteMark}
-                  />
-                ))}
-              </tbody>
-              <tfoot>
-                {removes.map((remove) => (
-                  <MarkListRemoves
-                    key={remove._id}
-                    remove={remove}
-                    restoreMark={_restoreMark}
-                  />
-                ))}
-              </tfoot>
-            </Table>
+            <>
+              <div className={styles.contentSearch}>
+                <div className={styles.contentSearch__search}>
+                  <Search onSearch={onSearch} placeholder="Buscar marca" />
+                </div>
+              </div>
+              <div
+                className="mb-3"
+                style={{ display: "flex", justifyContent: "space-between" }}
+              >
+                <PaginationComponent
+                  total={totalItems}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  currentPage={currentPage}
+                  onPageChange={onPageChange}
+                />
+                <div style={{ display: "flex", alignItems: "flex-end" }}>
+                  <span style={{ marginLeft: 5 }}>
+                    Hay un total de{" "}
+                    {search ? marksFiltered.length : marks.length} registros
+                  </span>
+                </div>
+              </div>
+              <Table
+                striped
+                bordered
+                hover
+                responsive="sm"
+                className={styles.table}
+              >
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th className={`${styles["table--center"]}`}>Estado</th>
+                    {resource && resource.canDelete && (
+                      <th className={`${styles["table--center"]}`}>Eliminar</th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {marksFiltered.map((mark, item: number) => (
+                    <MarkListActives
+                      item={item + 1}
+                      key={mark._id}
+                      mark={mark}
+                      openModalRE={openModalRE}
+                      deleteMark={_deleteMark}
+                    />
+                  ))}
+                </tbody>
+                <tfoot>
+                  {removes.map((remove) => (
+                    <MarkListRemoves
+                      key={remove._id}
+                      remove={remove}
+                      restoreMark={_restoreMark}
+                    />
+                  ))}
+                </tfoot>
+              </Table>
+            </>
           )}
         </Card.Body>
       </Card>

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Alert, Button, Card, Table } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 import {
@@ -8,6 +8,8 @@ import {
   restoreModel,
 } from "../../api/model/model";
 import { getModuleByMenu } from "../../api/module/module";
+import PaginationComponent from "../../components/DatatableComponent/Pagination/Pagination";
+import Search from "../../components/DatatableComponent/Search/Search";
 import ModelForm from "../../components/ModelComponent/Form/ModelForm";
 import ModelListActives from "../../components/ModelComponent/List/Actives/ModelListActives";
 import ModelListRemoves from "../../components/ModelComponent/List/Removes/ModelListRemoves";
@@ -31,6 +33,10 @@ const ModelScreen = () => {
   const location = useLocation();
   const getNameLocation = location.pathname.slice(1);
   const [message, setMessage] = useState<IAlert>(initialState);
+  const [totalItems, setTotalItems] = useState(0);
+  const ITEMS_PER_PAGE = 50;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
 
   const getMyModule = useCallback(async () => {
     const mymodule = await getModuleByMenu(getNameLocation);
@@ -114,10 +120,35 @@ const ModelScreen = () => {
     getMyModule();
   }, [listModels, listModelDeleted, getMyModule, resource]);
 
+  const modelsFiltered = useMemo(() => {
+    let computedModels = models! || [];
+
+    if (search) {
+      computedModels = computedModels.filter((model) =>
+        model.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    setTotalItems(computedModels.length);
+
+    //Current Page slice
+    return computedModels.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+    );
+  }, [models, currentPage, search]);
+
+  const onSearch = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1);
+  };
+
+  const onPageChange = (page: number) => setCurrentPage(page);
+
   return (
     <>
       <Card>
-        <Card.Header as="h5">Lista de Categoria</Card.Header>
+        <Card.Header as="h5">Lista de Categoría</Card.Header>
         <Card.Body>
           {message.type && (
             <Alert variant={message.type}>{message.message}</Alert>
@@ -166,43 +197,68 @@ const ModelScreen = () => {
             )
           )}
           {resource && resource.canRead && (
-            <Table
-              striped
-              bordered
-              hover
-              responsive="sm"
-              className={styles.table}
-            >
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Nombre</th>
-                  <th className={`${styles["table--center"]}`}>Estado</th>
-                  {resource && resource.canDelete && (
-                    <th className={`${styles["table--center"]}`}>Eliminar</th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {models.map((model) => (
-                  <ModelListActives
-                    key={model._id}
-                    model={model}
-                    openModalRE={openModalRE}
-                    deleteModel={_deleteModel}
-                  />
-                ))}
-              </tbody>
-              <tfoot>
-                {removes.map((remove) => (
-                  <ModelListRemoves
-                    key={remove._id}
-                    remove={remove}
-                    restoreModel={_restoreMark}
-                  />
-                ))}
-              </tfoot>
-            </Table>
+            <>
+              <div className={styles.contentSearch}>
+                <div className={styles.contentSearch__search}>
+                  <Search onSearch={onSearch} placeholder="Buscar categoría" />
+                </div>
+              </div>
+              <div
+                className="mb-3"
+                style={{ display: "flex", justifyContent: "space-between" }}
+              >
+                <PaginationComponent
+                  total={totalItems}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  currentPage={currentPage}
+                  onPageChange={onPageChange}
+                />
+                <div style={{ display: "flex", alignItems: "flex-end" }}>
+                  <span style={{ marginLeft: 5 }}>
+                    Hay un total de{" "}
+                    {search ? modelsFiltered.length : models.length} registros
+                  </span>
+                </div>
+              </div>
+              <Table
+                striped
+                bordered
+                hover
+                responsive="sm"
+                className={styles.table}
+              >
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th className={`${styles["table--center"]}`}>Estado</th>
+                    {resource && resource.canDelete && (
+                      <th className={`${styles["table--center"]}`}>Eliminar</th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {modelsFiltered.map((model, item: number) => (
+                    <ModelListActives
+                      item={item + 1}
+                      key={model._id}
+                      model={model}
+                      openModalRE={openModalRE}
+                      deleteModel={_deleteModel}
+                    />
+                  ))}
+                </tbody>
+                <tfoot>
+                  {removes.map((remove) => (
+                    <ModelListRemoves
+                      key={remove._id}
+                      remove={remove}
+                      restoreModel={_restoreMark}
+                    />
+                  ))}
+                </tfoot>
+              </Table>
+            </>
           )}
         </Card.Body>
       </Card>

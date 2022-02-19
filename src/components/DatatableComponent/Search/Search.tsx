@@ -2,7 +2,13 @@ import { useState } from "react";
 import { Form } from "react-bootstrap";
 import { InputChange } from "../../../lib/types/types";
 
-const Search = ({ onSearch }: { onSearch: (value: string) => void }) => {
+const Search = ({
+  onSearch,
+  placeholder = "Buscar por producto o código interno",
+}: {
+  onSearch: (value: string) => void;
+  placeholder?: string;
+}) => {
   const [search, setSearch] = useState("");
 
   const onInputChange = (e: InputChange) => {
@@ -15,7 +21,7 @@ const Search = ({ onSearch }: { onSearch: (value: string) => void }) => {
       type="text"
       className="form-control"
       style={{ width: "280px" }}
-      placeholder="Buscar por producto o código interno"
+      placeholder={placeholder}
       value={search}
       onChange={onInputChange}
     />
