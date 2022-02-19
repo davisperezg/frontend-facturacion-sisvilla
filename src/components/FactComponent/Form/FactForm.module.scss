@@ -1,3 +1,5 @@
+@import "../../../variables";
+
 .tr {
   &:focus-visible {
     background: yellowgreen;
@@ -9,6 +11,29 @@
 
   &:visited {
     background: yellowgreen;
+  }
+}
+
+// .contentRuc {
+//   display: block;
+
+//   .contentData {
+//     display: flex;
+//     align-items: center;
+//     text-align: center;
+//     flex-direction: column;
+//     margin-right: 20px;
+//     border: 1px solid #000;
+//   }
+// }
+
+@include for_breakpoint(small_laptop) {
+  tbody {
+    line-height: 1;
+  }
+
+  .contentTable {
+    // font-size: 12px;
   }
 }
 

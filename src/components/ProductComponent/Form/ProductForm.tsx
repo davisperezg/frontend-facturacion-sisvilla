@@ -131,7 +131,13 @@ const ProductForm = ({
     setForm({
       ...form,
       [e.target.name]:
-        e.target.name === "stock" ? Number(e.target.value) : e.target.value,
+        e.target.name === "stock"
+          ? Number(e.target.value)
+          : e.target.name === "price"
+          ? Number(e.target.value)
+          : e.target.name === "price_c"
+          ? Number(e.target.value)
+          : e.target.value,
     });
   };
 

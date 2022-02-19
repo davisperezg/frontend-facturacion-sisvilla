@@ -5,6 +5,7 @@ import { AuthContext } from "../../context/auth";
 import { User } from "../../interface/User";
 import ListModule from "./ListModule";
 import { Module } from "../../interface/Module";
+import styles2 from "../HeaderComponent/Header.module.scss";
 
 const Aside = () => {
   const { user } = useContext(AuthContext);
@@ -19,13 +20,17 @@ const Aside = () => {
   }, [listModules]);
 
   return (
-    <aside className={styles.aside}>
-      <Accordion flush>
-        {modules.map((mod: any) => (
-          <ListModule key={mod._id} mod={mod} />
-        ))}
-      </Accordion>
-    </aside>
+    <>
+      <input type="checkbox" id={styles2.btn_hamburger} />
+      <aside className={styles2.asidePrincipal}>
+        {/* <p className={styles2.kk}>aa</p> */}
+        <Accordion>
+          {modules.map((mod: any) => (
+            <ListModule key={mod._id} mod={mod} />
+          ))}
+        </Accordion>
+      </aside>
+    </>
   );
 };
 

@@ -1,5 +1,7 @@
+@import "../../variables";
+
 .aside {
-  width: 280px;
+  width: $width-aside;
   margin-top: 80px;
   position: absolute;
   top: 0;

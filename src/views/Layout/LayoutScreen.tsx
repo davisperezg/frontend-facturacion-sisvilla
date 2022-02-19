@@ -22,6 +22,7 @@ import { AuthContext } from "../../context/auth";
 import { BsFillHouseDoorFill } from "react-icons/bs";
 import ConsultFactScreen from "../Consults/Facts/ConsultFactScreen";
 import ConsultProductScreen from "../Consults/Products/ConsultProduct";
+import styles2 from "../../components/HeaderComponent/Header.module.scss";
 
 const LayoutScreen = () => {
   const { user } = useContext(AuthContext);
@@ -30,20 +31,10 @@ const LayoutScreen = () => {
     <>
       <Header />
       <Aside />
-      <div
-        style={{
-          marginLeft: 240,
-          position: "absolute",
-          left: 50,
-          marginTop: 10,
-          display: "flex",
-          alignItems: "center",
-          color: "red",
-        }}
-      >
+      <div className={styles2.sedePrincipal}>
         <BsFillHouseDoorFill /> <strong> SEDE: {user.area.name}</strong>
       </div>
-      <main className={styles.main}>
+      <main className={styles2.mainPrincipal}>
         <Routes>
           {/* pendiente de graficar*/}
           <Route path="/dashboard" element={<Dashboard />} />

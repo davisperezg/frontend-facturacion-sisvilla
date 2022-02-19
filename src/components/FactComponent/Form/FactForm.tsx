@@ -1007,7 +1007,7 @@ const FactForm = ({
                   </div>
                 </div>
               </div>
-              <Table striped bordered hover responsive="sm" className="mt-3">
+              <Table striped bordered hover responsive className="mt-3">
                 <thead>
                   <tr>
                     <th>Item</th>
@@ -1261,73 +1261,69 @@ const FactForm = ({
 
             <div style={{ width: "100%", display: "flex" }}>
               <div style={{ width: "65%" }}>
-                <Row>
-                  <Col xs={12} md={8}>
-                    <Row>
-                      <Form.Group md="3" as={Col} controlId="formGridFech">
-                        <Form.Label>Fecha</Form.Label>
-                        <Form.Control
-                          name="fech"
-                          value={
-                            fact?._id
-                              ? formatDate(new Date(String(fact?.createdAt)))
-                              : getDate()
-                          }
-                          type="text"
-                          disabled
-                        />
-                      </Form.Group>
-                      <Form.Group md="8" as={Col} controlId="formGridType">
-                        <Form.Label>Tipo de pago</Form.Label>
-                        <Form.Select
-                          name="payment_type"
-                          onChange={(e) => {
-                            if (e.target.value === "CREDITO") {
-                              setForm({
-                                ...form,
-                                payment_type: e.target.value,
-                                way_to_pay: "POR PAGAR",
-                              });
-                            } else {
-                              setForm({
-                                ...form,
-                                payment_type: e.target.value,
-                                way_to_pay: "EFECTIVO COMPLETO",
-                              });
-                            }
-                          }}
-                          value={form?.payment_type}
-                          isInvalid={!!errors?.payment_type}
-                          disabled={fact?._id ? true : false}
-                        >
-                          <option value="CONTADO">CONTADO</option>
-                          <option value="CREDITO">CREDITO</option>
-                        </Form.Select>
-                      </Form.Group>
-                    </Row>
+                <Row className="mb-3" style={{ marginRight: 5 }}>
+                  <Col xs={4} md={4} sm={12}>
+                    <Form.Group md="12" as={Col} controlId="formGridFech">
+                      <Form.Label>Fecha</Form.Label>
+                      <Form.Control
+                        name="fech"
+                        value={
+                          fact?._id
+                            ? formatDate(new Date(String(fact?.createdAt)))
+                            : getDate()
+                        }
+                        type="text"
+                        disabled
+                      />
+                    </Form.Group>
                   </Col>
-                  <Col xs={6} md={4}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        textAlign: "center",
-                        flexDirection: "column",
-                        marginRight: 20,
-                        border: "1px solid #000",
-                      }}
-                    >
+                  <Col xs={8} md={6} sm={12}>
+                    <Form.Group md="12" as={Col} controlId="formGridType">
+                      <Form.Label>Tipo de pago</Form.Label>
+                      <Form.Select
+                        name="payment_type"
+                        onChange={(e) => {
+                          if (e.target.value === "CREDITO") {
+                            setForm({
+                              ...form,
+                              payment_type: e.target.value,
+                              way_to_pay: "POR PAGAR",
+                            });
+                          } else {
+                            setForm({
+                              ...form,
+                              payment_type: e.target.value,
+                              way_to_pay: "EFECTIVO COMPLETO",
+                            });
+                          }
+                        }}
+                        value={form?.payment_type}
+                        isInvalid={!!errors?.payment_type}
+                        disabled={fact?._id ? true : false}
+                      >
+                        <option value="CONTADO">CONTADO</option>
+                        <option value="CREDITO">CREDITO</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                  <Col xs={2} md={2} sm={12}>
+                    <Form.Group md="12" as={Col} controlId="formGridNro">
+                      GUIA DE VENTA <strong>N° 000{numberFact}</strong>
+                    </Form.Group>
+                  </Col>
+                  {/* <div className={styles.contentRuc}>
+                    <div className={styles.contentData}>
                       <h3>RUC: 10443373824</h3>
                       <h3>
                         <strong>GUIA DE VENTA</strong>
                       </h3>
                       <h3>N° 000{numberFact}</h3>
                     </div>
-                  </Col>
+                  </div> */}
                 </Row>
 
-                <Row className="mb-3">
-                  <Col xs={6} md={4}>
+                <Row className="mb-3" style={{ marginRight: 5 }}>
+                  <Col xs={6} md={6} sm={12}>
                     <Form.Group md="12" as={Col} controlId="formGridFech">
                       <Form.Label>
                         Cliente{" "}
@@ -1363,7 +1359,7 @@ const FactForm = ({
                       />
                     </Form.Group>
                   </Col>
-                  <Col xs={6} md={4}>
+                  <Col xs={6} md={6} sm={12}>
                     <Form.Group md="12" as={Col} controlId="formGridType">
                       <Form.Label>Forma de pago</Form.Label>
                       <Form.Select
@@ -1401,6 +1397,7 @@ const FactForm = ({
                         flexDirection: "column",
                         alignItems: "flex-end",
                         marginRight: 20,
+                        marginTop: 20,
                       }}
                     >
                       <Form.Control
@@ -1415,14 +1412,12 @@ const FactForm = ({
                         onKeyDown={handleKeyDownInput}
                       />
                     </div>
-                    <div style={{ marginRight: 20 }}>
-                      <Table
-                        striped
-                        bordered
-                        hover
-                        responsive="sm"
-                        className="mt-3"
-                      >
+
+                    <div
+                      className={styles.contentTable}
+                      style={{ marginRight: 20 }}
+                    >
+                      <Table striped bordered hover responsive className="mt-3">
                         <TableHeader
                           headers={
                             user.role.name === "SUPER ADMINISTRADOR"
@@ -1480,20 +1475,6 @@ const FactForm = ({
                           })}
                         </tbody>
                       </Table>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          justifyContent: "flex-end",
-                        }}
-                      >
-                        <PaginationComponent
-                          total={totalItems}
-                          itemsPerPage={ITEMS_PER_PAGE}
-                          currentPage={currentPage}
-                          onPageChange={onPageChange}
-                        />
-                      </div>
                     </div>
                   </Col>
                 </Row>
@@ -1665,7 +1646,7 @@ const FactForm = ({
                       disabled={disabled}
                       type="submit"
                     >
-                      Realizar Venta
+                      Generar Venta
                     </Button>
                     {loader}
                   </div>
