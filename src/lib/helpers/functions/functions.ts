@@ -14,7 +14,7 @@ export const randomColors = () => {
 
 export const formatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
+  maximumFractionDigits: 4,
 });
 
 export const formatDate = (date: Date) => {

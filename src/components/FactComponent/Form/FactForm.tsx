@@ -707,8 +707,9 @@ const FactForm = ({
               <tr>
                 <th className={styles.cantidad}>CANT</th>
                 <th className={styles.producto}>PROD.</th>
+                <th className={styles.pu}>P. U.</th>
                 <th className={styles.descuento}>DESC.</th>
-                <th className={styles.precio}>S/</th>
+                <th className={styles.total}>S/</th>
               </tr>
             </thead>
             <tbody>
@@ -717,22 +718,29 @@ const FactForm = ({
                   <tr key={i}>
                     <td className={styles.cantidad}>{dtls.cantidad}</td>
                     <td className={styles.producto}>{dtls.producto}</td>
+                    <td className={styles.pu}>
+                      {formatter.format(dtls.precio)}
+                    </td>
                     <td className={styles.descuento}>
                       {formatter.format(dtls.descuento)}
                     </td>
-                    <td className={styles.precio}>
+                    <td className={styles.total}>
                       {/* dtls.precio - dtls.descuento DESCUENTO APLICADO */}
                       {/* dtls.precio DESCUENTO NO APLICADO */}
-                      {formatter.format(dtls.precio)}
+                      {formatter.format(
+                        dtls.precio * dtls.cantidad - dtls.descuento
+                      )}
                     </td>
                   </tr>
                 );
               })}
-              <tr>
+              <tr className={styles.ticket__borderTR}>
                 <td></td>
+
                 <td>
                   <strong>SUB TOTAL</strong>
                 </td>
+                <td></td>
                 <td></td>
                 <td>
                   <div className={styles.iconAndSoles}>
@@ -752,6 +760,7 @@ const FactForm = ({
                       <strong>DESCUENTO</strong>
                     </td>
                     <td></td>
+                    <td></td>
                     <td className={styles.ticket__soles}>
                       <div className={styles.iconAndSoles}>
                         <div>S/</div>
@@ -768,6 +777,7 @@ const FactForm = ({
                     <td>
                       <strong>TOTAL</strong>
                     </td>
+                    <td></td>
                     <td></td>
                     <td className={styles.ticket__soles}>
                       <div className={styles.iconAndSoles}>
@@ -786,6 +796,7 @@ const FactForm = ({
                       <strong>PAGO CON</strong>
                     </td>
                     <td></td>
+                    <td></td>
                     <td className={styles.ticket__soles}>
                       <div className={styles.iconAndSoles}>
                         <div>S/</div>
@@ -800,6 +811,7 @@ const FactForm = ({
                     <td>
                       <strong>VUELTO</strong>
                     </td>
+                    <td></td>
                     <td></td>
                     <td className={styles.ticket__soles}>
                       <div className={styles.iconAndSoles}>
@@ -834,6 +846,7 @@ const FactForm = ({
                       <strong>DESCUENTO</strong>
                     </td>
                     <td></td>
+                    <td></td>
                     <td className={styles.ticket__soles}>
                       <div className={styles.iconAndSoles}>
                         <div>S/</div>
@@ -850,6 +863,7 @@ const FactForm = ({
                     <td>
                       <strong>TOTAL</strong>
                     </td>
+                    <td></td>
                     <td></td>
                     <td className={styles.ticket__soles}>
                       <div className={styles.iconAndSoles}>
@@ -1043,7 +1057,7 @@ const FactForm = ({
                     <td></td>
                     <td></td>
                     <td></td>
-                    {!fact?._id && <td></td>}
+                    {user.role.name === "SUPER ADMINISTRADOR" && <td></td>}
                     <td>
                       <strong>SubTotal</strong>
                     </td>
@@ -1056,7 +1070,7 @@ const FactForm = ({
                     <td></td>
                     <td></td>
                     <td></td>
-                    {!fact?._id && <td></td>}
+                    {user.role.name === "SUPER ADMINISTRADOR" && <td></td>}
                     <td>
                       <strong>Descuento General</strong>
                     </td>
@@ -1069,7 +1083,7 @@ const FactForm = ({
                     <td></td>
                     <td></td>
                     <td></td>
-                    {!fact?._id && <td></td>}
+                    {user.role.name === "SUPER ADMINISTRADOR" && <td></td>}
                     <td>
                       <strong>Total</strong>
                     </td>
