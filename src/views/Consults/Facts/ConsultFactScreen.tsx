@@ -233,12 +233,24 @@ const ConsultFactScreen = () => {
     };
   });
 
-  const dataXML = factsFiltered.map((fact: any, i: number) => {
-    return {
-      ...fact,
-      item: i + 1,
-    };
-  });
+  // {facts.length >= ITEMS_PER_PAGE
+  //   ? facts.length
+  //   : factsFiltered.length}
+
+  const dataXML =
+    facts.length >= ITEMS_PER_PAGE
+      ? facts.map((fact: any, i: number) => {
+          return {
+            ...fact,
+            item: i + 1,
+          };
+        })
+      : factsFiltered.map((fact: any, i: number) => {
+          return {
+            ...fact,
+            item: i + 1,
+          };
+        });
 
   return (
     <Card>
@@ -317,7 +329,11 @@ const ConsultFactScreen = () => {
           />
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             <span style={{ marginLeft: 5 }}>
-              Se encontraron un total de {factsFiltered.length} registros
+              Se encontraron un total de{" "}
+              {facts.length >= ITEMS_PER_PAGE
+                ? facts.length
+                : factsFiltered.length}{" "}
+              registros
             </span>
           </div>
         </div>
@@ -353,7 +369,7 @@ const ConsultFactScreen = () => {
               <CSVLink
                 data={dataXML}
                 headers={headerXML}
-                filename="ventas.csv"
+                filename="reporte-ventas.csv"
                 target="_blank"
                 separator={";"}
               >

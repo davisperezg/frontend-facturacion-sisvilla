@@ -28,11 +28,35 @@ export const formatDate = (date: Date) => {
   return (
     date.getDate() +
     "/" +
-    date.getMonth() +
-    1 +
+    (date.getMonth() + 1 < 10
+      ? "0" + (date.getMonth() + 1)
+      : date.getMonth() + 1) +
     "/" +
     date.getFullYear() +
     "  " +
     strTime
   );
+};
+
+//usandose para la consulta producto
+export const convertDateToUTCLocal = (inputDate: Date) => {
+  const date = new Date(
+    inputDate.getTime() + inputDate.getTimezoneOffset() * 60000
+  );
+  return (
+    date.getDate() +
+    "/" +
+    (date.getMonth() + 1 < 10
+      ? "0" + (date.getMonth() + 1)
+      : date.getMonth() + 1) +
+    "/" +
+    date.getFullYear()
+  );
+};
+
+//usandose para el input del form producto
+export const formatFech = (inputDate: Date) => {
+  const isoDate = inputDate.toISOString();
+
+  return isoDate.substring(0, 10);
 };

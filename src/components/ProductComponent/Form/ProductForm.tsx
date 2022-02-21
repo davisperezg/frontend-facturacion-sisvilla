@@ -22,6 +22,8 @@ import { getUnits } from "../../../api/unit/unit";
 import { AuthContext } from "../../../context/auth";
 import { useLocation } from "react-router-dom";
 import { getModuleByMenu } from "../../../api/module/module";
+import { formatFech } from "../../../lib/helpers/functions/functions";
+import { format, compareAsc } from "date-fns";
 
 const animatedComponents = makeAnimated();
 
@@ -251,6 +253,9 @@ const ProductForm = ({
         stock: product?.stock,
         price: product?.price,
         price_c: product?.price_c,
+        fecVen: product?.fecVen
+          ? formatFech(new Date(product?.fecVen))
+          : undefined,
       });
     }
   }, [
@@ -264,6 +269,7 @@ const ProductForm = ({
     product?.stock,
     product?.price,
     product?.price_c,
+    product?.fecVen,
   ]);
 
   useEffect(() => {
@@ -416,36 +422,53 @@ const ProductForm = ({
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          <Form.Group className="mb-3" as={Col} controlId="formGridUnit">
-            <Form.Label>
-              Unidad de medida <strong className="text-danger">*</strong>
-            </Form.Label>
-            <Form.Control
-              name="unit"
-              type="hidden"
-              isInvalid={!!errors?.unit}
-            />
-            <Select
-              placeholder="[Seleccione unidad de medida]"
-              closeMenuOnSelect={true}
-              components={animatedComponents}
-              value={
-                form.unit === "" ? [] : { label: form.unit, value: form.unit }
-              }
-              onChange={(values: any) => {
-                const { value } = values;
-                setForm({ ...form, unit: value });
-                setErrors({
-                  ...errors,
-                  unit: null,
-                });
-              }}
-              options={units}
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors?.unit}
-            </Form.Control.Feedback>
-          </Form.Group>
+          <Row>
+            <Form.Group className="mb-3" as={Col} controlId="formGridUnit">
+              <Form.Label>
+                Unidad de medida <strong className="text-danger">*</strong>
+              </Form.Label>
+              <Form.Control
+                name="unit"
+                type="hidden"
+                isInvalid={!!errors?.unit}
+              />
+              <Select
+                placeholder="[Seleccione unidad de medida]"
+                closeMenuOnSelect={true}
+                components={animatedComponents}
+                value={
+                  form.unit === "" ? [] : { label: form.unit, value: form.unit }
+                }
+                onChange={(values: any) => {
+                  const { value } = values;
+                  setForm({ ...form, unit: value });
+                  setErrors({
+                    ...errors,
+                    unit: null,
+                  });
+                }}
+                options={units}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors?.unit}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group className="mb-3" as={Col} controlId="formGridFecVen">
+              <Form.Label>Fecha de vencimiento</Form.Label>
+              <Form.Control
+                name="fecVen"
+                type="date"
+                value={String(form.fecVen)}
+                onChange={handleChange}
+                isInvalid={!!errors?.fecVen}
+              />
+
+              <Form.Control.Feedback type="invalid">
+                {errors?.fecVen}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Row>
+
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridStock">
               <Form.Label>Stock</Form.Label>
