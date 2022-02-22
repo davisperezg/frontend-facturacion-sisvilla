@@ -49,11 +49,14 @@ const ConsultProductScreen = () => {
   const ITEMS_PER_PAGE = 50;
   const [resource] = useResource();
   const [message, setMessage] = useState<IAlert>(initialStateAlert);
+  const [cantProducts, setCantProduct] = useState(0);
+  const [exportXML, setExportXML] = useState([]);
 
   const onSorting = (field: string, order: string) =>
     setSorting({ field, order });
 
   const handleChange = (e: any) => {
+    setCurrentPage(1);
     setMessage(initialStateAlert);
     setConsult({ ...consult, [e.target.name]: e.target.checked });
   };
@@ -229,6 +232,9 @@ const ConsultProductScreen = () => {
       });
     }
 
+    setCantProduct(computedProducts.length);
+    setExportXML(computedProducts);
+
     if (resource.canRead)
       return computedProducts.slice(
         (currentPage - 1) * ITEMS_PER_PAGE,
@@ -269,38 +275,19 @@ const ConsultProductScreen = () => {
     };
   });
 
-  const dataXML =
-    products.length >= ITEMS_PER_PAGE
-      ? products.map((product: any, i: number) => {
-          return {
-            ...product,
-            area: product.area.name,
-            cod_internal: product.cod_internal.slice(3),
-            fecVen: product.fecVen
-              ? formatFech(new Date(String(product.fecVen)))
-              : "Sin fecha de vencimiento",
-            unit: product.unit.name,
-            daysVen: product.daysVen
-              ? product.daysVen
-              : "Sin fecha de vencimiento",
-            item: i + 1,
-          };
-        })
-      : productsFiltered.map((product: any, i: number) => {
-          return {
-            ...product,
-            area: product.area.name,
-            cod_internal: product.cod_internal.slice(3),
-            fecVen: product.fecVen
-              ? formatFech(new Date(String(product.fecVen)))
-              : "Sin fecha de vencimiento",
-            unit: product.unit.name,
-            daysVen: product.daysVen
-              ? product.daysVen
-              : "Sin fecha de vencimiento",
-            item: i + 1,
-          };
-        });
+  const dataXML = exportXML.map((product: any, i: number) => {
+    return {
+      ...product,
+      area: product.area.name,
+      cod_internal: product.cod_internal.slice(3),
+      fecVen: product.fecVen
+        ? formatFech(new Date(String(product.fecVen)))
+        : "Sin fecha de vencimiento",
+      unit: product.unit.name,
+      daysVen: product.daysVen ? product.daysVen : "Sin fecha de vencimiento",
+      item: i + 1,
+    };
+  });
 
   return (
     <Card>
@@ -397,6 +384,7 @@ const ConsultProductScreen = () => {
               label="Buscar productos habilitados"
               name="habs"
               onChange={(e) => {
+                setCurrentPage(1);
                 setConsult({
                   ...consult,
                   habs: {
@@ -416,6 +404,7 @@ const ConsultProductScreen = () => {
               label="Buscar productos vencidos"
               name="venc"
               onChange={(e) => {
+                setCurrentPage(1);
                 setConsult({
                   ...consult,
                   venc: {
@@ -435,6 +424,7 @@ const ConsultProductScreen = () => {
               label="Buscar productos por vencer"
               name="xvenc"
               onChange={(e) => {
+                setCurrentPage(1);
                 setConsult({
                   ...consult,
                   xvenc: {
@@ -454,6 +444,7 @@ const ConsultProductScreen = () => {
               label="Buscar productos sin fecha de vencimiento"
               name="nofec"
               onChange={(e) => {
+                setCurrentPage(1);
                 setConsult({
                   ...consult,
                   nofec: {
@@ -478,11 +469,7 @@ const ConsultProductScreen = () => {
           />
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             <span style={{ marginLeft: 5 }}>
-              Se encontraron un total de{" "}
-              {products.length >= ITEMS_PER_PAGE
-                ? products.length
-                : productsFiltered.length}{" "}
-              registros
+              Se encontraron un total de {cantProducts} registros
             </span>
           </div>
         </div>
@@ -510,7 +497,7 @@ const ConsultProductScreen = () => {
                 </Form.Label>
               </CSVLink>
             </Form.Group>
-            <Table striped bordered hover responsive="sm">
+            <Table striped bordered hover responsive>
               <TableHeader headers={headers} onSorting={onSorting} />
               <tbody>
                 {productsFiltered.map((product: any, i: number) => (

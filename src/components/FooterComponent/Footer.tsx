@@ -5,7 +5,7 @@ const Footer = () => {
     <footer className={styles.footer}>
       <div className={styles.footer__copyright}>
         © 2020-2021 by Kemay Technology. Todos los derechos reservados. Version:
-        0.1.10 | Powered by @davisperezg
+        0.1.11 | Powered by @davisperezg
       </div>
     </footer>
   );

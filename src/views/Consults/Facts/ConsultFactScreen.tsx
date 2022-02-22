@@ -56,6 +56,8 @@ const ConsultFactScreen = () => {
   const [priceC, setPriceC] = useState(0);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cantFacts, setCantFacts] = useState(0);
+  const [exportXML, setExportXML] = useState([]);
 
   const onSorting = (field: string, order: string) =>
     setSorting({ field, order });
@@ -191,6 +193,9 @@ const ConsultFactScreen = () => {
         });
     }
 
+    setCantFacts(computedFacts.length);
+    setExportXML(computedFacts);
+
     if (resource.canRead)
       return computedFacts.slice(
         (currentPage - 1) * ITEMS_PER_PAGE,
@@ -237,20 +242,12 @@ const ConsultFactScreen = () => {
   //   ? facts.length
   //   : factsFiltered.length}
 
-  const dataXML =
-    facts.length >= ITEMS_PER_PAGE
-      ? facts.map((fact: any, i: number) => {
-          return {
-            ...fact,
-            item: i + 1,
-          };
-        })
-      : factsFiltered.map((fact: any, i: number) => {
-          return {
-            ...fact,
-            item: i + 1,
-          };
-        });
+  const dataXML = exportXML.map((fact: any, i: number) => {
+    return {
+      ...fact,
+      item: i + 1,
+    };
+  });
 
   return (
     <Card>
@@ -329,11 +326,7 @@ const ConsultFactScreen = () => {
           />
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             <span style={{ marginLeft: 5 }}>
-              Se encontraron un total de{" "}
-              {facts.length >= ITEMS_PER_PAGE
-                ? facts.length
-                : factsFiltered.length}{" "}
-              registros
+              Se encontraron un total de {cantFacts} registros
             </span>
           </div>
         </div>
@@ -382,7 +375,7 @@ const ConsultFactScreen = () => {
               </CSVLink>
             </Form.Group>
 
-            <Table striped bordered hover responsive="sm">
+            <Table striped bordered hover responsive>
               <TableHeader headers={headers} onSorting={onSorting} />
               <tbody>
                 {factsFiltered.map((fact: any, i: number) => (
