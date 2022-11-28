@@ -22,6 +22,17 @@ You will also see any lint errors in the console.
 - Typescript
 - Axios
 
+# Modulos del proyecto:
+
+- Administración del sistema(Implementado con el sistema RPUM v1)
+  - Modulos
+  - Permisos
+  - Roles
+  - Usuarios 
+- Bootstrap
+- Typescript
+- Axios
+
 # Imagenes del proyecto
 
 *LOGIN
