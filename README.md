@@ -24,21 +24,21 @@ You will also see any lint errors in the console.
 
 # Modulos del proyecto:
 
-- ### [Administración del sistema(Implementado con el sistema RPUM v1)](#Imagenes-del-proyecto)
+- ### [Administración del sistema(Implementado con el sistema RPUM v1)](#Opciones-de-configuración)
   - Modulos
   - Permisos
   - Roles
   - Usuarios 
-- ### Clientes
+- ### [Clientes](#Modulo-Clientes)
   - Gestión de clientes
-- ### Compras
+- ### [Compras](#Modulo-Compras)
   - Proveedores
-- ### Comprobantes
+- ### [Comprobantes](#Modulo-Comprobantes)
   - Realizar ventas
-- ### Consultas y reportes
+- ### [Consultas y reportes](#Modulo-Consultas-y-reportes)
   - Consultar productos
   - Consultar ventas
-- ### Inventario
+- ### [Inventario](#Modulo-Inventario)
   - Categoría 
   - Marcas
   - Productos
@@ -145,6 +145,8 @@ You will also see any lint errors in the console.
  <img src="https://i.ibb.co/FzNgQYd/Listado-y-registro-de-proveedores.png" alt="Listado-y-registro-de-proveedores" border="0">
 </p>
 
+# Modulo Comprobantes
+
 *LISTA DE VENTAS
 <p align="center">
  <img src="https://i.ibb.co/0nwdkST/Lista-de-ventas.png" alt="Lista-de-ventas" border="0">
@@ -204,7 +206,6 @@ You will also see any lint errors in the console.
 
 # Modulo Inventario
 
-<div id="#a">a</div>
 *LISTA Y REGISTRO DE CATEGORIAS
 <p align="center">
   <img src="https://i.ibb.co/YtcShyz/Listado-y-registro-de-categorias.png" alt="Listado-y-registro-de-categorias" border="0">
