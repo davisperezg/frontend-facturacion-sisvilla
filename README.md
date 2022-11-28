@@ -29,9 +29,21 @@ You will also see any lint errors in the console.
   - Permisos
   - Roles
   - Usuarios 
-- Bootstrap
-- Typescript
-- Axios
+- Clientes
+  - Gestión de clientes
+- Compras
+  - Proveedores
+- Comprobantes
+  - Realizar ventas
+- Consultas y reportes
+  - Consultar productos
+  - Consultar ventas
+- Inventario
+  - Categoría 
+  - Marcas
+  - Productos
+  - Unidad de medida
+  
 
 # Imagenes del proyecto
 
