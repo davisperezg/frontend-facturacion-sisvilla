@@ -52,3 +52,27 @@ Imagenes del proyecto
   <img src="https://i.ibb.co/GR6nk1M/Login.png" alt="Login" border="0">
 </p>
 
+*MENU PRINCIPAL
+<p align="center">
+  <img src="https://i.ibb.co/Y3VC84y/Principal.png" alt="Principal" border="0">
+</p>
+
+*LISTADO DE SEDES
+<p align="center">
+  <img src="https://i.ibb.co/S7Z5d3B/Lista-de-sedes.png" alt="Lista-de-sedes" border="0">
+</p>
+
+*CREAR SEDE O AREA
+<p align="center">
+  <img src="https://i.ibb.co/b3CM50Y/Crear-sede-o-area.png" alt="Crear-sede-o-area" border="0">
+</p>
+
+*LISTADO DE SECUENCIAS POR DIFERENTES SEDES
+<p align="center">
+  <img src="https://i.ibb.co/0JQtR9v/Listado-de-secuencia-x-sede.png" alt="Listado-de-secuencia-x-sede" border="0">
+</p>
+
+*CREAR SECUENCIAS POR DIFERENTES SEDES
+<p align="center">
+  <img src="https://i.ibb.co/gThfSrB/Crear-secuencia-para-alguna-sede-o-area.png" alt="Crear-secuencia-para-alguna-sede-o-area" border="0">
+</p>
