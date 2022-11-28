@@ -157,11 +157,6 @@ You will also see any lint errors in the console.
  <img src="https://i.ibb.co/zrwwtgx/Realizar-una-venta.png" alt="Realizar-una-venta" border="0">
 </p>
 
-*REALIZAR VENTAS
-<p align="center">
- <img src="https://i.ibb.co/zrwwtgx/Realizar-una-venta.png" alt="Realizar-una-venta" border="0">
-</p>
-
 *REALIZAR VENTAS - el usuario puede modificar la cantidad, precio, descuento por producto o por total en la boleta
 <p align="center">
  <img src="https://i.ibb.co/7KqPfNk/Realizar-una-venta-puede-modificar-la-cantidad-precio-descuento-por-producto-o-hacer-descuento-por-b.png" alt="Realizar-una-venta-puede-modificar-la-cantidad-precio-descuento-por-producto-o-hacer-descuento-por-b" border="0">
