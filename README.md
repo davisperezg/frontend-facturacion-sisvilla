@@ -24,7 +24,7 @@ You will also see any lint errors in the console.
 
 # Modulos del proyecto:
 
-- ### <a href="/#a">Administración del sistema(Implementado con el sistema RPUM v1)</a>
+- ### [Administración del sistema(Implementado con el sistema RPUM v1)](#a)
   - Modulos
   - Permisos
   - Roles
