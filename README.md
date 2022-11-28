@@ -24,21 +24,21 @@ You will also see any lint errors in the console.
 
 # Modulos del proyecto:
 
-- Administración del sistema(Implementado con el sistema RPUM v1)
+- ### <a href="/#a">Administración del sistema(Implementado con el sistema RPUM v1)</a>
   - Modulos
   - Permisos
   - Roles
   - Usuarios 
-- Clientes
+- ### Clientes
   - Gestión de clientes
-- Compras
+- ### Compras
   - Proveedores
-- Comprobantes
+- ### Comprobantes
   - Realizar ventas
-- Consultas y reportes
+- ### Consultas y reportes
   - Consultar productos
   - Consultar ventas
-- Inventario
+- ### Inventario
   - Categoría 
   - Marcas
   - Productos
@@ -56,6 +56,8 @@ You will also see any lint errors in the console.
 <p align="center">
   <img src="https://i.ibb.co/Y3VC84y/Principal.png" alt="Principal" border="0">
 </p>
+
+# Opciones de configuración
 
 *LISTADO DE SEDES
 <p align="center">
@@ -76,6 +78,8 @@ You will also see any lint errors in the console.
 <p align="center">
   <img src="https://i.ibb.co/gThfSrB/Crear-secuencia-para-alguna-sede-o-area.png" alt="Crear-secuencia-para-alguna-sede-o-area" border="0">
 </p>
+
+# Modulo Administración del sistema
 
 *LISTA DE MODULOS
 <p align="center">
@@ -122,6 +126,8 @@ You will also see any lint errors in the console.
  <img src="https://i.ibb.co/23y70sC/CAMBIAR-PASS-EN-USUARIOS.png" alt="CAMBIAR-PASS-EN-USUARIOS" border="0">
 </p>
 
+# Modulo Clientes
+
 *LISTA DE CLIENTES
 <p align="center">
  <img src="https://i.ibb.co/GQMN3nY/Lista-de-clientes.png" alt="Lista-de-clientes" border="0">
@@ -131,6 +137,8 @@ You will also see any lint errors in the console.
 <p align="center">
  <img src="https://i.ibb.co/CWDpDNK/Crear-cliente-y-busqueda-en-la-consulta-x-DNI-RUC.png" alt="Crear-cliente-y-busqueda-en-la-consulta-x-DNI-RUC" border="0">
 </p>
+
+# Modulo Compras
 
 *LISTA Y REGISTRO DE PROVEEDORES
 <p align="center">
@@ -182,6 +190,8 @@ You will also see any lint errors in the console.
   <img src="https://i.ibb.co/YZb0N99/Realizar-una-venta-ventas-eliminadas-pasan-hacer-anuladas.png" alt="Realizar-una-venta-ventas-eliminadas-pasan-hacer-anuladas" border="0">
 </p>
 
+# Modulo Consultas y reportes
+
 *CONSULTA DE PRODUCTOS
 <p align="center">
  <img src="https://i.ibb.co/SVW27K1/Consultar-productos-x-diferentes-filtros.png" alt="Consultar-productos-x-diferentes-filtros" border="0">
@@ -192,6 +202,9 @@ You will also see any lint errors in the console.
   <img src="https://i.ibb.co/g4dV4rq/Consultar-ventas-x-rango-de-fechas-y-sedes.png" alt="Consultar-ventas-x-rango-de-fechas-y-sedes" border="0">
 </p>
 
+# Modulo Inventario
+
+<div id="#a">a</div>
 *LISTA Y REGISTRO DE CATEGORIAS
 <p align="center">
   <img src="https://i.ibb.co/YtcShyz/Listado-y-registro-de-categorias.png" alt="Listado-y-registro-de-categorias" border="0">
