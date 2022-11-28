@@ -76,3 +76,66 @@ Imagenes del proyecto
 <p align="center">
   <img src="https://i.ibb.co/gThfSrB/Crear-secuencia-para-alguna-sede-o-area.png" alt="Crear-secuencia-para-alguna-sede-o-area" border="0">
 </p>
+
+*LISTA DE MODULOS
+<p align="center">
+  <img src="https://i.ibb.co/L6Cv8y8/Lista-de-modulos.png" alt="Lista-de-modulos" border="0">
+</p>
+
+*CREAR MODULOS
+<p align="center">
+  <img src="https://i.ibb.co/9ybPHzB/Crear-modulo-con-menus-estaticos.png" alt="Crear-modulo-con-menus-estaticos" border="0">
+</p>
+
+*LISTA Y MODIFICACION DE PERMISOS X ROLES
+<p align="center">
+ <img src="https://i.ibb.co/6ZHjm31/Lista-y-modifica-los-permisos-por-roles.png" alt="Lista-y-modifica-los-permisos-por-roles" border="0">
+</p>
+
+*LISTA DE ROLES
+<p align="center">
+ <img src="https://i.ibb.co/c3kNHbP/Listado-de-roles.png" alt="Listado-de-roles" border="0">
+</p>
+
+*CREAR ROLES
+<p align="center">
+ <img src="https://i.ibb.co/Mprz5ZP/Crear-roles.png" alt="Crear-roles" border="0">
+</p>
+
+*LISTA DE USUARIOS
+<p align="center">
+ <img src="https://i.ibb.co/yBDsxPP/Lista-de-usuarios.png" alt="Lista-de-usuarios" border="0">
+</p>
+
+*CREAR USUARIOS
+<p align="center">
+ <img src="https://i.ibb.co/Fbjp9PG/Crear-usuarios.png" alt="Crear-usuarios" border="0">
+</p>
+
+*API EXTERNA PARA CONSULTA POR DNI Y RUC EN USUARIOS
+<p align="center">
+ <img src="https://i.ibb.co/3B7RjH7/API-CONSULTA-DNI-RUC-EN-USUARIOS.png" alt="API-CONSULTA-DNI-RUC-EN-USUARIOS" border="0">
+</p>
+
+*CAMBIAR CONTRASEÑA EN USUARIOS
+<p align="center">
+ <img src="https://i.ibb.co/23y70sC/CAMBIAR-PASS-EN-USUARIOS.png" alt="CAMBIAR-PASS-EN-USUARIOS" border="0">
+</p>
+
+*LISTA DE CLIENTES
+<p align="center">
+ <img src="https://i.ibb.co/GQMN3nY/Lista-de-clientes.png" alt="Lista-de-clientes" border="0">
+</p>
+
+*API EXTERNA PARA CONSULTA POR DNI Y RUC EN CLIENTES
+<p align="center">
+ <img src="https://i.ibb.co/CWDpDNK/Crear-cliente-y-busqueda-en-la-consulta-x-DNI-RUC.png" alt="Crear-cliente-y-busqueda-en-la-consulta-x-DNI-RUC" border="0">
+</p>
+
+*LISTA Y REGISTRO DE PROVEEDORES
+<p align="center">
+ <img src="https://i.ibb.co/FzNgQYd/Listado-y-registro-de-proveedores.png" alt="Listado-y-registro-de-proveedores" border="0">
+</p>
+
+
+
