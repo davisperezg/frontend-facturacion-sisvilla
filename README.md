@@ -25,6 +25,7 @@ También verá cualquier error en la consola.
 # Modulos del proyecto:
 
 - ### [Administración del sistema(Implementado con el sistema RPUM v1)](#Opciones-de-configuración)
+[RPUM v1](https://github.com/davisperezg/backend-adm-rpum)
   - Modulos
   - Permisos
   - Roles
