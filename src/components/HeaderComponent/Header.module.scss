@@ -2,6 +2,9 @@
 @import "node_modules/bootstrap/scss/functions";
 @import "node_modules/bootstrap/scss/variables";
 @import "node_modules/bootstrap/scss/mixins";
+@import "../AsideComponent/Aside.module.scss";
+@import "../../views/Layout/LayoutScreen.module.scss";
+@import "../../variables";
 
 .nav {
   background-color: $primary;
@@ -27,6 +30,12 @@
       padding: 20px;
       height: 100%;
       color: $white;
+    }
+
+    &__list {
+      font-weight: 900;
+      font-size: 24px;
+      cursor: pointer;
     }
 
     &__right {
@@ -55,4 +64,41 @@
       font-size: 24px;
     }
   }
+}
+#btn_hamburger {
+  display: none;
+}
+
+#btn_hamburger:checked ~ .asidePrincipal {
+  visibility: visible;
+  opacity: 1;
+  width: $width-aside-low;
+  transform: translateX(0px);
+}
+
+#btn_hamburger:checked ~ .mainPrincipal {
+  visibility: visible;
+  opacity: 1;
+  margin-left: $width-aside-low;
+}
+
+#btn_hamburger:checked ~ .sedePrincipal {
+  visibility: visible;
+  opacity: 1;
+  margin-left: $width-aside-low + 10;
+}
+
+.asidePrincipal {
+  @extend .aside;
+  transition: all cubic-bezier(0.215, 0.61, 0.355, 1) 0.5s;
+}
+
+.mainPrincipal {
+  @extend .main;
+  transition: all cubic-bezier(0.215, 0.61, 0.355, 1) 0.5s;
+}
+
+.sedePrincipal {
+  @extend .sede;
+  transition: all cubic-bezier(0.215, 0.61, 0.355, 1) 0.5s;
 }

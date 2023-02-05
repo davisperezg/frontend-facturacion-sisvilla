@@ -8,10 +8,12 @@ import { useLocation } from "react-router-dom";
 import { getModuleByMenu } from "../../../../api/module/module";
 
 const MarkListActives = ({
+  item,
   mark,
   deleteMark,
   openModalRE,
 }: {
+  item: number;
   mark: Mark;
   deleteMark: (id: string) => void;
   openModalRE: (props: boolean, value?: any) => void;
@@ -41,7 +43,7 @@ const MarkListActives = ({
             className={styles.table__td}
             onClick={() => openModalRE(true, mark)}
           >
-            {mark._id}
+            {item}
           </td>
           <td
             className={styles.table__td}
@@ -64,7 +66,7 @@ const MarkListActives = ({
         </tr>
       ) : (
         <tr>
-          <td>{mark._id}</td>
+          <td>{item}</td>
           <td>{mark.name}</td>
           <td className={`${styles.table__td} ${styles["table--center"]}`}>
             {mark.status && <Badge bg="success">Activo</Badge>}

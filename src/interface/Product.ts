@@ -15,4 +15,5 @@ export interface Product {
   price: number;
   status?: boolean;
   price_c: number;
+  fecVen?: Date | string;
 }

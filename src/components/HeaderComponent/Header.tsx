@@ -6,6 +6,7 @@ import { AuthContext } from "../../context/auth";
 import { User } from "../../interface/User";
 import { deleteSesions } from "../../lib/helpers/sesion/sesion";
 import { NavLink, useNavigate } from "react-router-dom";
+import { BsList } from "react-icons/bs";
 
 const Header = () => {
   const { user, setUser } = useContext(AuthContext);
@@ -27,10 +28,14 @@ const Header = () => {
       <div className={styles.item}>
         <div className={styles.item__left}>
           <h1>
-            TU <strong>EMPRESA.</strong>
+            Comercial <strong>SARAI</strong>{" "}
+            <label className={styles.item__list} htmlFor={styles.btn_hamburger}>
+              ☰
+            </label>
           </h1>
         </div>
       </div>
+
       <div className={styles.item}>
         <div className={styles.item__right}>
           {user.role.name === "SUPER ADMINISTRADOR" && (

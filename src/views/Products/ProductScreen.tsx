@@ -709,13 +709,7 @@ const ProductScreen = () => {
                   </span>
                 </div>
               </div>
-              <Table
-                striped
-                bordered
-                hover
-                responsive="sm"
-                className={styles.table}
-              >
+              <Table striped bordered hover responsive className={styles.table}>
                 <TableHeader
                   headers={
                     user.role.name === "SUPER ADMINISTRADOR"
