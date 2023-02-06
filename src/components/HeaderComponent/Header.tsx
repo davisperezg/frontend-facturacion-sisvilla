@@ -28,7 +28,7 @@ const Header = () => {
       <div className={styles.item}>
         <div className={styles.item__left}>
           <h1>
-            Comercial <strong>SARAI</strong>{" "}
+            K<strong>Tech</strong>{" "}
             <label className={styles.item__list} htmlFor={styles.btn_hamburger}>
               ☰
             </label>

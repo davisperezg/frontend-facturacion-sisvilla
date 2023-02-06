@@ -66,12 +66,12 @@ const ProductListActive = ({
           >
             {product.name}
           </td>
-          <td
+          {/* <td
             className={styles.table__td}
             onClick={() => openModalRE(true, product)}
           >
             {product.note}
-          </td>
+          </td> */}
           <td
             className={styles.table__td}
             onClick={() => openModalRE(true, product)}
@@ -139,7 +139,7 @@ const ProductListActive = ({
           <td>{String(area.name)}</td>
           <td>{String(product.cod_internal).slice(3)}</td>
           <td>{product.name}</td>
-          <td>{product.note}</td>
+          {/* <td>{product.note}</td> */}
           <td>{String(mark.name)}</td>
           <td>{String(model.name)}</td>
           <td>{String(unit.name)}</td>

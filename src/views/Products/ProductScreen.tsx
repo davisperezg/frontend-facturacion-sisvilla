@@ -38,17 +38,16 @@ const initialState: IAlert = {
 const EXTENSIONS = ["xlsx", "xls", "csv"];
 
 const headers = [
-  { name: "Item", field: "item", sortable: false },
-  { name: "Area / Sede", field: "area", sortable: true },
+  { name: "#", field: "item", sortable: false },
+  { name: "Sucursal", field: "area", sortable: true },
   { name: "Cod. Barra / interno", field: "cod_internal", sortable: true },
   { name: "Producto", field: "name", sortable: true },
-  { name: "Nota", field: "note", sortable: false },
   { name: "Marca", field: "mark", sortable: true },
   { name: "Modelo", field: "model", sortable: true },
-  { name: "Unidad de medida", field: "unit", sortable: true },
+  { name: "Unid. de medida", field: "unit", sortable: true },
   { name: "Stock", field: "stock", sortable: true },
-  { name: "Precio Venta", field: "price", sortable: true },
-  { name: "Precio Costo", field: "price_c", sortable: true },
+  { name: "P. Venta", field: "price", sortable: true },
+  { name: "P. Costo", field: "price_c", sortable: true },
   { name: "Estado", field: "status", sortable: false },
   { name: "Eliminar", field: "delete", sortable: false },
 ];

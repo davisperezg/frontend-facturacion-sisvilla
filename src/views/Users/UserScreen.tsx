@@ -281,13 +281,7 @@ const UserScreen = () => {
             )
           )}
           {resource && resource.canRead && (
-            <Table
-              striped
-              bordered
-              hover
-              responsive="sm"
-              className={styles.table}
-            >
+            <Table striped bordered hover responsive className={styles.table}>
               <thead>
                 <tr>
                   <th>#</th>
@@ -308,9 +302,10 @@ const UserScreen = () => {
               </thead>
               <tbody>
                 {user.role.name === "SUPER ADMINISTRADOR"
-                  ? users.map((user) => (
+                  ? users.map((user, i: number) => (
                       <UserListActives
                         key={user._id}
+                        index={i + 1}
                         user={user}
                         deleteUsu={deleteUsu}
                         openModalRE={openModalRE}
@@ -321,9 +316,10 @@ const UserScreen = () => {
                       .filter(
                         (flts) => flts.role.name !== "SUPER ADMINISTRADOR"
                       )
-                      .map((user) => (
+                      .map((user, i: number) => (
                         <UserListActives
                           key={user._id}
+                          index={i + 1}
                           user={user}
                           deleteUsu={deleteUsu}
                           openModalRE={openModalRE}

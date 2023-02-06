@@ -165,13 +165,7 @@ const ClientScreen = () => {
             )
           )}
           {resource && resource.canRead && (
-            <Table
-              striped
-              bordered
-              hover
-              responsive="sm"
-              className={styles.table}
-            >
+            <Table striped bordered hover responsive className={styles.table}>
               <thead>
                 <tr>
                   <th>#</th>

@@ -679,7 +679,7 @@ const FactForm = ({
           src="https://logodownload.org/wp-content/uploads/2016/03/ticket-logo.png"
           alt="Logotipo"
         /> */}
-        <h1 className={styles.ticket__centrado}>COMERCIAL SARAI</h1>
+        <h1 className={styles.ticket__centrado}>NOMBRE DE TU EMPRESA</h1>
         <p className={styles.ticket__centrado}>
           TICKET DE VENTA
           <br />

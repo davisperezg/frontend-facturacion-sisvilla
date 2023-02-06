@@ -307,7 +307,7 @@ const FactScreen = () => {
                   striped
                   bordered
                   hover
-                  responsive="sm"
+                  responsive
                   className={styles.table}
                 >
                   <TableHeader headers={headers} onSorting={onSorting} />

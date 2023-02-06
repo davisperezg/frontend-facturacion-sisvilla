@@ -9,11 +9,13 @@ import { getModuleByMenu } from "../../../../api/module/module";
 import { FaKey } from "react-icons/fa";
 
 const UserListActives = ({
+  index,
   user,
   deleteUsu,
   openModalRE,
   openModalPassword,
 }: {
+  index: number;
   user: User;
   deleteUsu: (id: string) => void;
   openModalRE: (props: boolean, value?: any) => void;
@@ -44,7 +46,7 @@ const UserListActives = ({
             className={styles.table__td}
             onClick={() => openModalRE(true, user)}
           >
-            {user._id}
+            {index}
           </td>
           <td
             className={styles.table__td}
@@ -117,7 +119,7 @@ const UserListActives = ({
         </tr>
       ) : (
         <tr>
-          <td>{user._id}</td>
+          <td>{index}</td>
           <td>{user.name}</td>
           <td>{user.lastname}</td>
           <td>{user.tipDocument}</td>

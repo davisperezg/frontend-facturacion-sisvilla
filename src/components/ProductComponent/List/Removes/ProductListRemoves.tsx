@@ -43,7 +43,7 @@ const ProductListRemoves = ({
         <td>{String(area.name)}</td>
         <td>{String(remove.cod_internal).slice(3)}</td>
         <td>{remove.name}</td>
-        <td>{remove.note}</td>
+        {/* <td>{remove.note}</td> */}
         <td>{String(mark.name)}</td>
         <td>{String(model.name)}</td>
         <td>{String(unit.name)}</td>
